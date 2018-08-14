@@ -1,0 +1,102 @@
+#!/usr/bin/Rscript
+
+suppressMessages(library(ballgown))
+suppressMessages(library(DataCombine))
+
+# Set function
+getmotif <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = ":", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
+      rv = as.character(NA) 
+    } 
+    return(rv) 
+  }) 
+}
+
+reduce_row = function(i) {
+  d <- unlist(strsplit(i, split=","))
+  paste(unique(d), collapse = ',') 
+}
+
+# Setting parameters
+library(optparse)
+
+option_list = list(
+  make_option(c("-i", "--input"), type="character", default=NULL,
+              help="dataset file name", metavar="character"),
+  make_option(c("-o", "--out"), type="character", default="out.txt",
+              help="output file name [default= %default]", metavar="character")
+);
+
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+if (is.null(opt$input)){
+  print_help(opt_parser)
+  stop("At least one argument must be supplied (input file)\n", call.=FALSE)
+}
+
+gff <- gffRead(opt$input)
+
+#patterns <- c("victors", "iceberg", "prophage", "vfdb")
+sub1 <- grepl.sub(gff, pattern = "*_subset*", Var = "attributes")
+s <- sub1$source
+sn <- getmotif(sub1$attributes, field = "protein_motif", attrsep = ",")
+sn <- sapply(strsplit(sn, split='_', fixed=TRUE), function(x) (x[1]))
+snew <- paste(s, sn, sep = ",")
+sub1$source <- snew
+
+#Change features
+f <- sub1$feature
+fn <- sn
+fn <- gsub("victors", "virulence", fn)
+fn <- gsub("VFDB", "virulence", fn)
+fn <- gsub("ICEberg", "ICE", fn)
+fn <- gsub("prophage", "PHAGE", fn)
+fnew <- paste(f, fn, sep = ",")
+sub1$feature <- fnew
+
+#The remaining
+sub2 <- grepl.sub(gff, pattern = "*_subset*", 
+                  Var = "attributes", keep.found = FALSE)
+
+#Merge
+merged_df <- merge.data.frame(sub1, sub2, all = TRUE)
+feat <- merged_df$feature
+merged_df$feature <- sapply(feat, reduce_row)
+source <- merged_df$source
+merged_df$source <- sapply(source, reduce_row)
+merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
+
+# Resistance
+
+res_df <- DataCombine::grepl.sub(merged_df, 
+          pattern = "*resistance*", Var = "attributes")
+#res_s <- "CARD"
+res_f <- "resistance"
+#s <- res_df$source
+f <- res_df$feature
+#snew <- paste(s, res_s, sep = ",")
+#res_df$source <- snew
+fnew <- paste(f, res_f, sep = ",")
+res_df$feature <- fnew
+
+not_res <- grepl.sub(gff, pattern = "*resistance*", 
+                     Var = "attributes", keep.found = FALSE)
+
+final_df <- merge.data.frame(res_df, not_res, all = TRUE)
+feat <- final_df$feature
+final_df$feature <- sapply(feat, reduce_row)
+source <- final_df$source
+final_df$source <- sapply(source, reduce_row)
+final_df <- final_df[order(final_df$seqname, final_df$start),]
+
+
+# Write output
+write.table(final_df, file = opt$out, quote = FALSE, sep = "\t", 
+            col.names = FALSE, row.names = FALSE)
