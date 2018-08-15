@@ -50,12 +50,12 @@ resistance_df <- grepl.sub(gff, pattern = "resistance", Var = "feature")
 
 ### CARD
 card_df <- grepl.sub(resistance_df, pattern = "CARD", Var = "source")
-card_df$ARO_Accession <- getAttributeField(resistance_df$attributes, "ARO", ";")
-card_df$Gene_Family <- getAttributeField(resistance_df$attributes, "Gene_Family", ";")
-card_df$Name <- getAttributeField(resistance_df$attributes, "DB_Name", ";")
-card_df$Drug_Class <- getAttributeField(resistance_df$attributes, "Drug_Class", ";")
+card_df$ARO_Accession <- getAttributeField(card_df$attributes, "ARO", ";")
+card_df$Gene_Family <- getAttributeField(card_df$attributes, "Gene_Family", ";")
+card_df$Name <- getAttributeField(card_df$attributes, "DB_Name", ";")
+card_df$Drug_Class <- getAttributeField(card_df$attributes, "Drug_Class", ";")
 card_df$Resistance_Mechanism <- 
-  getAttributeField(resistance_df$attributes, "Resistance_Mechanism", ";")
+  getAttributeField(card_df$attributes, "Resistance_Mechanism", ";")
 
 #### Write table
 col = c("seqname", "start", "end", "feature", "source", "ARO_Accession", 
