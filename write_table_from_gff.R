@@ -36,10 +36,6 @@ if (is.null(opt$input)){
   print_help(opt_parser)
   stop("At least one argument must be supplied (input file).n", call.=FALSE)
 }
-if (is.null(opt$pattern)){
-  print_help(opt_parser)
-  stop("At least one argument must be supplied (pattern character).n", call.=FALSE)
-}
 
 # Load gff
 gff_file <- opt$input

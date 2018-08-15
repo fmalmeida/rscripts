@@ -50,18 +50,11 @@ gff <- gffRead(opt$input)
 gff$attributes <- gsub(",", ";", gff$attributes)
 gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 gff$gene <- getAttributeField(gff$attributes, "gene", ";")
-#gff$name <- getAttributeField(gff$attributes, "Name", ";")
 gff$geneFamily <- substr(gff$gene, 1, 3)
 gff$product <- getAttributeField(gff$attributes, "product", ";")
 
 # Filter
 merged_df <- grepl.sub(gff, pattern = opt$pattern, Var = opt$field)
-
-#if(opt$pattern=="resistance"){
-#sub_df <- grepl.sub(gff, pattern = opt$pattern, Var = "attributes")
-#card_df <- grepl.sub(gff, pattern = opt$pattern, Var = "feature")
-#merged_df <- merge.data.frame(sub_df, card_df, all = TRUE)
-#}
 
 ## Altering some tag problems
 

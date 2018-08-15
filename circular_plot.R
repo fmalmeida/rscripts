@@ -67,8 +67,8 @@ tiles.res.gr <- tiles
 tiles.res.gr$Feature <- "Resistance"
 
 # Phage
-#phage <- grepl.sub(gff, pattern = "*prophage*", Var = "attributes")
-phage <- grepl.sub(gff, pattern = "*PHAGE*", Var = "feature")
+phage <- grepl.sub(gff, pattern = "*prophage*", Var = "attributes")
+#phage <- grepl.sub(gff, pattern = "*PHAGE*", Var = "feature")
 phage.gr <- makeGRangesFromDataFrame(phage, keep.extra.columns = TRUE)
 phage.gr <- f(phage.gr, "Feature", "Phage")
 tiles <- tile(gr, width = window)
