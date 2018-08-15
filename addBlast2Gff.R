@@ -38,7 +38,7 @@ blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
 blastFile <- read.table(opt$input, sep = "\t")
 colnames(blastFile) <- blastHeader
 
-att <- paste("Additional database=", opt$database, ";", "DB_ID=", blastFile$sseqid, ";DB_Target=",
+att <- paste("Additional_database=", opt$database, ";", "DB_ID=", blastFile$sseqid, ";DB_Target=",
              blastFile$stitle, sep = "")
 
 ids <- blastFile$qseqid
