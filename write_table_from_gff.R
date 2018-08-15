@@ -60,7 +60,7 @@ card_df$Resistance_Mechanism <-
 #### Write table
 col = c("seqname", "start", "end", "feature", "source", "ARO_Accession", 
         "Gene_Family", "Name", "Drug_Class", "Resistance_Mechanism")
-table <- sub_df[, col]
+table <- card_df[, col]
 out <- paste0(output_file, "_CARD_genes", ".tsv", sep = "")
 write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
