@@ -11,9 +11,7 @@ option_list = list(
   make_option(c("-i", "--input"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
   make_option(c("-o", "--out"), type="character", default="output", 
-              help="output file prefix name [default= %default]", metavar="character"),
-  make_option(c("-p", "--pattern"), type = "character", default=NULL,
-              help="subset pattern [default= %default]", metavar="character")
+              help="output file prefix name [default= %default]", metavar="character")
 ); 
 
 opt_parser = OptionParser(option_list=option_list);
@@ -48,43 +46,69 @@ gff_file <- opt$input
 gff <- gffRead(gff_file)
 output_file <- opt$out
 
-# Subset (optional)
-if ( !is.null(opt$pattern) ) {
-  output_file <- opt$out 
-  #sub_df <- grepl.sub(gff, pattern = opt$pattern, Var = "attributes")
-  #card_df <- grepl.sub(gff, pattern = opt$pattern, Var = "feature")
-  #merged_df <- merge.data.frame(sub_df, card_df, all = TRUE)
-  merged_df <- grepl.sub(gff, pattern = opt$pattern, Var = "feature")
-  merged_df$attributes <- gsub(",", ";", merged_df$attributes)
-  sub_df <- merged_df
-  #Create Fields
-  sub_df$ID <- getAttributeField(sub_df$attributes, "ID", ";")
-  sub_df$gene <- getAttributeField(sub_df$attributes, "gene", ";")
-  sub_df$geneFamily <- substr(sub_df$gene, 1, 3)
-  sub_df$name <- getAttributeField(sub_df$attributes, "Name", ";")
-  sub_df$product <- getAttributeField(sub_df$attributes, "product", ";")
-  # Write table
-  col = c("seqname", "start", "end", "feature", "source", "ID", "gene", "geneFamily", "product")
-  table <- sub_df[, col]
-  out <- paste0(output_file, "_", opt$pattern, ".txt", sep = "")
-  write.table(table, out, quote = FALSE, sep = "\t", 
-              row.names = FALSE, col.names = TRUE)
-}
+# Genes annotated related to resistance
+output_file <- opt$out
+resistance_df <- grepl.sub(gff, pattern = "resistance", Var = "feature")
 
-# Output Name
+## Create file specific for CARD database - Since it is the one that has the better described genes
+
+### CARD
+card_df <- grepl.sub(resistance_df, pattern = "CARD", Var = "source")
+card_df$ARO_Accession <- getAttributeField(resistance_df$attributes, "ARO", ";")
+card_df$Gene_Family <- getAttributeField(resistance_df$attributes, "Gene_Family", ";")
+card_df$Name <- getAttributeField(resistance_df$attributes, "DB_Name", ";")
+card_df$Drug_Class <- getAttributeField(resistance_df$attributes, "Drug_Class", ";")
+card_df$Resistance_Mechanism <- 
+  getAttributeField(resistance_df$attributes, "Resistance_Mechanism", ";")
+
+#### Write table
+col = c("seqname", "start", "end", "feature", "source", "ARO_Accession", 
+        "Gene_Family", "Name", "Drug_Class", "Resistance_Mechanism")
+table <- sub_df[, col]
+out <- paste0(output_file, "_CARD_genes", ".tsv", sep = "")
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+
+## Create a gene table that has all the databases or features together. With one specific column for 
+## each database entry.
+
+### Output Name
 output_file <- opt$out
 
-# Create fields
-gff$attributes <- gsub(",", ";", gff$attributes)
-gff$ID <- getAttributeField(gff$attributes, "ID", ";")
-gff$gene <- getAttributeField(gff$attributes, "gene", ";")
-gff$geneFamily <- substr(gff$gene, 1, 3)
-gff$name <- getAttributeField(gff$attributes, "Name", ";")
-gff$product <- getAttributeField(gff$attributes, "product", ";")
+### Create fields - Prokka
+gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
+gff$Prokka_gene <- getAttributeField(gff$attributes, "gene", ";")
+gff$Prokka_geneFamily <- substr(gff$gene, 1, 3)
+gff$Prokka_name <- getAttributeField(gff$attributes, "Name", ";")
+gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
+gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
+
+### Create fields - vfdb
+gff$VFDB_ID <- getAttributeField(gff$attributes, "VFDB_ID", ";")
+gff$VFDB_Target <- getAttributeField(gff$attributes, "VFDB_Target", ";")
+
+### Create fields - victors
+gff$Victors_ID <- getAttributeField(gff$attributes, "victors_ID", ";")
+gff$Victors_Target <- getAttributeField(gff$attributes, "victors_Target", ";")
+
+### Create fields - CARD
+gff$CARD_ARO_Accession <- getAttributeField(gff$attributes, "ARO", ";")
+gff$CARD_Drug_Class <- getAttributeField(gff$attributes, "Drug_Class", ";")
+
+### Create fields - Resfinder
+gff$Resfinder_ID <- getAttributeField(gff$attributes, "resfinder_ID", ";")
+gff$Resfinder_Target <- getAttributeField(gff$attributes, "resfinder_Target", ";")
+
+### Create fields - ICEberg
+gff$ICEberg_ID <- getAttributeField(gff$attributes, "ICEberg_ID", ";")
+gff$ICEberg_Target <- getAttributeField(gff$attributes, "ICEberg_Target", ";")
+
+### Create fields - PHAST
 
 # Write table
-col = c("seqname", "start", "end", "feature", "source", "ID", "gene", "geneFamily", "product")
+col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
+        "Prokka_name", "Prokka_product", "Prokka_inference", "VFDB_ID", "VFDB_Target", "Victors_ID", 
+        "Victors_Target", "CARD_ARO_Accession", "CARD_Drug_Class", "Resfinder_ID", "Resfinder_Target", 
+        "ICEberg_ID", "ICEberg_Target")
 table <- gff[, col]
-out <- paste0(output_file, ".txt", sep = "")
-write.table(table, out, quote = FALSE, sep = "\t", 
-            row.names = FALSE, col.names = TRUE)
+out <- paste0(output_file, "_complete_gene_table", ".tsv", sep = "")
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE, na = NA)
