@@ -40,13 +40,16 @@ card_indexes <- merge.data.frame(merged, cat, by.x = "ARO.Accession",
                                  by.y = "ARO.Accession", all = TRUE)
 
 #Load Blast
-blast <- read.table(opt$input, sep = "\t")
+blastFile <- read.table(opt$input, sep = "\t")
 blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
                  "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
-colnames(blast) <- blastHeader
+colnames(blastFile) <- blastHeader
+blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
+blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
+blastFile <- blastFile[order(blastFile$qseqid),]
 
 ##Filter per %Identity
-blast_filtered <- subset(blast, pident >= opt$pident)
+blast_filtered <- subset(blastFile, pident >= opt$pident)
 ssids <- as.vector(blast_filtered$sseqid)
 aroID <- sapply(strsplit(ssids, "\\|"), `[`, 3)
 blast_filtered$ARO <- aroID
@@ -69,6 +72,7 @@ card_subset$attributes <- description
 blast_filtered <- merge.data.frame(blast_filtered, card_subset, by.x = "ARO", 
                                    by.y = "ARO.Accession", all = TRUE)
 
+blast_filtered <- blast_filtered[order(blastFile$qseqid),]
 prokka_ids <- blast_filtered$qseqid
 
 #Subset GFF
