@@ -22,7 +22,7 @@ option_list = list(
   make_option(c("-t", "--type", type="character"), default = NULL,
               help = "feature type", metavar = "character"),
   make_option(c("-p", "--pident"), default=90, metavar = "integer",
-              help = "% identitty to filter blast [default= %default]")
+              help = "% identitty to filter blast [default= %default]", type = "integer")
 );
 
 opt_parser = OptionParser(option_list=option_list);

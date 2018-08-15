@@ -44,8 +44,8 @@ if (is.null(opt$input)){
 gff <- gffRead(opt$input)
 
 # Victors
-sub <- grepl.sub(gff, pattern = "*victors*", Var = "attributes")
-not <- grepl.sub(gff, pattern = "*victors*", Var = "attributes", keep.found = FALSE)
+sub <- grepl.sub(gff, pattern = "victors_subset", Var = "attributes")
+not <- grepl.sub(gff, pattern = "victors_subset", Var = "attributes", keep.found = FALSE)
 # source
 s <- sub$source
 sn <- "victors"
@@ -65,8 +65,8 @@ merged_df$source <- sapply(source, reduce_row)
 merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 
 # VFDB
-sub <- grepl.sub(merged_df, pattern = "*VFDB*", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "*VFDB*", Var = "attributes", keep.found = FALSE)
+sub <- grepl.sub(merged_df, pattern = "VFDB_subset", Var = "attributes")
+not <- grepl.sub(merged_df, pattern = "VFDB_subset", Var = "attributes", keep.found = FALSE)
 # source
 s <- sub$source
 sn <- "VFDB"
@@ -86,8 +86,8 @@ merged_df$source <- sapply(source, reduce_row)
 merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 
 # ICEberg
-sub <- grepl.sub(merged_df, pattern = "*ICEberg*", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "*ICEberg*", Var = "attributes", keep.found = FALSE)
+sub <- grepl.sub(merged_df, pattern = "ICEberg_subset", Var = "attributes")
+not <- grepl.sub(merged_df, pattern = "ICEberg_subset", Var = "attributes", keep.found = FALSE)
 # source
 s <- sub$source
 sn <- "ICEberg"
@@ -107,8 +107,8 @@ merged_df$source <- sapply(source, reduce_row)
 merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 
 # PHAGE
-sub <- grepl.sub(merged_df, pattern = "*prophage*", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "*prophage*", Var = "attributes", keep.found = FALSE)
+sub <- grepl.sub(merged_df, pattern = "prophage_subset", Var = "attributes")
+not <- grepl.sub(merged_df, pattern = "prophage_subset", Var = "attributes", keep.found = FALSE)
 # source
 s <- sub$source
 sn <- "phast"
@@ -128,8 +128,8 @@ merged_df$source <- sapply(source, reduce_row)
 merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 
 # Resistance
-sub <- grepl.sub(merged_df, pattern = "*resistance*", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "*resistance*", Var = "attributes", keep.found = FALSE)
+sub <- grepl.sub(merged_df, pattern = "resistance", Var = "attributes")
+not <- grepl.sub(merged_df, pattern = "resistance", Var = "attributes", keep.found = FALSE)
 # features
 f <- sub$feature
 fn <- "resistance"
@@ -144,8 +144,8 @@ merged_df$source <- sapply(source, reduce_row)
 merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 
 # resfams
-sub <- grepl.sub(merged_df, pattern = "*resfams*", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "*resfams*", Var = "attributes", keep.found = FALSE)
+sub <- grepl.sub(merged_df, pattern = "resfams-full", Var = "attributes")
+not <- grepl.sub(merged_df, pattern = "resfams-full", Var = "attributes", keep.found = FALSE)
 # source
 s <- sub$source
 sn <- "Resfams"

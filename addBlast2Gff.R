@@ -41,8 +41,8 @@ blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
 
-att <- paste("Additional_database=", opt$database, ";", "DB_ID=", blastFile$sseqid, ";DB_Target=",
-             blastFile$stitle, sep = "")
+att <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=", 
+             blastFile$sseqid, ";", opt$database, "_Target=", blastFile$stitle, sep = "")
 
 ids <- blastFile$qseqid
 
