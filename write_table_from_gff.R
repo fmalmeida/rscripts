@@ -73,7 +73,7 @@ output_file <- opt$out
 ### Create fields - Prokka
 gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
 gff$Prokka_gene <- getAttributeField(gff$attributes, "gene", ";")
-gff$Prokka_geneFamily <- substr(gff$gene, 1, 3)
+gff$Prokka_geneFamily <- substr(gff$Prokka_gene, 1, 3)
 gff$Prokka_name <- getAttributeField(gff$attributes, "Name", ";")
 gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
 gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
