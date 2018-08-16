@@ -107,4 +107,4 @@ col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gen
         "ICEberg_ID", "ICEberg_Target")
 table <- gff[, col]
 out <- paste0(output_file, "_complete_gene_table", ".tsv", sep = "")
-write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE, na = NA)
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
