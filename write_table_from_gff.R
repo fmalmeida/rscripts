@@ -99,12 +99,14 @@ gff$ICEberg_ID <- getAttributeField(gff$attributes, "ICEberg_ID", ";")
 gff$ICEberg_Target <- getAttributeField(gff$attributes, "ICEberg_Target", ";")
 
 ### Create fields - PHAST
+gff$PHAST_ID <- getAttributeField(gff$attributes, "PHAST_ID", ";")
+gff$PHAST_Target <- getAttributeField(gff$attributes, "PHAST_Target", ";")
 
 # Write table
 col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
         "Prokka_name", "Prokka_product", "Prokka_inference", "VFDB_ID", "VFDB_Target", "Victors_ID", 
         "Victors_Target", "CARD_ARO_Accession", "CARD_Drug_Class", "Resfinder_ID", "Resfinder_Target", 
-        "ICEberg_ID", "ICEberg_Target")
+        "ICEberg_ID", "ICEberg_Target", "PHAST_ID", "PHAST_Target")
 table <- gff[, col]
 out <- paste0(output_file, "_complete_gene_table", ".tsv", sep = "")
 write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
