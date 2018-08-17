@@ -90,7 +90,7 @@ if( length(unique(gff$seqname)) == 1 ) {
     circle(tiles.phage.gr, geom = "line", aes(color = "Phage", y=count), radius = 25) +
     circle(gr, geom = "ideo", fill = "gray70", radius = 30) +
     circle(gr, geom = "scale", radius = 35, scale.n = scale) +
-    circle(gr, geom = "text", aes(label = seqnames), vjust = 0, size = 3.5, radius = 50, angle = 180) +
+    circle(gr, geom = "text", aes(label = seqnames), vjust = 0, size = 3.5, radius = 50) +
     theme(legend.position = "bottom")
 } else  {
   p <- ggbio() +
