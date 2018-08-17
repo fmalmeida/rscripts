@@ -111,12 +111,12 @@ sub <- grepl.sub(merged_df, pattern = "prophage_subset", Var = "attributes")
 not <- grepl.sub(merged_df, pattern = "prophage_subset", Var = "attributes", keep.found = FALSE)
 # source
 s <- sub$source
-sn <- "phast"
+sn <- "PHAST"
 snew <- paste(s, sn, sep = ",")
 sub$source <- snew
 # features
 f <- sub$feature
-fn <- "PHAGE"
+fn <- "prophage"
 fnew <- paste(f, fn, sep = ",")
 sub$feature <- fnew
 # merge
