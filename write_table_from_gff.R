@@ -86,6 +86,12 @@ gff$VFDB_Target <- getAttributeField(gff$attributes, "VFDB_Target", ";")
 gff$Victors_ID <- getAttributeField(gff$attributes, "victors_ID", ";")
 gff$Victors_Target <- getAttributeField(gff$attributes, "victors_Target", ";")
 
+col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
+        "Prokka_name", "Prokka_product", "Prokka_inference", "VFDB_ID", "VFDB_Target", "Victors_ID", "Victors_Target")
+virulence <- grepl.sub(gff, "virulence", "feature")
+table <- victors[, col]
+out <- paste0(output_file, "_virulence_gene_table", ".tsv", sep = "")
+
 ### Create fields - CARD
 gff$CARD_ARO_Accession <- getAttributeField(gff$attributes, "ARO", ";")
 gff$CARD_Drug_Class <- getAttributeField(gff$attributes, "Drug_Class", ";")
@@ -94,13 +100,32 @@ gff$CARD_Drug_Class <- getAttributeField(gff$attributes, "Drug_Class", ";")
 gff$Resfinder_ID <- getAttributeField(gff$attributes, "resfinder_ID", ";")
 gff$Resfinder_Target <- getAttributeField(gff$attributes, "resfinder_Target", ";")
 
+col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
+        "Prokka_name", "Prokka_product", "Prokka_inference", "CARD_ARO_Accession", "CARD_Drug_Class", 
+        "Resfinder_ID", "Resfinder_Target")
+resistance <- grepl.sub(gff, "resistance", "feature")
+table <- resistance[, col]
+out <- paste0(output_file, "_resistance_gene_table", ".tsv", sep = "")
+
 ### Create fields - ICEberg
 gff$ICEberg_ID <- getAttributeField(gff$attributes, "ICEberg_ID", ";")
 gff$ICEberg_Target <- getAttributeField(gff$attributes, "ICEberg_Target", ";")
 
+col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
+        "Prokka_name", "Prokka_product", "Prokka_inference",  "ICEberg_ID", "ICEberg_Target")
+ice <- grepl.sub(gff, "ICE", "feature")
+table <- ice[, col]
+out <- paste0(output_file, "_ice_gene_table", ".tsv", sep = "")
+
 ### Create fields - PHAST
 gff$PHAST_ID <- getAttributeField(gff$attributes, "PHAST_ID", ";")
 gff$PHAST_Target <- getAttributeField(gff$attributes, "PHAST_Target", ";")
+
+col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
+        "Prokka_name", "Prokka_product", "Prokka_inference", "PHAST_ID", "PHAST_Target")
+prophage <- grepl.sub(gff, "prophage", "feature")
+table <- prophage[, col]
+out <- paste0(output_file, "_prophage_gene_table", ".tsv", sep = "")
 
 # Write table
 col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 

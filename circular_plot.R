@@ -109,16 +109,3 @@ png(opt$out, width = 1280, height = 1080, res = 130)
 #png(opt$out)
 p # Make plot
 dev.off()
-
-
-## BKP
-
-# vfdb
-#vfdb <- grepl.sub(gff, pattern = "*vfdb*", Var = "source")
-#vfdb.gr <- makeGRangesFromDataFrame(vfdb, keep.extra.columns = TRUE)
-#vfdb.gr <- f(vfdb.gr, "Feature", "vfdb")
-
-# Victors
-#vic <- grepl.sub(gff, pattern = "*victors*", Var = "source")
-#vic.gr <- makeGRangesFromDataFrame(vic, keep.extra.columns = TRUE)
-#vic.gr <- f(vic.gr, "Feature", "victors")
