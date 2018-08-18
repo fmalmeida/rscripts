@@ -89,7 +89,7 @@ gff$Victors_Target <- getAttributeField(gff$attributes, "victors_Target", ";")
 col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
         "Prokka_name", "Prokka_product", "Prokka_inference", "VFDB_ID", "VFDB_Target", "Victors_ID", "Victors_Target")
 virulence <- grepl.sub(gff, "virulence", "feature")
-table <- victors[, col]
+table <- virulence[, col]
 out <- paste0(output_file, "_virulence_gene_table", ".tsv", sep = "")
 
 ### Create fields - CARD
