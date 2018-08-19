@@ -91,6 +91,7 @@ col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gen
 virulence <- grepl.sub(gff, "virulence", "feature")
 table <- virulence[, col]
 out <- paste0(output_file, "_virulence_gene_table", ".tsv", sep = "")
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
 ### Create fields - CARD
 gff$CARD_ARO_Accession <- getAttributeField(gff$attributes, "ARO", ";")
@@ -106,6 +107,7 @@ col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gen
 resistance <- grepl.sub(gff, "resistance", "feature")
 table <- resistance[, col]
 out <- paste0(output_file, "_resistance_gene_table", ".tsv", sep = "")
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
 ### Create fields - ICEberg
 gff$ICEberg_ID <- getAttributeField(gff$attributes, "ICEberg_ID", ";")
@@ -116,6 +118,7 @@ col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gen
 ice <- grepl.sub(gff, "ICE", "feature")
 table <- ice[, col]
 out <- paste0(output_file, "_ice_gene_table", ".tsv", sep = "")
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
 ### Create fields - PHAST
 gff$PHAST_ID <- getAttributeField(gff$attributes, "PHAST_ID", ";")
@@ -126,6 +129,7 @@ col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gen
 prophage <- grepl.sub(gff, "prophage", "feature")
 table <- prophage[, col]
 out <- paste0(output_file, "_prophage_gene_table", ".tsv", sep = "")
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 
 # Write table
 col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
