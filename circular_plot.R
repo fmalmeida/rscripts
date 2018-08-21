@@ -36,9 +36,8 @@ seqlengths(gr) <- genome$end
 window <- 100000L
 
 # ICEberg
-ice <- grepl.sub(gff, pattern = "*ICEberg*", Var = "source")
+ice <- grepl.sub(gff, pattern = "ICE", Var = "feature")
 ice.gr <- makeGRangesFromDataFrame(ice, keep.extra.columns = TRUE)
-ice.gr <- f(ice.gr, "Feature", "ICEs")
 tiles <- tile(gr, width = window)
 tiles <- unlist(tiles)
 tiles$count <- countOverlaps(tiles, ice.gr, maxgap = 0L, minoverlap = 0L)
@@ -46,7 +45,7 @@ tiles.ice.gr <- tiles
 tiles.ice.gr$Feature <- "ICEs"
 
 # Virulence
-vir <- grepl.sub(gff, pattern = "*virulence*", Var = "feature")
+vir <- grepl.sub(gff, pattern = "virulence", Var = "feature")
 vir.gr <- makeGRangesFromDataFrame(vir, keep.extra.columns = TRUE)
 vir.gr <- f(vir.gr, "Feature", "Virulence")
 tiles <- tile(gr, width = window)
@@ -57,7 +56,7 @@ tiles.vir.gr$Feature <- "Virulence"
 
 
 # Resistance
-res <- grepl.sub(gff, pattern = "*resistance*", Var = "feature")
+res <- grepl.sub(gff, pattern = "resistance", Var = "feature")
 res.gr <- makeGRangesFromDataFrame(res, keep.extra.columns = TRUE)
 res.gr <- f(res.gr, "Feature", "Resistance")
 tiles <- tile(gr, width = window)
@@ -67,7 +66,6 @@ tiles.res.gr <- tiles
 tiles.res.gr$Feature <- "Resistance"
 
 # Phage
-#phage <- grepl.sub(gff, pattern = "*prophage*", Var = "attributes")
 phage <- grepl.sub(gff, pattern = "prophage", Var = "feature")
 phage.gr <- makeGRangesFromDataFrame(phage, keep.extra.columns = TRUE)
 phage.gr <- f(phage.gr, "Feature", "Phage")
@@ -90,7 +88,8 @@ if( length(unique(gff$seqname)) == 1 ) {
     circle(tiles.phage.gr, geom = "line", aes(color = "Phage", y=count), radius = 25) +
     circle(gr, geom = "ideo", fill = "gray70", radius = 30) +
     circle(gr, geom = "scale", radius = 35, scale.n = scale) +
-    circle(gr, geom = "text", aes(label = seqnames), vjust = 0, size = 3.5, radius = 50) +
+    circle(gr, geom = "text", aes(label = seqnames), vjust = 0, 
+           size = 3.5, radius = 5, angle = 0) +
     theme(legend.position = "bottom")
 } else  {
   p <- ggbio() +
@@ -105,7 +104,14 @@ if( length(unique(gff$seqname)) == 1 ) {
 }
 
 # Save Image
-png(opt$out, width = 1280, height = 1080, res = 130)
+png <- paste0(opt$out, ".png", collapse = "")
+png(png, width = 1280, height = 1080, res = 130)
+#png(opt$out)
+p # Make plot
+dev.off()
+
+svg <- paste0(opt$out, ".svg", collapse = "")
+svg(svg, width = 1280, height = 1080, res = 130)
 #png(opt$out)
 p # Make plot
 dev.off()
