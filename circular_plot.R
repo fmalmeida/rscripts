@@ -47,7 +47,6 @@ tiles.ice.gr$Feature <- "ICEs"
 # Virulence
 vir <- grepl.sub(gff, pattern = "virulence", Var = "feature")
 vir.gr <- makeGRangesFromDataFrame(vir, keep.extra.columns = TRUE)
-vir.gr <- f(vir.gr, "Feature", "Virulence")
 tiles <- tile(gr, width = window)
 tiles <- unlist(tiles)
 tiles$count <- countOverlaps(tiles, vir.gr, maxgap = 0L, minoverlap = 0L)
@@ -58,7 +57,6 @@ tiles.vir.gr$Feature <- "Virulence"
 # Resistance
 res <- grepl.sub(gff, pattern = "resistance", Var = "feature")
 res.gr <- makeGRangesFromDataFrame(res, keep.extra.columns = TRUE)
-res.gr <- f(res.gr, "Feature", "Resistance")
 tiles <- tile(gr, width = window)
 tiles <- unlist(tiles)
 tiles$count <- countOverlaps(tiles, res.gr, maxgap = 0L, minoverlap = 0L)
@@ -68,7 +66,6 @@ tiles.res.gr$Feature <- "Resistance"
 # Phage
 phage <- grepl.sub(gff, pattern = "prophage", Var = "feature")
 phage.gr <- makeGRangesFromDataFrame(phage, keep.extra.columns = TRUE)
-phage.gr <- f(phage.gr, "Feature", "Phage")
 tiles <- tile(gr, width = window)
 tiles <- unlist(tiles)
 tiles$count <- countOverlaps(tiles, phage.gr, maxgap = 0L, minoverlap = 0L)
@@ -111,7 +108,7 @@ p # Make plot
 dev.off()
 
 svg <- paste0(opt$out, ".svg", collapse = "")
-svg(svg, width = 1280, height = 1080, res = 130)
+svg(svg, width = 14, height = 7)
 #png(opt$out)
 p # Make plot
 dev.off()
