@@ -6,7 +6,7 @@ suppressMessages(library(DataCombine))
 
 # Teste para plotar features com outros plots além do circular
 
-gff <- gffRead("~/Documents/testes/output_teste/gffs/prokka_gff_with_hmmSources/ncbi_prokka_with_hmmSources.gff")
+gff <- gffRead("~/Documents/testes/output_teste/gffs/merged/ncbi_final.gff")
 gff.gr <- makeGRangesFromDataFrame(gff, keep.extra.columns = FALSE)
 
 ##Resistance Features
@@ -44,4 +44,20 @@ vtrack <- DataTrack(subV.gr, options(ucscChromosomeNames=FALSE),
 itrack <- DataTrack(subI.gr, options(ucscChromosomeNames=FALSE),
                     name = "ICEbergs", type=c("heatmap"))
 gtrack <- GenomeAxisTrack()
-plotTracks(list(gtrack, rtrack, vtrack, itrack), main = "Genomic Features")
+plotTracks(list(gtrack, rtrack, vtrack, itrack), 
+           main = "Genomic Features")
+
+# Save Image
+png <- paste0("~/Downloads/teste_without_window_and_not_separeted_grs", 
+              ".png", collapse = "")
+png(png, width = 1280, height = 1080, res = 130)
+plotTracks(list(gtrack, rtrack, vtrack, itrack), 
+           main = "Genomic Features")
+dev.off()
+
+svg <- paste0("~/Downloads/teste_without_window_and_not_separeted_grs", 
+              ".svg", collapse = "")
+svg(svg, width = 14, height = 7)
+plotTracks(list(gtrack, rtrack, vtrack, itrack), 
+           main = "Genomic Features")
+dev.off()
