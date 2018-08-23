@@ -75,6 +75,7 @@ tiles.phage.gr$Feature <- "Phage"
 # Plot
 ## Getting scales
 scale <- round(max(genome$end / as.integer(gsub("L", "", window))))
+scale <- round(scale / 2)
 ##
 
 if( length(unique(gff$seqname)) == 1 ) {
