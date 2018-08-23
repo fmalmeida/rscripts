@@ -1,5 +1,4 @@
 #!/usr/bin/Rscript
-
 # Plot with multiple layers
 suppressMessages(library(sunburstR))
 suppressMessages(library(plyr))
@@ -57,7 +56,6 @@ gff$product <- getAttributeField(gff$attributes, "product", ";")
 merged_df <- grepl.sub(gff, pattern = opt$pattern, Var = opt$field)
 
 ## Altering some tag problems
-
 merged_df$ID <- getAttributeField(merged_df$attributes, "ID", ";")
 merged_df$gene <- getAttributeField(merged_df$attributes, "gene", ";")
 merged_df$name <- getAttributeField(merged_df$attributes, "Name", ";")
@@ -69,10 +67,11 @@ merged_df$product <- gsub("-", "_", merged_df$product)
 merged_df$product <- gsub(",", "_", merged_df$product)
 
 #Count
-count <- count(merged_df, c("seqname", "geneFamily", "product"))
+count <- count(merged_df, c("seqname", "ID", "geneFamily", "product"))
 
 id_sb_csv <- paste0(count$seqname, "-", count$geneFamily, 
-                    "-", count$product, ",", count$freq, sep = "")
+                    "-", count$product, "-", count$ID,
+                    ",", count$freq, sep = "")
 write(id_sb_csv, file = "sb.csv")
 
 #plot
@@ -93,3 +92,88 @@ htmlwidgets::saveWidget(sb, opt$out, selfcontained = FALSE)
 
 # Delete temp
 file.remove("sb.csv")
+
+############################################
+## Same plot - Specific for CARD database ##
+############################################
+gff <- gffRead(opt$input)
+card_df <- grepl.sub(gff, "CARD", "source")
+
+card_df$ARO <- getAttributeField(card_df$attributes, "ARO", ";")
+
+card_df$DrugClass <- getAttributeField(card_df$attributes, 
+                                       "Drug_Class", ";")
+card_df$DrugClass <- gsub("-", "_", card_df$DrugClass)
+card_df$DrugClass <- gsub(",", "_", card_df$DrugClass)
+
+card_df$GeneFamily <- getAttributeField(card_df$attributes, 
+                                        "Gene_Family", ";")
+card_df$GeneFamily <- gsub("-", "_", card_df$GeneFamily)
+card_df$GeneFamily <- gsub(",", "_", card_df$GeneFamily)
+
+card_df$ResistanceMechanism <- getAttributeField(card_df$attributes, 
+                                                 "Resistance_Mechanism", ";")
+card_df$ResistanceMechanism <- gsub("-", "_", card_df$ResistanceMechanism)
+card_df$ResistanceMechanism <- gsub(",", "_", card_df$ResistanceMechanism)
+
+card_df$Name <- getAttributeField(card_df$attributes, 
+                                  "DB_Name", ";")
+card_df$Name <- gsub("-", "_", card_df$Name)
+card_df$Name <- gsub(",", "_", card_df$Name)
+card_df$ID <- getAttributeField(card_df$attributes, "ID", ";")
+
+#Count
+count <- count(card_df, 
+               c("seqname", "ID", "GeneFamily", 
+                 "DrugClass", "ResistanceMechanism", 
+                 "ARO", "Name"))
+
+id_sb_csv <- paste0(count$seqname, "-", count$DrugClass, 
+                    "-", count$ResistanceMechanism, "-", 
+                    count$GeneFamily, "-", count$Name, 
+                    "-", count$ARO, 
+                    "-", count$ID, ",", count$freq, sep = "")
+write(id_sb_csv, file = "sb.csv")
+
+#plot
+df_sb <- read.delim("sb.csv", header = FALSE, sep = ",", 
+                    dec = NULL, quote = NULL)
+sb <- sunburst(
+  df_sb,
+  count = TRUE, # add count just for demonstration
+  legend = list(w=200, h=50, r=10), # make extra room for our legend
+  legendOrder = c(unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                                `[`, 1, FUN.VALUE=character(1))), 
+                  unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                                `[`, 2, FUN.VALUE=character(1))))
+)
+
+# Save
+htmlwidgets::saveWidget(sb, "Complete_CARD_entries.html", 
+                        selfcontained = FALSE)
+
+# Delete temp
+file.remove("sb.csv")
+
+## Concise CARD plot
+id_sb_csv <- paste0(count$seqname, "-", count$DrugClass, 
+                    "-", count$ResistanceMechanism, "-", 
+                    count$ARO, ",", count$freq, sep = "")
+write(id_sb_csv, file = "sb.csv")
+
+#plot
+df_sb <- read.delim("sb.csv", header = FALSE, sep = ",", 
+                    dec = NULL, quote = NULL)
+sb <- sunburst(
+  df_sb,
+  count = TRUE, # add count just for demonstration
+  legend = list(w=200, h=50, r=10), # make extra room for our legend
+  legendOrder = c(unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                                `[`, 1, FUN.VALUE=character(1))), 
+                  unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                                `[`, 2, FUN.VALUE=character(1))))
+)
+
+# Save
+htmlwidgets::saveWidget(sb, "Concise_CARD_entries.html", 
+                        selfcontained = FALSE)
