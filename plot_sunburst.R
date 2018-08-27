@@ -177,3 +177,6 @@ sb <- sunburst(
 # Save
 htmlwidgets::saveWidget(sb, "Concise_CARD_entries.html", 
                         selfcontained = FALSE)
+
+# Delete temp
+file.remove("sb.csv")
