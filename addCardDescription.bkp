@@ -1,15 +1,12 @@
 #!/usr/bin/Rscript
-
-# Load CARD entries index
+#Create index
 cat_index <- read.table("/work/indexes/aro_categories_index.csv", header = TRUE, sep = "\t")
 cat <- read.table("/work/indexes/aro_categories.csv", header = TRUE, sep = "\t")
-index <- read.table("/work/indexes/cardDB/aro_index.csv", header = TRUE, sep = "\t", fill = TRUE)
 index <- read.table("/work/indexes/aro_index.csv", header = TRUE, sep = "\t", fill = TRUE)
 
-# Load library
+#Load library
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
-
 # Setting parameters
 suppressMessages(library(optparse))
 
@@ -36,24 +33,22 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
-# Merge indexes to create a full index with all values
+#Merge indexes
 merged <- merge.data.frame(cat_index, index, by.x = "Protein.Accession",
                            by.y = "Protein.Accession", all = TRUE)
 card_indexes <- merge.data.frame(merged, cat, by.x = "ARO.Accession", 
                                  by.y = "ARO.Accession", all = TRUE)
 
-# Load Blast
+#Load Blast
 blastFile <- read.table(opt$input, sep = "\t")
 blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
                  "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
 colnames(blastFile) <- blastHeader
-
-# Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
 
-## Filter per %Identity
+##Filter per %Identity
 blast_filtered <- subset(blastFile, pident >= opt$pident)
 ssids <- as.vector(blast_filtered$sseqid)
 aroID <- sapply(strsplit(ssids, "\\|"), `[`, 3)
@@ -74,20 +69,17 @@ description <- paste("Additional_Database=", opt$database, ";",
 
 card_subset$attributes <- description
 
-# Concatenate new attributes values
 blast_filtered <- merge.data.frame(blast_filtered, card_subset, by.x = "ARO", 
                                    by.y = "ARO.Accession", all = TRUE)
 
 blast_filtered <- blast_filtered[order(blastFile$qseqid),]
-
-# Get gene names from blast hits
 prokka_ids <- blast_filtered$qseqid
 
-# Subset GFF - based on genes that have a hit
+#Subset GFF
 sub <- grepl.sub(gff, pattern = prokka_ids, Var = "attributes")
 not <- grepl.sub(gff, pattern = prokka_ids, Var = "attributes", keep.found = FALSE)
 
-#Change fields - Add database source and feature type
+#Change fields
 ##source
 s <- sub$source
 sn <- opt$database
