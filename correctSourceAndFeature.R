@@ -13,6 +13,9 @@ getmotif <- function (x, field, attrsep = ";") {
     m = match(field, sapply(a, "[", 1)) 
     if (!is.na(m)) { rv = a[[m]][2] 
     } 
+    else { 
+      rv = as.character(NA) 
+    } 
     return(rv) 
   }) 
 }
