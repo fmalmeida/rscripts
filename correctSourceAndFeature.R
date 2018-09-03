@@ -61,7 +61,7 @@ previous_source <- sub$source
 
 # Then, we need to extract the name of the database.
 motifs <- getmotif(sub$attributes, "protein_motif", ";")
-motifs <- sapply(strsplit(motif, split = "_", fixed = TRUE), "[", 1)
+motifs <- sapply(strsplit(motifs, split = "_", fixed = TRUE), "[", 1)
 
 # Finally, we add these names to the previous sources
 new_source <- paste(previous_source, motifs, sep = ",")
