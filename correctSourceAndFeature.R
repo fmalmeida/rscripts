@@ -45,6 +45,7 @@ if (is.null(opt$input)){
 
 # Read gff file
 gff <- gffRead(opt$input)
+gff$attributes <- gsub(" ", "_", gff$attributes)
 
 # First step is to subset those entries that have something related to one 
 # of the pfam subsets
