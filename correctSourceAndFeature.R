@@ -4,15 +4,14 @@ suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
 
 # Set function
+# This function is used to extract the values of the fields stored in
+# Attributes column of gff file.
 getmotif <- function (x, field, attrsep = ";") { 
   s = strsplit(x, split = attrsep, fixed = TRUE) 
   sapply(s, function(atts) { 
-    a = strsplit(atts, split = ":", fixed = TRUE) 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
     m = match(field, sapply(a, "[", 1)) 
     if (!is.na(m)) { rv = a[[m]][2] 
-    } 
-    else { 
-      rv = as.character(NA) 
     } 
     return(rv) 
   }) 
@@ -41,122 +40,40 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
+# Read gff file
 gff <- gffRead(opt$input)
 
-# Victors
-sub <- grepl.sub(gff, pattern = "victors_subset", Var = "attributes")
-not <- grepl.sub(gff, pattern = "victors_subset", Var = "attributes", keep.found = FALSE)
-# source
-s <- sub$source
-sn <- "victors"
-snew <- paste(s, sn, sep = ",")
-sub$source <- snew
-# features
-f <- sub$feature
-fn <- "virulence"
-fnew <- paste(f, fn, sep = ",")
-sub$feature <- fnew
-# merge
-merged_df <- merge.data.frame(sub, not, all = TRUE)
-feat <- merged_df$feature
-merged_df$feature <- sapply(feat, reduce_row)
-source <- merged_df$source
-merged_df$source <- sapply(source, reduce_row)
-merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
+# First step is to subset those entries that have something related to one 
+# of the pfam subsets
 
-# VFDB
-sub <- grepl.sub(merged_df, pattern = "VFDB_subset", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "VFDB_subset", Var = "attributes", keep.found = FALSE)
-# source
-s <- sub$source
-sn <- "VFDB"
-snew <- paste(s, sn, sep = ",")
-sub$source <- snew
-# features
-f <- sub$feature
-fn <- "virulence"
-fnew <- paste(f, fn, sep = ",")
-sub$feature <- fnew
-# merge
-merged_df <- merge.data.frame(sub, not, all = TRUE)
-feat <- merged_df$feature
-merged_df$feature <- sapply(feat, reduce_row)
-source <- merged_df$source
-merged_df$source <- sapply(source, reduce_row)
-merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
+sub <- grepl.sub(gff, pattern = "_subset", Var = "attributes")
+not <- grepl.sub(gff, pattern = "_subset", Var = "attributes", keep.found = FALSE)
+sub$attributes <- gsub(",protein_motif:", ";protein_motif=", sub$attributes)
+sub$attributes <- gsub(",", ";", sub$attributes)
 
-# ICEberg
-sub <- grepl.sub(merged_df, pattern = "ICEberg_subset", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "ICEberg_subset", Var = "attributes", keep.found = FALSE)
-# source
-s <- sub$source
-sn <- "ICEberg"
-snew <- paste(s, sn, sep = ",")
-sub$source <- snew
-# features
-f <- sub$feature
-fn <- "ICE"
-fnew <- paste(f, fn, sep = ",")
-sub$feature <- fnew
-# merge
-merged_df <- merge.data.frame(sub, not, all = TRUE)
-feat <- merged_df$feature
-merged_df$feature <- sapply(feat, reduce_row)
-source <- merged_df$source
-merged_df$source <- sapply(source, reduce_row)
-merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
+# Secondly we need to store the previous value of the source column in 
+# order to add to it the name of the pfam subset database
 
-# PHAGE
-sub <- grepl.sub(merged_df, pattern = "prophage_subset", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "prophage_subset", Var = "attributes", keep.found = FALSE)
-# source
-s <- sub$source
-sn <- "PHAST"
-snew <- paste(s, sn, sep = ",")
-sub$source <- snew
-# features
-f <- sub$feature
-fn <- "prophage"
-fnew <- paste(f, fn, sep = ",")
-sub$feature <- fnew
-# merge
-merged_df <- merge.data.frame(sub, not, all = TRUE)
-feat <- merged_df$feature
-merged_df$feature <- sapply(feat, reduce_row)
-source <- merged_df$source
-merged_df$source <- sapply(source, reduce_row)
-merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
+previous_source <- sub$source
 
-# Resistance
-sub <- grepl.sub(merged_df, pattern = "resistance", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "resistance", Var = "attributes", keep.found = FALSE)
-# features
-f <- sub$feature
-fn <- "resistance"
-fnew <- paste(f, fn, sep = ",")
-sub$feature <- fnew
-# merge
-merged_df <- merge.data.frame(sub, not, all = TRUE)
-feat <- merged_df$feature
-merged_df$feature <- sapply(feat, reduce_row)
-source <- merged_df$source
-merged_df$source <- sapply(source, reduce_row)
-merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
+# Then, we need to extract the name of the database.
+motifs <- getmotif(sub$attributes, "protein_motif", ";")
+motifs <- sapply(strsplit(motif, split = "_", fixed = TRUE), "[", 1)
 
-# resfams
-sub <- grepl.sub(merged_df, pattern = "resfams-full", Var = "attributes")
-not <- grepl.sub(merged_df, pattern = "resfams-full", Var = "attributes", keep.found = FALSE)
-# source
-s <- sub$source
-sn <- "Resfams"
-snew <- paste(s, sn, sep = ",")
-sub$source <- snew
-# features
-f <- sub$feature
-fn <- "resistance"
-fnew <- paste(f, fn, sep = ",")
-sub$feature <- fnew
-# merge
+# Finally, we add these names to the previous sources
+new_source <- paste(previous_source, motifs, sep = ",")
+sub$source <- new_source
+
+# Next, we need to write the respective feature types.
+features <- gsub("victors|VFDB", "virulence", motifs)
+features <- gsub("ICEberg", "ICE", features)
+
+# Then, we add it to previously wrote features
+previous_features <- sub$feature
+new_features <- paste(previous_features, features, sep = ",")
+sub$feature <- new_features
+
+# Merge gff subsets
 merged_df <- merge.data.frame(sub, not, all = TRUE)
 feat <- merged_df$feature
 merged_df$feature <- sapply(feat, reduce_row)
