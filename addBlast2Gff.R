@@ -1,9 +1,9 @@
 #!/usr/bin/Rscript
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
-# Setting parameters
 suppressMessages(library(optparse))
 
+# Setting parameters
 option_list = list(
   make_option(c("-i", "--input"), type="character", default=NULL,
               help="blast tab output", metavar="character"),
@@ -25,20 +25,20 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
-#Reduce row function
+# Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
 
-#Load blast result
+# Load blast tabular file
 blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
 "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "stitle")
 
 blastFile <- read.delim(opt$input, header = FALSE)
 colnames(blastFile) <- blastHeader
 
-#Remove duplicates based on bitscore
+# Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
@@ -46,34 +46,36 @@ blastFile <- blastFile[order(blastFile$qseqid),]
 att <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=", 
              blastFile$sseqid, ";", opt$database, "_Target=", blastFile$stitle, sep = "")
 
-#Get gene names
+# Get gene names
 ids <- blastFile$qseqid
 
-#Load GFF file
+# Load GFF file
 gff <- gffRead(opt$gff)
 
-#Subset based on gene names
+# Subset based on gene names
 sub <- grepl.sub(gff, pattern = ids, Var = "attributes")
 not <- grepl.sub(gff, pattern = ids, Var = "attributes", keep.found = FALSE)
 
-#Change fields values
-##source
+# Change fields values
+## source
 s <- sub$source
 sn <- opt$database
 snew <- paste(s, sn, sep = ",")
 sub$source <- snew
-##feature
+
+## feature
 f <- sub$feature
 fn <- opt$type
 fnew <- paste(f, fn, sep = ",")
 sub$feature <- fnew
-##attributes
+
+## attributes
 a <- sub$attributes
 an <- att
 anew <- paste(a, an, sep = ";")
 sub$attributes <- anew
 
-#Merge files
+# Merge files
 merged_df <- merge.data.frame(sub, not, all = TRUE)
 feat <- merged_df$feature
 merged_df$feature <- sapply(feat, reduce_row)
@@ -85,5 +87,5 @@ merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", 
             col.names = FALSE, row.names = FALSE)
 
-#Clear workspace
+# Clear workspace
 rm(list=ls())

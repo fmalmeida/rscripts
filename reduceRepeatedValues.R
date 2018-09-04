@@ -1,17 +1,17 @@
 #!/usr/bin/Rscript
 
+# Load libraries
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
+suppressMessages(library(optparse))
 
-# Set function
+# Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
 
 # Setting parameters
-library(optparse)
-
 option_list = list(
   make_option(c("-i", "--input"), type="character", default=NULL,
               help="dataset file name", metavar="character"),
@@ -27,10 +27,10 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
-#Load GFF
+# Load GFF file
 gff <- gffRead(opt$input)
 
-## Reduce values
+## Remove repeated values
 feature <- gff$feature
 gff$feature <- sapply(feature, reduce_row)
 source <- gff$source

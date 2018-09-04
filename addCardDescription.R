@@ -1,17 +1,24 @@
 #!/usr/bin/Rscript
 
-# Load CARD entries index
+# Load CARD entries index. These will be used to write
+# the attributes columns of CARD entries.
 cat_index <- read.table("/work/indexes/aro_categories_index.csv", header = TRUE, sep = "\t")
 cat <- read.table("/work/indexes/aro_categories.csv", header = TRUE, sep = "\t")
 index <- read.table("/work/indexes/aro_index.csv", header = TRUE, sep = "\t", fill = TRUE)
 
-# Load library
+# Load libraries
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
-
-# Setting parameters
 suppressMessages(library(optparse))
 
+# Function used to remove redundancy
+reduce_row = function(i) {
+  d <- unlist(strsplit(i, split=","))
+  paste(unique(d), collapse = ',') 
+}
+
+
+# Setting parameters
 option_list = list(
   make_option(c("-i", "--input"), type="character", default=NULL,
               help="blast tab output", metavar="character"),
@@ -35,13 +42,13 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
-# Merge indexes to create a full index with all values
+# Merge indexes to create a full index with all CARD values
 merged <- merge.data.frame(cat_index, index, by.x = "Protein.Accession",
                            by.y = "Protein.Accession", all = TRUE)
 card_indexes <- merge.data.frame(merged, cat, by.x = "ARO.Accession", 
                                  by.y = "ARO.Accession", all = TRUE)
 
-# Load Blast
+# Load Blast tabular file
 blastFile <- read.table(opt$input, sep = "\t")
 blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
                  "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
@@ -58,13 +65,13 @@ ssids <- as.vector(blast_filtered$sseqid)
 aroID <- sapply(strsplit(ssids, "\\|"), `[`, 3)
 blast_filtered$ARO <- aroID
 
-#Load gff
+# Load gff file to merge entries
 gff <- gffRead(opt$gff)
 
-##Subset Card indexes
+## Subset Card indexes
 card_subset <- grepl.sub(card_indexes, pattern = aroID, Var = "ARO.Accession")
 
-#Get desired fields
+# Get desired values for attributes columns
 description <- paste("Additional_Database=", opt$database, ";", 
                      "ARO=", card_subset$ARO.Accession, ";", "Gene_Family=", 
                      card_subset$AMR.Gene.Family, ";", "Drug_Class=", card_subset$Drug.Class, 
@@ -86,33 +93,27 @@ prokka_ids <- blast_filtered$qseqid
 sub <- grepl.sub(gff, pattern = prokka_ids, Var = "attributes")
 not <- grepl.sub(gff, pattern = prokka_ids, Var = "attributes", keep.found = FALSE)
 
-#Change fields - Add database source and feature type
-##source
+# Change fields - Add database source and feature type
+## source
 s <- sub$source
 sn <- opt$database
 snew <- paste(s, sn, sep = ",")
 sub$source <- snew
 
-##feature
+## feature
 f <- sub$feature
 fn <- opt$type
 fnew <- paste(f, fn, sep = ",")
 sub$feature <- fnew
 
-##attributes
+## attributes
 blast_filtered <- blast_filtered[order(blast_filtered$qseqid),]
 a <- sub$attributes
 an <- blast_filtered$attributes
 anew <- paste(a, an, sep = ";")
 sub$attributes <- anew
 
-##Merging final GFF
-reduce_row = function(i) {
-  d <- unlist(strsplit(i, split=","))
-  paste(unique(d), collapse = ',') 
-}
-
-#Merge files
+# Merge files
 merged_df <- merge.data.frame(sub, not, all = TRUE)
 feat <- merged_df$feature
 merged_df$feature <- sapply(feat, reduce_row)
@@ -124,5 +125,5 @@ merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", 
             col.names = FALSE, row.names = FALSE, append = FALSE)
 
-#Clear workspace
+# Clear workspace
 rm(list=ls())

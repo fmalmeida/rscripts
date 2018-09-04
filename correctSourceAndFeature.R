@@ -1,7 +1,9 @@
 #!/usr/bin/Rscript
 
+# Load libraries
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
+suppressMessages(library(optparse))
 
 # Set function
 # This function is used to extract the values of the fields stored in
@@ -20,14 +22,13 @@ getmotif <- function (x, field, attrsep = ";") {
   }) 
 }
 
+# Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
 
 # Setting parameters
-library(optparse)
-
 option_list = list(
   make_option(c("-i", "--input"), type="character", default=NULL,
               help="dataset file name", metavar="character"),

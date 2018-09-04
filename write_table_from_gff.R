@@ -1,12 +1,11 @@
 #!/usr/bin/Rscript
 
-# Load Library
+# Load Libraries
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
-
-# optparse
 suppressMessages(library(optparse))
 
+# Set parameters
 option_list = list(
   make_option(c("-i", "--input"), type="character", default=NULL, 
               help="dataset file name", metavar="character"),
@@ -17,7 +16,12 @@ option_list = list(
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
-# Create function
+if (is.null(opt$input)){
+  print_help(opt_parser)
+  stop("At least one argument must be supplied (input file).n", call.=FALSE)
+}
+
+# Function used to get values from attributes colum
 getAttributeField <- function (x, field, attrsep = ";") { 
   s = strsplit(x, split = attrsep, fixed = TRUE) 
   sapply(s, function(atts) { 
@@ -32,12 +36,7 @@ getAttributeField <- function (x, field, attrsep = ";") {
   }) 
 }
 
-if (is.null(opt$input)){
-  print_help(opt_parser)
-  stop("At least one argument must be supplied (input file).n", call.=FALSE)
-}
-
-# Load gff
+# Load gff file
 gff_file <- opt$input
 gff <- gffRead(gff_file)
 output_file <- opt$out
