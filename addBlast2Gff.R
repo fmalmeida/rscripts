@@ -35,7 +35,7 @@ reduce_row = function(i) {
 blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
 "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "stitle")
 
-blastFile <- read.table(opt$input, sep = "\t")
+blastFile <- read.delim(opt$input, header = FALSE)
 colnames(blastFile) <- blastHeader
 
 #Remove duplicates based on bitscore
