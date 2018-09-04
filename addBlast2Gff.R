@@ -25,39 +25,38 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
-# Reduce row function - Function used to remove reduncancy
+#Reduce row function
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
 
-# Read blast tab file
+#Load blast result
 blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
 "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "stitle")
 
 blastFile <- read.table(opt$input, sep = "\t")
 colnames(blastFile) <- blastHeader
 
-# Sort blast and remove duplicates based on bitscore
+#Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
 
-# Building string for attributes column
 att <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=", 
              blastFile$sseqid, ";", opt$database, "_Target=", blastFile$stitle, sep = "")
 
-# Get gene ids
+#Get gene names
 ids <- blastFile$qseqid
 
-# Load GFF file
+#Load GFF file
 gff <- gffRead(opt$gff)
 
-# Subset gff based on gene ids that have a blast hit
+#Subset based on gene names
 sub <- grepl.sub(gff, pattern = ids, Var = "attributes")
 not <- grepl.sub(gff, pattern = ids, Var = "attributes", keep.found = FALSE)
 
-# Add database source and feature to gff columns
+#Change fields values
 ##source
 s <- sub$source
 sn <- opt$database
