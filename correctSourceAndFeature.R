@@ -60,19 +60,17 @@ sub$attributes <- gsub(",", ";", sub$attributes)
 
 previous_source <- sub$source
 
-# Then, we need to extract the name of the database.
+# Then, we need to extract the name of the database 
+# and feature type.
 motifs <- getmotif(sub$attributes, "protein_motif", ";")
-motifs <- sapply(strsplit(motifs, split = "_", fixed = TRUE), "[", 1)
+sources <- sapply(strsplit(motifs, split = "_", fixed = TRUE), "[", 1)
+features <- sapply(strsplit(motifs, split = "_", fixed = TRUE), "[", 2)
 
 # Finally, we add these names to the previous sources
-new_source <- paste(previous_source, motifs, sep = ",")
+new_source <- paste(previous_source, sources, sep = ",")
 sub$source <- new_source
 
-# Next, we need to write the respective feature types.
-features <- gsub("victors|VFDB", "virulence", motifs)
-features <- gsub("ICEberg", "ICE", features)
-
-# Then, we add it to previously wrote features
+# Then, we add it to previously written features
 previous_features <- sub$feature
 new_features <- paste(previous_features, features, sep = ",")
 sub$feature <- new_features

@@ -3,7 +3,6 @@
 # Load CARD entries index
 cat_index <- read.table("/work/indexes/aro_categories_index.csv", header = TRUE, sep = "\t")
 cat <- read.table("/work/indexes/aro_categories.csv", header = TRUE, sep = "\t")
-index <- read.table("/work/indexes/cardDB/aro_index.csv", header = TRUE, sep = "\t", fill = TRUE)
 index <- read.table("/work/indexes/aro_index.csv", header = TRUE, sep = "\t", fill = TRUE)
 
 # Load library
