@@ -48,7 +48,6 @@ if (is.null(opt$input)){
 gff <- gffRead(opt$input)
 gff$attributes <- gsub(" ", "_", gff$attributes)
 gff$attributes <- gsub(",protein_motif:", ";protein_motif=", gff$attributes)
-gff$attributes <- gsub(",", ";", gff$attributes)
 
 # First step is to subset those entries that have something related to one 
 # of the pfam subsets
