@@ -45,7 +45,7 @@ output_file <- opt$out
 output_file <- opt$out
 resistance_df <- grepl.sub(gff, pattern = "resistance", Var = "feature")
 
-## Create file specific for CARD database - Since it is the one that has the better described genes
+## Create file specific for CARD database - Since it is the one that has the better described resistance genes
 
 ### CARD
 card_df <- grepl.sub(resistance_df, pattern = "CARD", Var = "source")
