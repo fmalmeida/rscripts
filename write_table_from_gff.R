@@ -41,18 +41,34 @@ getAttributeField <- function (x, field, attrsep = ";") {
 # Load gff file
 gff <- gffRead(opt$input)
 output_file <- opt$out
-type <- opt$type
 
 ## Create file specific for CARD database - Since it is the one that has the better described resistance genes
 
-if (type == "resistance") {
-
-  gff$ARO_Accession <- getAttributeField(card_df$attributes, "ARO", ";")
-  gff$Gene_Family <- getAttributeField(card_df$attributes, "Gene_Family", ";")
-  gff$Name <- getAttributeField(card_df$attributes, "DB_Name", ";")
-  gff$Drug_Class <- getAttributeField(card_df$attributes, "Drug_Class", ";")
-  gff$Resistance_Mechanism <- getAttributeField(card_df$attributes, "Resistance_Mechanism", ";")
-  gff$Domain <- getAttributeField(card_df$attributes, "protein_motif", ";")
+if (is.null(opt$type)) {
+  ### Create fields - Prokka
+  gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
+  gff$Prokka_gene <- getAttributeField(gff$attributes, "gene", ";")
+  gff$Prokka_geneFamily <- substr(gff$Prokka_gene, 1, 3)
+  gff$Prokka_name <- getAttributeField(gff$attributes, "Name", ";")
+  gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
+  gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
+  gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
+  gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
+  
+  col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
+          "Prokka_name", "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
+  
+  table <- gff[, col]
+  out <- paste0(output_file, ".tsv", sep = "")
+  write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+} else if (opt$type == "resistance") {
+  
+  gff$ARO_Accession <- getAttributeField(gff$attributes, "ARO", ";")
+  gff$Gene_Family <- getAttributeField(gff$attributes, "Gene_Family", ";")
+  gff$Name <- getAttributeField(gff$attributes, "DB_Name", ";")
+  gff$Drug_Class <- getAttributeField(gff$attributes, "Drug_Class", ";")
+  gff$Resistance_Mechanism <- getAttributeField(gff$attributes, "Resistance_Mechanism", ";")
+  gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
   gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
   gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
 
@@ -61,10 +77,9 @@ col = c("seqname", "start", "end", "feature", "source", "ARO_Accession",
         "Gene_Family", "Name", "Drug_Class", "Resistance_Mechanism", 
         "Domain", "Prokka_product", "Prokka_inference")
 table <- gff[, col]
-out <- paste0(output_file, "_", type, ".tsv", sep = "")
+out <- paste0(output_file, "_", opt$type, ".tsv", sep = "")
 write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
-}
-
+} else {
 ### Create fields - Prokka
 gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
 gff$Prokka_gene <- getAttributeField(gff$attributes, "gene", ";")
@@ -79,5 +94,5 @@ col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gen
         "Prokka_name", "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
 
 table <- gff[, col]
-out <- paste0(output_file, "_", type, ".tsv", sep = "")
-write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
+out <- paste0(output_file, "_", opt$type, ".tsv", sep = "")
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)}
