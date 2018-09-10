@@ -47,13 +47,14 @@ if (is.null(opt$input)){
 # Read gff file
 gff <- gffRead(opt$input)
 gff$attributes <- gsub(" ", "_", gff$attributes)
+gff$attributes <- gsub("protein motif:", "protein_motif=", gff$attributes)
 gff$attributes <- gsub(",protein_motif:", ";protein_motif=", gff$attributes)
 
 # First step is to subset those entries that have something related to one 
 # of the pfam subsets
 
-sub <- grepl.sub(gff, pattern = "_subset", Var = "attributes")
-not <- grepl.sub(gff, pattern = "_subset", Var = "attributes", keep.found = FALSE)
+sub <- grepl.sub(gff, pattern = "protein_motif", Var = "attributes")
+not <- grepl.sub(gff, pattern = "protein_motif", Var = "attributes", keep.found = FALSE)
 
 # Secondly we need to store the previous value of the source column in 
 # order to add to it the name of the pfam subset database
