@@ -67,7 +67,7 @@ merged_df$product <- gsub("-", "_", merged_df$product)
 merged_df$product <- gsub(",", "_", merged_df$product)
 
 ## Data without NA values
-sub <- grepl.sub(merged_df, pattern = "", Var = "gene", keep.found = FALSE)
+sub <- na.omit(merged_df)
 
 # Count - with NA values
 count <- count(merged_df, c("seqname", "ID", "geneFamily", "product"))
@@ -155,7 +155,7 @@ card_df$Name <- gsub(",", "_", card_df$Name)
 card_df$ID <- getAttributeField(card_df$attributes, "ID", ";")
 
 ## Data without NA values
-sub <- grepl.sub(card_df, pattern = "", Var = "gene", keep.found = FALSE)
+sub <- na.omit(card_df)
 
 # Count
 count <- count(sub, 
