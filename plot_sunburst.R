@@ -67,7 +67,7 @@ merged_df$product <- gsub("-", "_", merged_df$product)
 merged_df$product <- gsub(",", "_", merged_df$product)
 
 ## Data without NA values
-sub <- grepl.sub(merged_df, "", "gene", keep.found = FALSE)
+sub <- grepl.sub(merged_df, pattern = "", Var = "gene", keep.found = FALSE)
 
 # Count - with NA values
 count <- count(merged_df, c("seqname", "ID", "geneFamily", "product"))
@@ -77,7 +77,7 @@ id_sb_csv <- paste0(count$seqname, "-", count$geneFamily,
                     ",", count$freq, sep = "")
 write(id_sb_csv, file = "sb.csv")
 
-#plot
+# plot
 df_sb <- read.delim("sb.csv", header = FALSE, sep = ",", 
                     dec = NULL, quote = NULL)
 sb <- sunburst(
@@ -96,9 +96,6 @@ htmlwidgets::saveWidget(sb, opt$out, selfcontained = FALSE)
 
 # Delete temp
 file.remove("sb.csv")
-
-## Data without NA values
-sub <- grepl.sub(merged_df, "", "gene", keep.found = FALSE)
 
 # Count - without NA values
 count <- count(sub, c("seqname", "ID", "geneFamily", "product"))
@@ -132,7 +129,7 @@ file.remove("sb.csv")
 ## Same plot - Specific for CARD database ##
 ############################################
 gff <- gffRead(opt$input)
-card_df <- grepl.sub(gff, "CARD", "source")
+card_df <- grepl.sub(gff, pattern = "CARD", Var = "source")
 
 card_df$ARO <- getAttributeField(card_df$attributes, "ARO", ";")
 
@@ -158,7 +155,7 @@ card_df$Name <- gsub(",", "_", card_df$Name)
 card_df$ID <- getAttributeField(card_df$attributes, "ID", ";")
 
 ## Data without NA values
-sub <- grepl.sub(card_df, "", "gene", keep.found = FALSE)
+sub <- grepl.sub(card_df, pattern = "", Var = "gene", keep.found = FALSE)
 
 # Count
 count <- count(sub, 
