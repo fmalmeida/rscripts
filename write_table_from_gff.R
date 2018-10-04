@@ -38,12 +38,13 @@ getAttributeField <- function (x, field, attrsep = ";") {
   }) 
 }
 
+# Check if file is empty
+if (file.info(opt$input)$size > 0 ) {
 # Load gff file
 gff <- gffRead(opt$input)
 output_file <- opt$out
 
 ## Create file specific for CARD database - Since it is the one that has the better described resistance genes
-
 if (is.null(opt$type)) {
   ### Create fields - Prokka
   gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
@@ -96,3 +97,8 @@ col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gen
 table <- gff[, col]
 out <- paste0(output_file, "_", opt$type, ".tsv", sep = "")
 write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)}
+} else {
+  opt <- options(show.error.messages=FALSE)
+  on.exit(options(opt))
+  stop()
+}
