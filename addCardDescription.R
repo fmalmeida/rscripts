@@ -42,6 +42,8 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
+# Check if file is empty
+if (file.info(opt$input)$size > 0 ) {
 # Merge indexes to create a full index with all CARD values
 merged <- merge.data.frame(cat_index, index, by.x = "Protein.Accession",
                            by.y = "Protein.Accession", all = TRUE)
@@ -124,6 +126,13 @@ merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 # Write output
 write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", 
             col.names = FALSE, row.names = FALSE, append = FALSE)
+} else {
+  # Load GFF file
+  gff <- gffRead(opt$gff)
+  # Write output
+  write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
+              col.names = FALSE, row.names = FALSE)
+}
 
 # Clear workspace
 rm(list=ls())

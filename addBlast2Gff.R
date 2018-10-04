@@ -31,6 +31,9 @@ reduce_row = function(i) {
   paste(unique(d), collapse = ',') 
 }
 
+# Check if file is empty
+
+if (file.info(opt$input)$size > 0 ) {
 # Load blast tabular file
 blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
 "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "stitle")
@@ -86,6 +89,13 @@ merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 # Write output
 write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", 
             col.names = FALSE, row.names = FALSE)
+} else {
+  # Load GFF file
+  gff <- gffRead(opt$gff)
+  # Write output
+  write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
+              col.names = FALSE, row.names = FALSE)
+}
 
 # Clear workspace
 rm(list=ls())
