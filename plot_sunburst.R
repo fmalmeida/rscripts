@@ -42,7 +42,7 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
-if (opt$pattern == "CARD" && opt$field = "source"){
+if (opt$pattern == "CARD" && opt$field == "source"){
 # WORK
 gff <- gffRead(opt$input)
 
@@ -130,7 +130,7 @@ file.remove("sb.csv") } else {
 }
 }
 
-if (opt$pattern == "CARD" && opt$field = "source") {
+if (opt$pattern == "CARD" && opt$field == "source") {
 ############################################
 ## Same plot - Specific for CARD database ##
 ############################################
@@ -222,6 +222,6 @@ htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""),
                         selfcontained = FALSE)
 
 # Delete temp
-file.remove("sb.csv") }} else {
+file.remove("sb.csv") } else {
   file.create(opt$out)
-}
+}}
