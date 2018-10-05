@@ -42,7 +42,7 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
-if (opt$pattern == "CARD" && opt$field == "source"){
+if (opt$pattern != "CARD" && opt$field != "source"){
 # WORK
 gff <- gffRead(opt$input)
 
