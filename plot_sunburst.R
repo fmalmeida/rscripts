@@ -42,6 +42,7 @@ if (is.null(opt$input)){
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
+if (opt$pattern == "CARD" && opt$field = "source"){
 # WORK
 gff <- gffRead(opt$input)
 
@@ -91,8 +92,8 @@ sb <- sunburst(
 )
 
 # Save
-out <- paste0(opt$out, "_", "with_NA_values", sep = "")
-htmlwidgets::saveWidget(sb, opt$out, selfcontained = FALSE)
+htmlwidgets::saveWidget(sb, paste0(opt$out, "with_NA_values.html", sep = ""),
+                        selfcontained = FALSE)
 
 # Delete temp
 file.remove("sb.csv")
@@ -119,17 +120,20 @@ sb <- sunburst(
 )
 
 # Save
-out <- paste0(opt$out, "_", "without_NA_values", sep = "")
-htmlwidgets::saveWidget(sb, opt$out, selfcontained = FALSE)
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_without_NA_values.html", sep = ""), 
+                        selfcontained = FALSE)
 
 # Delete temp
-file.remove("sb.csv")
+file.remove("sb.csv")}
 
+if (opt$pattern == "CARD" && opt$field = "source") {
 ############################################
 ## Same plot - Specific for CARD database ##
 ############################################
 gff <- gffRead(opt$input)
 card_df <- grepl.sub(gff, pattern = "CARD", Var = "source")
+
+if (!is.data.frame(card_df) && nrow(card_df)==0) {
 
 card_df$ARO <- getAttributeField(card_df$attributes, "ARO", ";")
 
@@ -184,7 +188,7 @@ sb <- sunburst(
 )
 
 # Save
-htmlwidgets::saveWidget(sb, "Complete_CARD_entries.html", 
+htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""), 
                         selfcontained = FALSE)
 
 # Delete temp
@@ -210,8 +214,8 @@ sb <- sunburst(
 )
 
 # Save
-htmlwidgets::saveWidget(sb, "Concise_CARD_entries.html", 
+htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""), 
                         selfcontained = FALSE)
 
 # Delete temp
-file.remove("sb.csv")
+file.remove("sb.csv") }}
