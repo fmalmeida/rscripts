@@ -54,8 +54,8 @@ gff$geneFamily <- substr(gff$gene, 1, 3)
 gff$product <- getAttributeField(gff$attributes, "product", ";")
 
 # Filter
-if (!is.data.frame(card_df) && nrow(card_df)==0) {
 merged_df <- grepl.sub(gff, pattern = opt$pattern, Var = opt$field)
+if (!is.data.frame(merged_df) && nrow(merged_df)==0) {
 
 ## Altering some tag problems
 merged_df$ID <- getAttributeField(merged_df$attributes, "ID", ";")
