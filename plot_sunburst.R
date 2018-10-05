@@ -54,6 +54,7 @@ gff$geneFamily <- substr(gff$gene, 1, 3)
 gff$product <- getAttributeField(gff$attributes, "product", ";")
 
 # Filter
+if (!is.data.frame(card_df) && nrow(card_df)==0) {
 merged_df <- grepl.sub(gff, pattern = opt$pattern, Var = opt$field)
 
 ## Altering some tag problems
@@ -124,7 +125,10 @@ htmlwidgets::saveWidget(sb, paste0(opt$out, "_without_NA_values.html", sep = "")
                         selfcontained = FALSE)
 
 # Delete temp
-file.remove("sb.csv")}
+file.remove("sb.csv") } else {
+  file.create(opt$out)
+}
+}
 
 if (opt$pattern == "CARD" && opt$field = "source") {
 ############################################
@@ -218,4 +222,6 @@ htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""),
                         selfcontained = FALSE)
 
 # Delete temp
-file.remove("sb.csv") }}
+file.remove("sb.csv") }} else {
+  file.create(opt$out)
+}
