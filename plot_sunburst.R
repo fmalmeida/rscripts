@@ -93,7 +93,7 @@ sb <- sunburst(
 )
 
 # Save
-htmlwidgets::saveWidget(sb, paste0(opt$out, "with_NA_values.html", sep = ""),
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_with_NA_values.html", sep = ""),
                         selfcontained = FALSE)
 
 # Delete temp
@@ -190,7 +190,7 @@ sb <- sunburst(
 )
 
 # Save
-htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""), 
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_complete.html", sep = ""), 
                         selfcontained = FALSE)
 
 # Delete temp
@@ -216,7 +216,7 @@ sb <- sunburst(
 )
 
 # Save
-htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""), 
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_concise.html", sep = ""), 
                         selfcontained = FALSE)
 
 # Delete temp
