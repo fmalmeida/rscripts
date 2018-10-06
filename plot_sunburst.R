@@ -128,9 +128,7 @@ htmlwidgets::saveWidget(sb, paste0(opt$out, "_without_NA_values.html", sep = "")
 file.remove("sb.csv") } else {
   file.create(opt$out)
 }
-}
-
-if (opt$pattern == "CARD" && opt$field == "source") {
+} else {
 ############################################
 ## Same plot - Specific for CARD database ##
 ############################################
