@@ -55,7 +55,7 @@ gff$product <- getAttributeField(gff$attributes, "product", ";")
 
 # Filter
 merged_df <- grepl.sub(gff, pattern = opt$pattern, Var = opt$field)
-if (!is.data.frame(merged_df) && nrow(merged_df)==0) {
+if (is.data.frame(merged_df) && nrow(merged_df)!=0) {
 
 ## Altering some tag problems
 merged_df$ID <- getAttributeField(merged_df$attributes, "ID", ";")
@@ -137,7 +137,7 @@ if (opt$pattern == "CARD" && opt$field == "source") {
 gff <- gffRead(opt$input)
 card_df <- grepl.sub(gff, pattern = "CARD", Var = "source")
 
-if (!is.data.frame(card_df) && nrow(card_df)==0) {
+if (is.data.frame(card_df) && nrow(card_df)!=0) {
 
 card_df$ARO <- getAttributeField(card_df$attributes, "ARO", ";")
 
