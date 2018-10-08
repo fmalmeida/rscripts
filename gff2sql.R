@@ -57,13 +57,6 @@ suppressWarnings(dbClearResult(res))
 ### Close db
 suppressWarnings(dbCommit(con))
 
-# Getting Data Out - Test
-#head(dbListTables(con)) # Lists tables in database
-#dbListFields(con, "FinalGFF") # Lists table fields
-
-#out <- 
-#  dbGetQuery(con, "SELECT * FROM FinalGFF WHERE feature LIKE '%resistance%'") # Select few data
-
 ## Loading Protein fasta
 genes_aa <- read.delim(opt$aminoacid, header = FALSE)
 names(genes_aa) <- c("ID", "Comment", "Sequence")
@@ -111,25 +104,3 @@ suppressWarnings(dbClearResult(res))
 
 ## Close db
 suppressWarnings(dbCommit(con))
-
-# Yet another test (regions)
-#region = function(s, e) {
-#  dbGetQuery(con, paste("SELECT * FROM FinalGFF WHERE start > ", s, " AND end < ", e, sep=""))
-#}
-
-#suppressWarnings(res <- region(100000, 200000))
-
-# Get FASTA based on ids
-#ids <- c("DNEDODLF_00001", "DNEDODLF_00004", "DNEDODLF_00005")
-
-#get_from_ids <-
-#  function(y) {
-#    dbGetQuery(con, paste("SELECT * FROM AAsequences WHERE ID='", y, "'", sep=""))
-#  }
-
-#suppressWarnings(res <- lapply(ids, get_from_ids))
-#out <- suppressWarnings(data.frame(t(sapply(res,c))))
-#out_fasta <- 
-#  glue('>{out$ID} {out$Comment}\n{out$Sequence}')
-
-# Creating acessors
