@@ -1,5 +1,5 @@
 #!/usr/bin/Rscript
-# Plot with multiple layers
+
 suppressMessages(library(sunburstR))
 suppressMessages(library(plyr))
 suppressMessages(library(DataCombine))
