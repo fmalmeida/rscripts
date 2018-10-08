@@ -27,7 +27,7 @@ option_list = list(
   make_option(c("-i", "--input"), type="character", default=NULL,
               help="dataset file name", metavar="character"),
   make_option(c("-o", "--out"), type="character", default="out.txt",
-              help="output file prefix name [default= %default]", metavar="character"),
+              help="output file name [default= %default]", metavar="character"),
   make_option(c("-p", "--pattern"), type = "character", default=NULL,
               help="subset pattern [default= %default]", metavar="character"),
   make_option(c("-f", "--field"), type = "character", default="attributes",
@@ -68,10 +68,38 @@ merged_df$product <- sub("_[^_]+$", "", merged_df$product)
 merged_df$product <- gsub("-", "_", merged_df$product)
 merged_df$product <- gsub(",", "_", merged_df$product)
 
-## Removing NA values
+## Data without NA values
 sub <- na.omit(merged_df)
 
-# Count feature repetition
+# Count - with NA values
+count <- count(merged_df, c("seqname", "ID", "geneFamily", "product"))
+
+id_sb_csv <- paste0(count$seqname, "-", count$geneFamily, 
+                    "-", count$product, "-", count$ID,
+                    ",", count$freq, sep = "")
+write(id_sb_csv, file = "sb.csv")
+
+# plot
+df_sb <- read.delim("sb.csv", header = FALSE, sep = ",", 
+                    dec = NULL, quote = NULL)
+sb <- sunburst(
+  df_sb,
+  count = TRUE, # add count just for demonstration
+  legend = list(w=200, h=50, r=10), # make extra room for our legend
+  legendOrder = c(unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                              `[`, 1, FUN.VALUE=character(1))), 
+                  unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                                `[`, 2, FUN.VALUE=character(1))))
+)
+
+# Save
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_with_NA_values.html", sep = ""),
+                        selfcontained = FALSE)
+
+# Delete temp
+file.remove("sb.csv")
+
+# Count - without NA values
 count <- count(sub, c("seqname", "ID", "geneFamily", "product"))
 
 id_sb_csv <- paste0(count$seqname, "-", count$geneFamily, 
@@ -93,7 +121,7 @@ sb <- sunburst(
 )
 
 # Save
-htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""), 
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_without_NA_values.html", sep = ""), 
                         selfcontained = FALSE)
 
 # Delete temp
@@ -132,13 +160,41 @@ card_df$Name <- gsub("-", "_", card_df$Name)
 card_df$Name <- gsub(",", "_", card_df$Name)
 card_df$ID <- getAttributeField(card_df$attributes, "ID", ";")
 
-## Removing NA values
+## Data without NA values
 sub <- na.omit(card_df)
 
 # Count
 count <- count(sub, 
-               c("seqname", "ID", "DrugClass", 
-                 "ResistanceMechanism", "ARO", "Name"))
+               c("seqname", "ID", "GeneFamily", 
+                 "DrugClass", "ResistanceMechanism", 
+                 "ARO", "Name"))
+
+id_sb_csv <- paste0(count$seqname, "-", count$DrugClass, 
+                    "-", count$ResistanceMechanism, "-", 
+                    count$GeneFamily, "-", count$Name, 
+                    "-", count$ARO, 
+                    "-", count$ID, ",", count$freq, sep = "")
+write(id_sb_csv, file = "sb.csv")
+
+#plot
+df_sb <- read.delim("sb.csv", header = FALSE, sep = ",", 
+                    dec = NULL, quote = NULL)
+sb <- sunburst(
+  df_sb,
+  count = TRUE, # add count just for demonstration
+  legend = list(w=200, h=50, r=10), # make extra room for our legend
+  legendOrder = c(unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                                `[`, 1, FUN.VALUE=character(1))), 
+                  unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                                `[`, 2, FUN.VALUE=character(1))))
+)
+
+# Save
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_complete.html", sep = ""), 
+                        selfcontained = FALSE)
+
+# Delete temp
+file.remove("sb.csv")
 
 ## Concise CARD plot
 id_sb_csv <- paste0(count$seqname, "-", count$DrugClass, 
@@ -160,7 +216,7 @@ sb <- sunburst(
 )
 
 # Save
-htmlwidgets::saveWidget(sb, paste0(opt$out, "_CARD_compliant.html", sep = ""), 
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_concise.html", sep = ""), 
                         selfcontained = FALSE)
 
 # Delete temp
