@@ -1,24 +1,20 @@
 #!/usr/bin/Rscript
+# Setting Help
+'usage: addBlast2Gff.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr>]
+
+options:
+  -i, --input=<file>    Tabular Blast to be added to GFF
+  -g, --gff=<file>      GFF file to add Blast hits into
+  -o, --out=<chr>       Output file name [default: out.gff]
+  -d, --database=<chr>  Name of databased which Blast came from
+  -t, --type=<chr>      Type of feature blasted. Ex: resistance' -> doc
+
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
-suppressMessages(library(optparse))
+suppressMessages(library(docopt))
 
-# Setting parameters
-option_list = list(
-  make_option(c("-i", "--input"), type="character", default=NULL,
-              help="blast tab output", metavar="character"),
-  make_option(c("-g", "--gff"), type="character", default = NULL,
-              help = "gff file to merge", metavar = "character"),
-  make_option(c("-o", "--out"), type="character", default="out.txt",
-              help="output file name [default= %default]", metavar="character"),
-  make_option(c("-d", "--database"), type="character", default=NULL,
-              help="database annotated from", metavar="character"),
-  make_option(c("-t", "--type", type="character"), default = NULL,
-                help = "feature type", metavar = "character")
-);
-
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
+# Parse parameters
+opt <- docopt(doc)
 
 if (is.null(opt$input)){
   print_help(opt_parser)

@@ -1,9 +1,21 @@
 #!/usr/bin/Rscript
+# Setting help
+'usage: plot_sunburst.R [--input<file> --out=<chr> --pattern=<chr> --field=<chr>]
+
+options:
+  -i, --input=<file>    GFF from which you want to plot
+  -o, --out=<chr>       Output prefix file name [default: out]
+  -p, --pattern=<chr>   Pattern that will be used to subset GFF [default: CARD]
+  -f, --field=<chr>     GFF field to search for pattern [default: source]' -> doc
 
 suppressMessages(library(sunburstR))
 suppressMessages(library(plyr))
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
+suppressMessages(library(docopt))
+
+# Parse parameters
+opt <- docopt(doc)
 
 # Create function
 getAttributeField <- function (x, field, attrsep = ";") { 
@@ -19,23 +31,6 @@ getAttributeField <- function (x, field, attrsep = ";") {
     return(rv) 
   }) 
 }
-
-# Setting parameters
-suppressMessages(library(optparse))
-
-option_list = list(
-  make_option(c("-i", "--input"), type="character", default=NULL,
-              help="dataset file name", metavar="character"),
-  make_option(c("-o", "--out"), type="character", default="out.txt",
-              help="output file prefix name [default= %default]", metavar="character"),
-  make_option(c("-p", "--pattern"), type = "character", default=NULL,
-              help="subset pattern [default= %default]", metavar="character"),
-  make_option(c("-f", "--field"), type = "character", default="attributes",
-              help="subset pattern [default= %default]", metavar="character")
-);
-
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
 
 if (is.null(opt$input)){
   print_help(opt_parser)

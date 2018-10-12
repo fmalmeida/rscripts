@@ -1,22 +1,19 @@
 #!/usr/bin/Rscript
+# Setting help
+'usage: write_table_from_gff.R [--input=<file> --out=<chr> --type=<chr>]
+
+options:
+  -i, --input=<file>    GFF file name
+  -o, --out=<chr>       Output prefix file name [default: out]
+  -t, --type=<chr>      Feature type to subset and write table from [default: resistance]' -> doc
 
 # Load Libraries
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
-suppressMessages(library(optparse))
+suppressMessages(library(docopt))
 
-# Set parameters
-option_list = list(
-  make_option(c("-i", "--input"), type="character", default=NULL, 
-              help="dataset file name", metavar="character"),
-  make_option(c("-o", "--out"), type="character", default="output", 
-              help="output file prefix name [default= %default]", metavar="character"),
-  make_option(c("-t", "--type"), type="character", default=NULL, 
-              help="feature type [default= %default]", metavar="character")
-); 
-
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
+# Parse parameters
+opt <- docopt(doc)
 
 if (is.null(opt$input)){
   print_help(opt_parser)

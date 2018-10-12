@@ -1,4 +1,22 @@
 #!/usr/bin/Rscript
+# Setting help
+'usage: addCardDescription.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr> --pident=<int>]
+
+options:
+  -i, --input=<file>    Tabular Blast to be added to GFF
+  -g, --gff=<file>      GFF file to add Blast hits into
+  -o, --out=<chr>       Output file name [default: out.gff]
+  -d, --database=<chr>  Name of databased which Blast came from
+  -t, --type=<chr>      Type of feature blasted. Ex: resistance
+  -p, --pident=<int>    % identity to filter blast [default: 90]' -> doc
+
+# Load libraries
+suppressMessages(library(DataCombine))
+suppressMessages(library(ballgown))
+suppressMessages(library(docopt))
+
+# Parse parameters
+opt <- docopt(doc)
 
 # Load CARD entries index. These will be used to write
 # the attributes columns of CARD entries.
@@ -6,36 +24,11 @@ cat_index <- read.table("/work/indexes/aro_categories_index.csv", header = TRUE,
 cat <- read.table("/work/indexes/aro_categories.csv", header = TRUE, sep = "\t")
 index <- read.table("/work/indexes/aro_index.csv", header = TRUE, sep = "\t", fill = TRUE)
 
-# Load libraries
-suppressMessages(library(DataCombine))
-suppressMessages(library(ballgown))
-suppressMessages(library(optparse))
-
 # Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
-
-
-# Setting parameters
-option_list = list(
-  make_option(c("-i", "--input"), type="character", default=NULL,
-              help="blast tab output", metavar="character"),
-  make_option(c("-g", "--gff"), type="character", default = NULL,
-              help = "gff file to merge", metavar = "character"),
-  make_option(c("-o", "--out"), type="character", default="out.txt",
-              help="output file name [default= %default]", metavar="character"),
-  make_option(c("-d", "--database"), type="character", default=NULL,
-              help="database annotated from", metavar="character"),
-  make_option(c("-t", "--type", type="character"), default = NULL,
-              help = "feature type", metavar = "character"),
-  make_option(c("-p", "--pident"), default=90, metavar = "integer",
-              help = "% identitty to filter blast [default= %default]", type = "integer")
-);
-
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
 
 if (is.null(opt$input)){
   print_help(opt_parser)

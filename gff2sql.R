@@ -1,27 +1,14 @@
 #!/usr/bin/Rscript
+'usage: gff2sql.R [--input=<file> --out=<chr> --nucleotide=<file> --aminoacid=<file>]
 
+options:
+  -i, --input=<file>         GFF file to transform in SQL
+  -o, --out=<chr>            SQL database name to output [default: out.sql]
+  -n, --nucleotide=<file>    Takes in the nucleotide FASTA.
+  -a, --aminoacid=<file>     Takes in the protein FASTA' -> doc
+library("docopt")
+opt <- docopt(doc)
 suppressMessages(library(RSQLite))
-suppressMessages(library(optparse))
-
-## Setting parameters
-option_list = list(
-  make_option(c("-i", "--input"), type="character", default=NULL,
-              help="GFF file to be converted into a sql database", metavar="character"),
-  make_option(c("-o", "--out"), type="character", default="myNewDb.sqlite",
-              help="SQL database output name [default= %default]", metavar="character"),
-  make_option(c("-n", "--nucleotide"), type = "character", default=NULL,
-              help="Nucleotide FASTA containing annotated genes [default= %default]", metavar="character"),
-  make_option(c("-a", "--aminoacid"), type = "character", default=NULL,
-              help="Protein FASTA containing annotated genes [default= %default]", metavar="character")
-);
-
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
-
-if (is.null(opt$input)){
-  print_help(opt_parser)
-  stop("At least one argument must be supplied (input file)\n", call.=FALSE)
-}
 
 ## Loading SQL database driver
 drv <- dbDriver("SQLite")

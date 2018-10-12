@@ -1,26 +1,24 @@
 #!/usr/bin/Rscript
+# Setting help
+'usage: reduceRepeatedValues.R [--input=<file> --out=<chr>]
+
+options:
+  -i, --input=<file>    GFF file
+  -o, --out=<chr>       Output file name [default: out.gff]' -> doc
 
 # Load libraries
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
-suppressMessages(library(optparse))
+suppressMessages(library(docopt))
+
+# Parse parameters
+opt <- docopt(doc)
 
 # Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
-
-# Setting parameters
-option_list = list(
-  make_option(c("-i", "--input"), type="character", default=NULL,
-              help="dataset file name", metavar="character"),
-  make_option(c("-o", "--out"), type="character", default="out.txt",
-              help="output file name [default= %default]", metavar="character")
-);
-
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
 
 if (is.null(opt$input)){
   print_help(opt_parser)
