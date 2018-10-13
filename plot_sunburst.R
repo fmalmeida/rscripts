@@ -67,10 +67,10 @@ merged_df$product <- gsub(",", "_", merged_df$product)
 sub <- na.omit(merged_df)
 
 # Count feature repetition
-count <- count(sub, c("seqname", "ID", "geneFamily", "product"))
+count <- count(sub, c("seqname", "product", "name", "ID"))
 
-id_sb_csv <- paste0(count$seqname, "-", count$geneFamily, 
-                    "-", count$product, "-", count$ID,
+id_sb_csv <- paste0(count$seqname, "-", count$product, 
+                    "-", count$name, "-", count$ID,
                     ",", count$freq, sep = "")
 write(id_sb_csv, file = "sb.csv")
 
