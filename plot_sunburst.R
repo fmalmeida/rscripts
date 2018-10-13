@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 # Setting help
-'usage: plot_sunburst.R [--input<file> --out=<chr> --pattern=<chr> --field=<chr>]
+'usage: plot_sunburst.R [--input=<file> --out=<chr> --pattern=<chr> --field=<chr>]
 
 options:
   -i, --input=<file>    GFF from which you want to plot
@@ -132,13 +132,13 @@ sub <- na.omit(card_df)
 
 # Count
 count <- count(sub, 
-               c("seqname", "ID", "DrugClass", 
-                 "ResistanceMechanism", "ARO", "Name"))
+               c("seqname", "ResistanceMechanism", "DrugClass", 
+                 "ID"))
 
 ## Concise CARD plot
-id_sb_csv <- paste0(count$seqname, "-", count$DrugClass, 
-                    "-", count$ResistanceMechanism, "-", 
-                    count$ARO, ",", count$freq, sep = "")
+id_sb_csv <- paste0(count$seqname, "-", count$ResistanceMechanism, 
+                    "-", count$DrugClass, "-", 
+                    count$ID, ",", count$freq, sep = "")
 write(id_sb_csv, file = "sb.csv")
 
 #plot
