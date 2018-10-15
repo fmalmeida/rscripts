@@ -33,7 +33,6 @@ getAttributeField <- function (x, field, attrsep = ";") {
 }
 
 if (is.null(opt$input)){
-  print_help(opt_parser)
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
@@ -132,8 +131,8 @@ sub <- na.omit(card_df)
 
 # Count
 count <- count(sub, 
-               c("seqname", "ResistanceMechanism", "DrugClass", 
-                 "ID"))
+               c("seqname", "ID", "DrugClass", 
+                 "ResistanceMechanism", "ARO"))
 
 ## Concise CARD plot
 id_sb_csv <- paste0(count$seqname, "-", count$ResistanceMechanism, 
