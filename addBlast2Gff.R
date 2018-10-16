@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 # Setting Help
-'usage: addBlast2Gff.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr>]
+'usage: addBlast2Gff.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr> --scoverage=<int>]
 
 options:
   -i, --input=<file>    Tabular Blast to be added to GFF

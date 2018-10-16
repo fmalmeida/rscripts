@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 # Setting help
-'usage: addCardDescription.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr> --pident=<int>]
+'usage: addCardDescription.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr> --pident=<int> --scoverage=<int>]
 
 options:
   -i, --input=<file>    Tabular Blast to be added to GFF
