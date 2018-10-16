@@ -8,12 +8,14 @@ options:
   -o, --out=<chr>       Output file name [default: out.gff]
   -d, --database=<chr>  Name of databased which Blast came from
   -t, --type=<chr>      Type of feature blasted. Ex: resistance
-  -p, --pident=<int>    % identity to filter blast [default: 90]' -> doc
+  -p, --pident=<int>    % identity to filter blast [default: 90]
+  -c, --scoverage=<int> Minimum subject coverage to keep [default: 80]' -> doc
 
 # Load libraries
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
 suppressMessages(library(docopt))
+suppressMessages(library(dplyr))
 
 # Parse parameters
 opt <- docopt(doc)
@@ -45,9 +47,13 @@ card_indexes <- merge.data.frame(merged, cat, by.x = "ARO.Accession",
 
 # Load Blast tabular file
 blastFile <- read.table(opt$input, sep = "\t")
-blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
-                 "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
+blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", 
+                 "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")
 colnames(blastFile) <- blastHeader
+
+# Filter blast based on subject coverage
+blastFile$scov <- (blastFile$length / blastFile$slen) * 100
+blastFile <- dplyr::filter(blastFile, blastFile.scov >= opt$scoverage)
 
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]

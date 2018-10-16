@@ -7,11 +7,13 @@ options:
   -g, --gff=<file>      GFF file to add Blast hits into
   -o, --out=<chr>       Output file name [default: out.gff]
   -d, --database=<chr>  Name of databased which Blast came from
-  -t, --type=<chr>      Type of feature blasted. Ex: resistance' -> doc
+  -t, --type=<chr>      Type of feature blasted. Ex: resistance
+  -c, --scoverage=<int> Minimum subject coverage to keep' -> doc
 
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
 suppressMessages(library(docopt))
+suppressMessages(library(dplyr))
 
 # Parse parameters
 opt <- docopt(doc)
@@ -31,11 +33,16 @@ reduce_row = function(i) {
 
 if (file.info(opt$input)$size > 0 ) {
 # Load blast tabular file
-blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch",
-"gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "stitle")
+blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", 
+                 "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")
 
 blastFile <- read.delim(opt$input, header = FALSE)
 colnames(blastFile) <- blastHeader
+
+# Filter blast based on subject coverage
+if(opt$coverage) {
+blastFile$scov <- (blastFile$length / blastFile$slen) * 100
+blastFile <- dplyr::filter(blastFile, blastFile.scov >= opt$scoverage)}
 
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
