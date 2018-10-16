@@ -92,7 +92,7 @@ htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""),
 
 # Delete temp
 file.remove("sb.csv") } else {
-  file.create(opt$out)
+  
 }
 } else {
 ############################################
@@ -159,5 +159,5 @@ htmlwidgets::saveWidget(sb, paste0(opt$out, "_CARD_compliant.html", sep = ""),
 
 # Delete temp
 file.remove("sb.csv") } else {
-  file.create(opt$out)
+  
 }}
