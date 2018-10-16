@@ -40,7 +40,7 @@ blastFile <- read.delim(opt$input, header = FALSE)
 colnames(blastFile) <- blastHeader
 
 # Filter blast based on subject coverage
-if(opt$scoverage) {
+if (!is.null(opt$scoverage)) {
 blastFile$scov <- (blastFile$length / blastFile$slen) * 100
 blastFile <- dplyr::filter(blastFile, blastFile.scov >= opt$scoverage)}
 
