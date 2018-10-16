@@ -9,7 +9,7 @@ options:
   -d, --database=<chr>  Name of databased which Blast came from
   -t, --type=<chr>      Type of feature blasted. Ex: resistance
   -p, --pident=<int>    % identity to filter blast [default: 90]
-  -c, --scoverage=<int> Minimum subject coverage to keep [default: 80]' -> doc
+  -c, --scoverage=<int> Minimum subject coverage to keep' -> doc
 
 # Load libraries
 suppressMessages(library(DataCombine))
@@ -52,8 +52,9 @@ blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", 
 colnames(blastFile) <- blastHeader
 
 # Filter blast based on subject coverage
+if (opt$coverage) {
 blastFile$scov <- (blastFile$length / blastFile$slen) * 100
-blastFile <- dplyr::filter(blastFile, blastFile.scov >= opt$scoverage)
+blastFile <- dplyr::filter(blastFile, blastFile.scov >= opt$scoverage)}
 
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
