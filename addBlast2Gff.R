@@ -42,7 +42,7 @@ colnames(blastFile) <- blastHeader
 # Filter blast based on subject coverage
 if (!is.null(opt$scoverage)) {
 blastFile$scov <- (blastFile$length / blastFile$slen) * 100
-blastFile <- dplyr::filter(blastFile, blastFile.scov >= opt$scoverage)}
+blastFile <- dplyr::filter(blastFile, scov >= opt$scoverage)}
 
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
