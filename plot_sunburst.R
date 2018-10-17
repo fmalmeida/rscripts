@@ -36,7 +36,72 @@ getAttributeField <- function (x, field, attrsep = ";") {
   }) 
 }
 
-if (opt$pattern != "CARD" && opt$field != "source"){
+if (opt$pattern == "CARD" && opt$field == "source") {
+############################################
+## Same plot - Specific for CARD database ##
+############################################
+gff <- gffRead(opt$input)
+card_df <- grepl.sub(gff, pattern = "CARD", Var = "source")
+
+if (is.data.frame(card_df) && nrow(card_df)!=0) {
+
+card_df$ARO <- getAttributeField(card_df$attributes, "ARO", ";")
+
+card_df$DrugClass <- getAttributeField(card_df$attributes, 
+                                       "Drug_Class", ";")
+card_df$DrugClass <- gsub("-", "_", card_df$DrugClass)
+card_df$DrugClass <- gsub(",", "_", card_df$DrugClass)
+
+card_df$GeneFamily <- getAttributeField(card_df$attributes, 
+                                        "Gene_Family", ";")
+card_df$GeneFamily <- gsub("-", "_", card_df$GeneFamily)
+card_df$GeneFamily <- gsub(",", "_", card_df$GeneFamily)
+
+card_df$ResistanceMechanism <- getAttributeField(card_df$attributes, 
+                                                 "Resistance_Mechanism", ";")
+card_df$ResistanceMechanism <- gsub("-", "_", card_df$ResistanceMechanism)
+card_df$ResistanceMechanism <- gsub(",", "_", card_df$ResistanceMechanism)
+
+card_df$Name <- getAttributeField(card_df$attributes, 
+                                  "DB_Name", ";")
+card_df$Name <- gsub("-", "_", card_df$Name)
+card_df$Name <- gsub(",", "_", card_df$Name)
+card_df$ID <- getAttributeField(card_df$attributes, "ID", ";")
+
+## Removing NA values
+sub <- na.omit(card_df)
+
+# Count
+count <- count(sub, 
+               c("seqname", "DrugClass", "ResistanceMechanism", "ID", "ARO"))
+
+## Concise CARD plot
+id_sb_csv <- paste0(count$seqname, "-", count$ResistanceMechanism, 
+                    "-", count$DrugClass, "-", 
+                    count$ID, ",", count$freq, sep = "")
+write(id_sb_csv, file = "sb.csv")
+    
+#plot
+df_sb <- read.delim("sb.csv", header = FALSE, sep = ",", 
+                    dec = NULL, quote = NULL)
+sb <- sunburst(
+df_sb,
+count = TRUE, # add count just for demonstration
+legend = list(w=200, h=50, r=10), # make extra room for our legend
+legendOrder = c(unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                              `[`, 1, FUN.VALUE=character(1))), 
+                unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
+                              `[`, 2, FUN.VALUE=character(1))))
+)
+    
+# Save
+htmlwidgets::saveWidget(sb, paste0(opt$out, "_CARD_compliant.html", sep = ""), 
+                            selfcontained = FALSE)
+    
+# Delete temp
+file.remove("sb.csv") } else {
+      
+}} else {
 # WORK
 gff <- gffRead(opt$input)
 
@@ -88,72 +153,6 @@ sb <- sunburst(
 
 # Save
 htmlwidgets::saveWidget(sb, paste0(opt$out, ".html", sep = ""), 
-                        selfcontained = FALSE)
-
-# Delete temp
-file.remove("sb.csv") } else {
-  
-}
-} else {
-############################################
-## Same plot - Specific for CARD database ##
-############################################
-gff <- gffRead(opt$input)
-card_df <- grepl.sub(gff, pattern = "CARD", Var = "source")
-
-if (is.data.frame(card_df) && nrow(card_df)!=0) {
-
-card_df$ARO <- getAttributeField(card_df$attributes, "ARO", ";")
-
-card_df$DrugClass <- getAttributeField(card_df$attributes, 
-                                       "Drug_Class", ";")
-card_df$DrugClass <- gsub("-", "_", card_df$DrugClass)
-card_df$DrugClass <- gsub(",", "_", card_df$DrugClass)
-
-card_df$GeneFamily <- getAttributeField(card_df$attributes, 
-                                        "Gene_Family", ";")
-card_df$GeneFamily <- gsub("-", "_", card_df$GeneFamily)
-card_df$GeneFamily <- gsub(",", "_", card_df$GeneFamily)
-
-card_df$ResistanceMechanism <- getAttributeField(card_df$attributes, 
-                                                 "Resistance_Mechanism", ";")
-card_df$ResistanceMechanism <- gsub("-", "_", card_df$ResistanceMechanism)
-card_df$ResistanceMechanism <- gsub(",", "_", card_df$ResistanceMechanism)
-
-card_df$Name <- getAttributeField(card_df$attributes, 
-                                  "DB_Name", ";")
-card_df$Name <- gsub("-", "_", card_df$Name)
-card_df$Name <- gsub(",", "_", card_df$Name)
-card_df$ID <- getAttributeField(card_df$attributes, "ID", ";")
-
-## Removing NA values
-sub <- na.omit(card_df)
-
-# Count
-count <- count(sub, 
-               c("seqname", "DrugClass", "ResistanceMechanism", "ID", "ARO"))
-
-## Concise CARD plot
-id_sb_csv <- paste0(count$seqname, "-", count$ResistanceMechanism, 
-                    "-", count$DrugClass, "-", 
-                    count$ID, ",", count$freq, sep = "")
-write(id_sb_csv, file = "sb.csv")
-
-#plot
-df_sb <- read.delim("sb.csv", header = FALSE, sep = ",", 
-                    dec = NULL, quote = NULL)
-sb <- sunburst(
-  df_sb,
-  count = TRUE, # add count just for demonstration
-  legend = list(w=200, h=50, r=10), # make extra room for our legend
-  legendOrder = c(unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
-                                `[`, 1, FUN.VALUE=character(1))), 
-                  unique(vapply(strsplit(as.character(df_sb[,1]),"-"), 
-                                `[`, 2, FUN.VALUE=character(1))))
-)
-
-# Save
-htmlwidgets::saveWidget(sb, paste0(opt$out, "_CARD_compliant.html", sep = ""), 
                         selfcontained = FALSE)
 
 # Delete temp
