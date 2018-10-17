@@ -8,14 +8,18 @@ options:
   -p, --pattern=<chr>   Pattern that will be used to subset GFF [default: CARD]
   -f, --field=<chr>     GFF field to search for pattern [default: source]' -> doc
 
+# Parse parameters
+suppressMessages(library(docopt))
+opt <- docopt(doc)
+if (is.null(opt$input)){
+  stop("At least one argument must be supplied (input file)\n", call.=FALSE)
+}
+
+# Load libraries
 suppressMessages(library(sunburstR))
 suppressMessages(library(plyr))
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
-suppressMessages(library(docopt))
-
-# Parse parameters
-opt <- docopt(doc)
 
 # Create function
 getAttributeField <- function (x, field, attrsep = ";") { 
@@ -30,10 +34,6 @@ getAttributeField <- function (x, field, attrsep = ";") {
     } 
     return(rv) 
   }) 
-}
-
-if (is.null(opt$input)){
-  stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
 if (opt$pattern != "CARD" && opt$field != "source"){

@@ -7,18 +7,16 @@ options:
   -o, --out=<chr>       Output prefix file name [default: out]
   -t, --type=<chr>      Feature type to subset and write table from [default: resistance]' -> doc
 
+# Parse parameters
+suppressMessages(library(docopt))
+opt <- docopt(doc)
+if (is.null(opt$input)){
+  stop("At least one argument must be supplied (input file).n", call.=FALSE)
+}
+
 # Load Libraries
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
-suppressMessages(library(docopt))
-
-# Parse parameters
-opt <- docopt(doc)
-
-if (is.null(opt$input)){
-  print_help(opt_parser)
-  stop("At least one argument must be supplied (input file).n", call.=FALSE)
-}
 
 # Function used to get values from attributes colum
 getAttributeField <- function (x, field, attrsep = ";") { 

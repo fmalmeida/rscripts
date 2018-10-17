@@ -6,13 +6,16 @@ options:
   -i, --input=<file>    GFF to add annotated features source and type based on Pfam subset.
   -o, --out=<chr>       Output file name [default: out.gff]' -> doc
 
+# Parse parameters
+suppressMessages(library(docopt))
+opt <- docopt(doc)
+if (is.null(opt$input)){
+  stop("At least one argument must be supplied (input file)\n", call.=FALSE)
+}
+
 # Load libraries
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
-suppressMessages(library(docopt))
-
-# Parse parameters
-opt <- docopt(doc)
 
 # Set function
 # This function is used to extract the values of the fields stored in
@@ -35,11 +38,6 @@ getmotif <- function (x, field, attrsep = ";") {
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
-}
-
-if (is.null(opt$input)){
-  print_help(opt_parser)
-  stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
 # Read gff file
