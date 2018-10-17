@@ -11,14 +11,17 @@ options:
   -p, --pident=<int>    % identity to filter blast [default: 90]
   -c, --scoverage=<int> Minimum subject coverage to keep' -> doc
 
+# Parse parameters
+suppressMessages(library(docopt))
+opt <- docopt(doc)
+if (is.null(opt$input)){
+  stop("At least one argument must be supplied (input file)\n", call.=FALSE)
+}
+
 # Load libraries
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
-suppressMessages(library(docopt))
 suppressMessages(library(dplyr))
-
-# Parse parameters
-opt <- docopt(doc)
 
 # Load CARD entries index. These will be used to write
 # the attributes columns of CARD entries.
@@ -30,11 +33,6 @@ index <- read.table("/work/indexes/aro_index.csv", header = TRUE, sep = "\t", fi
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
-}
-
-if (is.null(opt$input)){
-  print_help(opt_parser)
-  stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
 
 # Check if file is empty

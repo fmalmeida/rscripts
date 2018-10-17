@@ -10,18 +10,18 @@ options:
   -t, --type=<chr>      Type of feature blasted. Ex: resistance
   -c, --scoverage=<int> Minimum subject coverage to keep' -> doc
 
-suppressMessages(library(ballgown))
-suppressMessages(library(DataCombine))
-suppressMessages(library(docopt))
-suppressMessages(library(dplyr))
-
 # Parse parameters
+suppressMessages(library(docopt))
 opt <- docopt(doc)
 
 if (is.null(opt$input)){
-  print_help(opt_parser)
   stop("At least one argument must be supplied (input file)\n", call.=FALSE)
 }
+
+# Load libraries
+suppressMessages(library(ballgown))
+suppressMessages(library(DataCombine))
+suppressMessages(library(dplyr))
 
 # Function used to remove redundancy
 reduce_row = function(i) {
