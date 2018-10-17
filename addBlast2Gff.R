@@ -100,6 +100,3 @@ write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t",
   write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
               col.names = FALSE, row.names = FALSE)
 }
-
-# Clear workspace
-rm(list=ls())
