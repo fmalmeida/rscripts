@@ -29,6 +29,20 @@ reduce_row = function(i) {
   paste(unique(d), collapse = ',') 
 }
 
+getAttributeField <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
+      rv = as.character(NA) 
+    } 
+    return(rv) 
+  }) 
+}
+
 # Check if file is empty
 
 if (file.info(opt$input)$size > 0 ) {
@@ -42,9 +56,10 @@ colnames(blastFile) <- blastHeader
 # Filter blast based on subject coverage
 if (!is.null(opt$scoverage)) {
 blastFile$scov <- (blastFile$length / blastFile$slen) * 100
-blastFile <- dplyr::filter(blastFile, scov >= opt$scoverage)
+blastFile <- dplyr::filter(blastFile, scov >= as.integer(opt$scoverage))
 }
 
+if (!is.null(blastFile)) {
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
@@ -59,9 +74,12 @@ ids <- blastFile$qseqid
 # Load GFF file
 gff <- gffRead(opt$gff)
 
-# Subset based on gene names
-sub <- grepl.sub(gff, pattern = ids, Var = "attributes")
-not <- grepl.sub(gff, pattern = ids, Var = "attributes", keep.found = FALSE)
+# Create a column in gff with ids
+gff$ID <- getAttributeField(gff$attributes, "ID", ";")
+
+# Subset based on gene IDs
+sub <- grepl.sub(gff, pattern = ids, Var = "ID") %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
+not <- grepl.sub(gff, pattern = ids, Var = "ID", keep.found = FALSE) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
 # Change fields values
 ## source
@@ -94,6 +112,12 @@ merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", 
             col.names = FALSE, row.names = FALSE)
 } else {
+  # Load GFF file
+  gff <- gffRead(opt$gff)
+  # Write output
+  write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
+              col.names = FALSE, row.names = FALSE)
+}} else {
   # Load GFF file
   gff <- gffRead(opt$gff)
   # Write output

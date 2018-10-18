@@ -52,8 +52,9 @@ colnames(blastFile) <- blastHeader
 # Filter blast based on subject coverage
 if (!is.null(opt$scoverage)) {
 blastFile$scov <- (blastFile$length / blastFile$slen) * 100
-blastFile <- dplyr::filter(blastFile, scov >= opt$scoverage)}
+blastFile <- dplyr::filter(blastFile, scov >= as.integer(opt$scoverage))}
 
+if (!is.null(blastFile)) {
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
@@ -130,7 +131,10 @@ write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t",
   # Write output
   write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
               col.names = FALSE, row.names = FALSE)
+}} else {
+  # Load GFF file
+  gff <- gffRead(opt$gff)
+  # Write output
+  write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
+              col.names = FALSE, row.names = FALSE)
 }
-
-# Clear workspace
-rm(list=ls())
