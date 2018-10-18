@@ -73,12 +73,12 @@ sub <- na.omit(card_df)
 
 # Count
 count <- count(sub, 
-               c("seqname", "DrugClass", "ResistanceMechanism", "ID", "ARO"))
+               c("seqname", "DrugClass", "ResistanceMechanism", "GeneFamily", "ID", "ARO"))
 
 ## Concise CARD plot
-id_sb_csv <- paste0(count$seqname, "-", count$ResistanceMechanism, 
-                    "-", count$DrugClass, "-", 
-                    count$ID, ",", count$freq, sep = "")
+id_sb_csv <- paste0(count$seqname, "-", count$DrugClass, 
+                    "-", count$ResistanceMechanism, "-", 
+                    count$GeneFamily, "-", count$ID, ",", count$freq, sep = "")
 write(id_sb_csv, file = "sb.csv")
     
 #plot

@@ -35,6 +35,20 @@ reduce_row = function(i) {
   paste(unique(d), collapse = ',') 
 }
 
+getAttributeField <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
+      rv = as.character(NA) 
+    } 
+    return(rv) 
+  }) 
+}
+
 # Check if file is empty
 if (file.info(opt$input)$size > 0 ) {
 # Merge indexes to create a full index with all CARD values
@@ -44,7 +58,7 @@ card_indexes <- merge.data.frame(merged, cat, by.x = "ARO.Accession",
                                  by.y = "ARO.Accession", all = TRUE)
 
 # Load Blast tabular file
-blastFile <- read.table(opt$input, sep = "\t")
+blastFile <- read.delim(opt$input, header = FALSE)
 blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", 
                  "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")
 colnames(blastFile) <- blastHeader
@@ -61,13 +75,16 @@ blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
 
 ## Filter per %Identity
-blast_filtered <- subset(blastFile, pident >= opt$pident)
+blast_filtered <- subset(blastFile, pident >= as.integer(opt$pident))
 ssids <- as.vector(blast_filtered$sseqid)
 aroID <- sapply(strsplit(ssids, "\\|"), `[`, 3)
 blast_filtered$ARO <- aroID
 
 # Load gff file to merge entries
 gff <- gffRead(opt$gff)
+
+# Create a column in gff with ids
+gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 
 ## Subset Card indexes
 card_subset <- grepl.sub(card_indexes, pattern = aroID, Var = "ARO.Accession")
@@ -88,11 +105,11 @@ blast_filtered <- merge.data.frame(blast_filtered, card_subset, by.x = "ARO",
 blast_filtered <- blast_filtered[order(blastFile$qseqid),]
 
 # Get gene names from blast hits
-prokka_ids <- blast_filtered$qseqid
+ids <- blast_filtered$qseqid
 
-# Subset GFF - based on genes that have a hit
-sub <- grepl.sub(gff, pattern = prokka_ids, Var = "attributes")
-not <- grepl.sub(gff, pattern = prokka_ids, Var = "attributes", keep.found = FALSE)
+# Subset based on gene IDs
+sub <- grepl.sub(gff, pattern = ids, Var = "ID") %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
+not <- grepl.sub(gff, pattern = ids, Var = "ID", keep.found = FALSE) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
 # Change fields - Add database source and feature type
 ## source
