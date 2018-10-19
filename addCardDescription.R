@@ -88,6 +88,15 @@ gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 
 ## Subset Card indexes
 card_subset <- grepl.sub(card_indexes, pattern = aroID, Var = "ARO.Accession")
+card_subset$Drug.Class <- gsub(";", ":", card_subset$Drug.Class)
+card_subset$Drug.Class <- gsub(" ", "_", card_subset$Drug.Class)
+card_subset$Drug.Class <- gsub("-", "_", card_subset$Drug.Class)
+card_subset$AMR.Gene.Family <- gsub(";", ":", card_subset$AMR.Gene.Family)
+card_subset$AMR.Gene.Family <- gsub(" ", "_", card_subset$AMR.Gene.Family)
+card_subset$AMR.Gene.Family <- gsub("-", "_", card_subset$AMR.Gene.Family)
+card_subset$Resistance.Mechanism <- gsub(";", ":", card_subset$Resistance.Mechanism)
+card_subset$Resistance.Mechanism <- gsub(" ", "_", card_subset$Resistance.Mechanism)
+card_subset$Resistance.Mechanism <- gsub("-", "_", card_subset$Resistance.Mechanism)
 
 # Get desired values for attributes columns
 description <- paste("Additional_Database=", opt$database, ";", 
