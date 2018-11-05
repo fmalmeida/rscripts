@@ -34,31 +34,30 @@ getAttributeField <- function (x, field, attrsep = ";") {
 }
 
 # Check if file is empty
-if (file.info(opt$input)$size > 0 ) {
+if (file.info(opt$input)$size > 0) {
 # Load gff file
 gff <- gffRead(opt$input)
 output_file <- opt$out
 
-## Create file specific for CARD database - Since it is the one that has the better described resistance genes
-if (is.null(opt$type)) {
+## Create non-specific file
   ### Create fields - Prokka
   gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
-  gff$Prokka_gene <- getAttributeField(gff$attributes, "gene", ";")
-  gff$Prokka_geneFamily <- substr(gff$Prokka_gene, 1, 3)
-  gff$Prokka_name <- getAttributeField(gff$attributes, "Name", ";")
   gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
   gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
   gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
   gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
+  gff$Additional_product <- getAttributeField(gff$attributes, "", ";")
   
-  col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
-          "Prokka_name", "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
+  col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", 
+          "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
   
   table <- gff[, col]
   out <- paste0(output_file, ".tsv", sep = "")
   write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
-} else if (opt$type == "resistance") {
-  
+} else if (opt$type == "CARD") {
+
+# Create CARD specific summary table, since it has great information about antimicrobial genes.
+    
   gff$ARO_Accession <- getAttributeField(gff$attributes, "ARO", ";")
   gff$Gene_Family <- getAttributeField(gff$attributes, "Gene_Family", ";")
   gff$Name <- getAttributeField(gff$attributes, "DB_Name", ";")
@@ -78,20 +77,17 @@ write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names 
 } else {
 ### Create fields - Prokka
 gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
-gff$Prokka_gene <- getAttributeField(gff$attributes, "gene", ";")
-gff$Prokka_geneFamily <- substr(gff$Prokka_gene, 1, 3)
-gff$Prokka_name <- getAttributeField(gff$attributes, "Name", ";")
 gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
 gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
 gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
 gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
 
-col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", "Prokka_gene", "Prokka_geneFamily", 
-        "Prokka_name", "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
+col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", 
+        "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
 
 table <- gff[, col]
 out <- paste0(output_file, "_", opt$type, ".tsv", sep = "")
-write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)}
+write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 } else {
   opt <- options(show.error.messages=FALSE)
   on.exit(options(opt))

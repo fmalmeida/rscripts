@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 # Setting Help
-'usage: render_report.R [--input=<file> --prefix=<chr> --fasta=<chr> --gff=<file> --gffDir=<chr> --gbk=<chr> --command=<chr> --config=<file> --DBice=<true_or_false> --iceSummary=<file> --iceGff=<file> --isResfams=<true_or_false> --resfamsSummary=<file> --resfamsGff=<file>]
+'usage: render_report.R [--input=<file> --prefix=<chr> --fasta=<chr> --gff=<file> --gffDir=<chr> --gbk=<chr> --command=<chr> --config=<file> --isICEberg=<true_or_false> --iceSummary=<file> --iceGff=<file> --isResfams=<true_or_false> --resfamsSummary=<file> --resfamsGff=<file>]
 
 options:
   --input=<file>                  Rmd file to render
@@ -11,7 +11,7 @@ options:
   --gbk=<chr>                     Genbank File produced
   --command=<chr>                 Command executed
   --config=<file>                 Configuration file used
-  --DBice=<boolean>    [Default: TRUE]
+  --isICEberg=<boolean>    [Default: TRUE]
   --iceSummary=<file>            ices summary table
   --iceGff=<file>                ices gff file
   --isResfams=<true_or_false>    [Default: TRUE]
