@@ -1,0 +1,27 @@
+---
+title: "resfams"
+params:
+  resfams_summary:
+  resfams_gff:
+---
+```{r echo=FALSE}
+library(magrittr)
+
+resfams_summary <- params$resfams_summary
+resfams_gff <- params$resfams_gff
+```
+
+#### Resfams database
+
+These elements were annotated from the [Resfams database](http://www.dantaslab.org/resfams/). This database contains genes related to antibiotic resistance genes as well as genes related to environmental stress resistance.
+
+* Files:
+    * GFF: ``r resfams_gff``
+    * Summary table: ``r resfams_summary``
+
+Summary table overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+df <- read.delim(params$resfams_summary, header = TRUE, sep = "\t")
+df
+```

@@ -1,0 +1,123 @@
+---
+title: "Pipeline Report"
+author: "Felipe Marques de Almeida <falmeida@aluno.unb.br>"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    theme: readable
+    toc: true
+    df_print: paged
+params:
+  prefix: output
+  fasta: sequence.fasta
+  gff: 
+  gff_dir: 
+  gbk:
+  command: nextflow run pipeline -c config
+  config:
+  blast_dir: blasts
+  is_CARD: TRUE
+  is_VFDB: TRUE
+  is_Resfams: TRUE
+  resfams_summary:
+  resfams_gff:
+  is_ICEberg: TRUE
+  ice_summary:
+  ice_gff: 
+  is_PHAST: TRUE
+  is_Victors: TRUE
+---
+```{r setup, echo=FALSE}
+library(magrittr)
+
+prefix <- params$prefix
+fasta <- params$fasta
+gff <- params$gff
+gff_dir <- params$gff_dir
+gbk <- params$gbk
+config <- params$config
+command <- params$command
+blast_dir <- params$blast_dir
+is_CARD <- params$is_CARD
+is_Resfams <- params$is_Resfams
+resfams_summary <- params$resfams_summary
+resfams_gff <- params$resfams_gff
+is_ICEberg <- params$is_ICEberg
+is_PHAST <- params$is_PHAST
+is_VFDB <- params$is_VFDB
+is_Victors <- params$is_Victors
+ice_summary <- params$ice_summary
+ice_gff <- params$ice_gff
+```
+
+# Introduction
+
+This pipeline was automatically produced via our [annotation pipeline](https://github.com/fmalmeida/bioinfo/tree/master/pipelines/bac_annotation) (`give a name`) and it contains the results from the annotation of the ``r fasta`` FASTA file.
+
+Any doubts, please contat me at <falmeida@aluno.unb.br>.
+
+## Execution
+
+Command line: 
+
+The pipeline was successfully executed with the following parameters:
+
+* Fasta: ``r fasta``
+* Output prefix: ``r prefix``
+* Configuration file:
+
+````groovy
+```{r comment='', echo=FALSE, highlight=TRUE}
+cat(readLines(config), sep = '\n')
+```
+````
+
+## Report Content
+
+This report contains a summary of the pipeline's most important results, which are:
+
+* The final GFF and Genbank File;
+* BLAST storage directory;
+* Summary tables of ices, virulence, prophage and resistance genes;
+* JBROWSE genome browser;
+* And an explanation about how to extract data from the sql database produced.
+
+> Since the execution of additional blasts is optional, this report may or not contain a section
+> for some databases based on its execution.
+
+### Final GFF
+
+* GFF filepath: ``r gff`` ;
+* GFF dir: `` r gff_dir`` ;
+    * In this directory are stored the final gff file and the subseted gffs (e.g. _prefix_\_**resistance**.gff)
+* Genbank file filepath: ``r gbk``.
+* Complete GFF file summarization:
+
+```{r Gff file, comment="", eval=TRUE, echo=FALSE}
+gffFile <- ballgown::gffRead(params$gff)
+gffFile
+```
+
+### Additional BLASTS executed
+
+If executed, the blast outputs will all be stored at ``r blast_dir`` directory.
+
+* Was the additional database used to BLAST against?
+    * CARD database: ``r is_CARD``
+    * Resfams database: ``r is_Resfams``
+    * ICEberg database: ``r is_ICEberg``
+    * PHAST database: ``r is_PHAST``
+    * Victors database: ``r is_Victors``
+    * VFDB database: ``r is_VFDB``
+
+### Summary tables
+
+This section is based on the blast search above. If no additional database were searched then no summary table were produced.
+
+Therefore, this section can appear blank or it can contain the summary tables produced.
+
+```{r, ICEberg_conditional_block, echo=FALSE, results='asis', eval=is_ICEberg, child='ices.Rmd'}
+```
+
+```{r, Resfams_conditional_block, echo=FALSE, results='asis', eval=is_Resfams, child='resfams.Rmd'}
+```
