@@ -39,6 +39,7 @@ if (file.info(opt$input)$size > 0) {
 gff <- gffRead(opt$input)
 output_file <- opt$out
 
+if (!opt$type) {
 ## Create non-specific file
   ### Create fields - Prokka
   gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
@@ -46,7 +47,7 @@ output_file <- opt$out
   gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
   gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
   gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
-  gff$Additional_product <- getAttributeField(gff$attributes, "", ";")
+  #gff$Additional_product <- getAttributeField(gff$attributes, "", ";")
   
   col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", 
           "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
@@ -88,7 +89,7 @@ col = c("seqname", "start", "end", "feature", "source", "Prokka_ID",
 table <- gff[, col]
 out <- paste0(output_file, "_", opt$type, ".tsv", sep = "")
 write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
-} else {
+}} else {
   opt <- options(show.error.messages=FALSE)
   on.exit(options(opt))
   stop()
