@@ -18,19 +18,22 @@ if (is.null(opt$input)){
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
 
-# Function used to get values from attributes colum
-getAttributeField <- function (x, field, attrsep = ";") { 
-  s = strsplit(x, split = attrsep, fixed = TRUE) 
-  sapply(s, function(atts) { 
-    a = strsplit(atts, split = "=", fixed = TRUE) 
-    m = match(field, sapply(a, "[", 1)) 
-    if (!is.na(m)) { rv = a[[m]][2] 
-    } 
+# Function used to get values from attributes column. It was completely edited
+# to keep all additional findings. I may have to implement on other scripts.
+getAttributeField <- function (df, field, attrsep = ";") {
+  s = strsplit(df, split = attrsep, fixed = TRUE)
+  v <- sapply(s, function(x) {
+    v = str_subset(x, pattern="Additional_database")
+    y = strsplit(v, split = "=", fixed = TRUE)
+    m = sapply(y, "[", 2)
+    line = paste(unique(m), collapse = ",")
+    if (!is.na(line)) { rv = line 
+    }
     else { 
       rv = as.character(NA) 
     } 
-    return(rv) 
-  }) 
+  })
+  return(v)
 }
 
 # Check if file is empty
@@ -81,6 +84,7 @@ gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
 gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
 gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
 gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
+dbs <- sapply(getAttributeField(sub$attributes, "Additional_database", ";"), "[", 1)
 gff <- cbind(gff,Additional_product = mapply(function(x,y) getAttributeField(x, paste(y, "Target", sep = "_"), ";"), 
                                              gff$attributes, gff$Additional_DB))
 row.names(gff) <- NULL

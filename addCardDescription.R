@@ -99,7 +99,7 @@ card_subset$Resistance.Mechanism <- gsub(" ", "_", card_subset$Resistance.Mechan
 card_subset$Resistance.Mechanism <- gsub("-", "_", card_subset$Resistance.Mechanism)
 
 # Get desired values for attributes columns
-description <- paste("Additional_Database=", opt$database, ";", 
+description <- paste("Additional_database=", opt$database, ";", 
                      "ARO=", card_subset$ARO.Accession, ";", "Gene_Family=", 
                      card_subset$AMR.Gene.Family, ";", "Drug_Class=", card_subset$Drug.Class, 
                      ";", "Resistance_Mechanism=", card_subset$Resistance.Mechanism, ";", 
