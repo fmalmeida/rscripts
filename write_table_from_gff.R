@@ -39,18 +39,17 @@ if (file.info(opt$input)$size > 0) {
 gff <- gffRead(opt$input)
 output_file <- opt$out
 
-if (!opt$type) {
+if (is.null(opt$type)) {
 ## Create non-specific file
   ### Create fields - Prokka
   gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
   gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
   gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
   gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
-  gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
-  #gff$Additional_product <- getAttributeField(gff$attributes, "", ";")
   
   col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", 
-          "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
+          "Prokka_product", "Prokka_inference", "Annotated_domain")
+  
   
   table <- gff[, col]
   out <- paste0(output_file, ".tsv", sep = "")
@@ -82,9 +81,12 @@ gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
 gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
 gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
 gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
+gff <- cbind(gff,Additional_product = mapply(function(x,y) getAttributeField(x, paste(y, "Target", sep = "_"), ";"), 
+                                             gff$attributes, gff$Additional_DB))
+row.names(gff) <- NULL
 
-col = c("seqname", "start", "end", "feature", "source", "Prokka_ID", 
-        "Prokka_product", "Prokka_inference", "Domain", "Additional_DB")
+col = c("seqname", "Prokka_ID", "start", "end", "feature", "source", "Additional_DB",
+        "Prokka_product", "Additional_product", "Prokka_inference", "Domain")
 
 table <- gff[, col]
 out <- paste0(output_file, "_", opt$type, ".tsv", sep = "")
