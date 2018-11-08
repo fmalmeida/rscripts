@@ -59,7 +59,7 @@ gff <- gffRead(opt$input)
 gff$attributes <- gsub(x = gff$attributes, pattern = ",ID", replacement = ";ID")
 output_file <- opt$out
 
-if (exists("opt$type") && opt$type != "CARD") {
+if (length(opt$type) && opt$type != "CARD") {
   ### Create fields - Prokka
   gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
   gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
