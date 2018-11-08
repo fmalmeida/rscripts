@@ -38,15 +38,17 @@ getAttributeField <- function (df, field, attrsep = ";") {
 getAdditionalProducts <- function (vector) {
   s=strsplit(vector, split = ";", fixed = TRUE)
   sapply(s, function(x) {
-    v = str_subset(x, pattern="Additional_database")
-    y = strsplit(v, split = "=", fixed = TRUE)
-    i = sapply(y, "[", 2)
-    m = suppressWarnings(str_subset(x,
-                                    pattern = paste(sapply(y, "[", 2), "Target", sep = "_")))
-    w = strsplit(m, split = "=", fixed = TRUE)
+    v = str_subset(x, pattern="_Target")
+    w = strsplit(v, split = "=", fixed = TRUE)
+    d = sapply(sapply(w, "[", 1), 
+               function(x) {
+                 strsplit(x, split = "_", fixed = TRUE)
+                 })
+    d = sapply(d, "[", 1)
     j = sapply(w, "[", 2)
-    if (length(j) > 0) {
-      rv = paste(unique(j), collapse = ",") } else {rv = as.character(NA)}
+    i = paste(d, j, sep = ":")
+    if (length(i) > 0) {
+      rv = paste(unique(i), collapse = ",") } else {rv = as.character(NA)}
   })
 }
 
