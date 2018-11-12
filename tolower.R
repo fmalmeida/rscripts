@@ -20,7 +20,7 @@ suppressMessages(library(DataCombine))
 suppressMessages(library(dplyr))
 
 # Load GFF file
-gff <- gffRead(opt$gff)
+gff <- gffRead(opt$input)
 # Lower case the attributes column
 att <- gff$attributes
 att <- as.list(tolower(att))
