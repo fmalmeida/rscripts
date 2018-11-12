@@ -38,7 +38,7 @@ getAttributeField <- function (df, field, attrsep = ";") {
 getAdditionalProducts <- function (vector) {
   s=strsplit(vector, split = ";", fixed = TRUE)
   sapply(s, function(x) {
-    v = str_subset(x, pattern="_Target")
+    v = str_subset(x, pattern="_target")
     w = strsplit(v, split = "=", fixed = TRUE)
     d = sapply(sapply(w, "[", 1), 
                function(x) {
@@ -56,16 +56,16 @@ getAdditionalProducts <- function (vector) {
 if (file.info(opt$input)$size > 0) {
 # Load gff file
 gff <- gffRead(opt$input)
-gff$attributes <- gsub(x = gff$attributes, pattern = ",ID", replacement = ";ID")
+gff$attributes <- gsub(x = gff$attributes, pattern = ",id", replacement = ";id")
 output_file <- opt$out
 
-if (length(opt$type) && opt$type != "CARD") {
+if (length(opt$type) && opt$type != "card") {
   ### Create fields - Prokka
-  gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
+  gff$Prokka_ID <- getAttributeField(gff$attributes, "id", ";")
   gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
   gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
   gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
-  gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
+  gff$Additional_DB <- getAttributeField(gff$attributes, "additional_database", ";")
   gff$Additional_product <- getAdditionalProducts(gff$attributes)
   
   ### Give columns a name
@@ -76,19 +76,19 @@ if (length(opt$type) && opt$type != "CARD") {
   table <- gff[, col]
   out <- paste0(output_file, "_", opt$type, ".tsv", sep = "")
   write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
-} else if (opt$type == "CARD") {
+} else if (opt$type == "card") {
 
   ### Create CARD specific summary table, 
   ### since it has great information about antimicrobial genes.
-  gff$ARO_Accession <- getAttributeField(gff$attributes, "ARO", ";")
-  gff$Gene_Family <- getAttributeField(gff$attributes, "Gene_Family", ";")
-  gff$Name <- getAttributeField(gff$attributes, "DB_Name", ";")
-  gff$Drug_Class <- getAttributeField(gff$attributes, "Drug_Class", ";")
-  gff$Resistance_Mechanism <- getAttributeField(gff$attributes, "Resistance_Mechanism", ";")
+  gff$ARO_Accession <- getAttributeField(gff$attributes, "aro", ";")
+  gff$Gene_Family <- getAttributeField(gff$attributes, "gene_family", ";")
+  gff$Name <- getAttributeField(gff$attributes, "db_name", ";")
+  gff$Drug_Class <- getAttributeField(gff$attributes, "drug_class", ";")
+  gff$Resistance_Mechanism <- getAttributeField(gff$attributes, "resistance_mechanism", ";")
   gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
   gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
   gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
-  gff$Additional_DB <- getAttributeField(gff$attributes, "Additional_database", ";")
+  gff$Additional_DB <- getAttributeField(gff$attributes, "additional_database", ";")
   gff$Additional_product <- getAdditionalProducts(gff$attributes)
 
   #### Give columns a name
@@ -103,7 +103,7 @@ if (length(opt$type) && opt$type != "CARD") {
 } else {
   ### Create non-specific file
   ### Create fields - Prokka
-  gff$Prokka_ID <- getAttributeField(gff$attributes, "ID", ";")
+  gff$Prokka_ID <- getAttributeField(gff$attributes, "id", ";")
   gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
   gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
   gff$Annotated_domain <- getAttributeField(gff$attributes, "protein_motif", ";")
@@ -115,7 +115,7 @@ if (length(opt$type) && opt$type != "CARD") {
 
   ### Write document
   table <- gff[, col]
-  out <- paste0(output_file, ".tsv", sep = "")
+  out <- paste0(output_file, "_non_specific.tsv", sep = "")
   write.table(table, out, quote = FALSE, sep = "\t", row.names = FALSE, col.names = TRUE)
 }} else {
   opt <- options(show.error.messages=FALSE)
