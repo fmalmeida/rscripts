@@ -148,31 +148,18 @@ source <- merged_df$source
 merged_df$source <- sapply(source, reduce_row)
 merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 
-# Lower case the attributes column
-att <- gff$attributes
-att <- as.list(tolower(att))
-gff$attributes <- att
-
 # Write output
 write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", 
             col.names = FALSE, row.names = FALSE, append = FALSE)
 } else {
   # Load GFF file
   gff <- gffRead(opt$gff)
-  # Lower case the attributes column
-  att <- gff$attributes
-  att <- as.list(tolower(att))
-  gff$attributes <- att
   # Write output
   write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
               col.names = FALSE, row.names = FALSE)
 }} else {
   # Load GFF file
   gff <- gffRead(opt$gff)
-  # Lower case the attributes column
-  att <- gff$attributes
-  att <- as.list(tolower(att))
-  gff$attributes <- att
   # Write output
   write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
               col.names = FALSE, row.names = FALSE)
