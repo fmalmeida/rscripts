@@ -11,43 +11,91 @@ params:
   prefix: output
   fasta: sequence.fasta
   gff: 
-  gff_dir: 
+  gff_dir:
+  gff_file: 
   gbk:
   command: nextflow run pipeline -c config
   config:
   blast_dir: blasts
+  is_resistance: TRUE
+  resistance_gff:
+  resistance_gff_file:
+  resistance_summary:
+  resistance_summary_file:
   is_CARD: TRUE
-  is_VFDB: TRUE
-  is_Resfams: TRUE
-  resfams_summary:
-  resfams_gff:
+  card_summary:
+  card_summary_file:
+  is_Resfinder: TRUE
   is_ICEberg: TRUE
   ice_summary:
-  ice_gff: 
+  ice_summary_file:
+  ice_gff:
+  ice_gff_file:
   is_PHAST: TRUE
+  is_VFDB: TRUE
   is_Victors: TRUE
 ---
 ```{r setup, echo=FALSE}
 library(magrittr)
 
+# Prefix
 prefix <- params$prefix
+# Fasta file name
 fasta <- params$fasta
+# Gff filename
 gff <- params$gff
+# Gff directory name
 gff_dir <- params$gff_dir
+# Gff file load
+gff_file <- params$gff_file
+# Genbank filename
 gbk <- params$gbk
+# Load of configuration file
 config <- params$config
+# Nextflow command used
 command <- params$command
+# Blast directory name
 blast_dir <- params$blast_dir
+# Was some resistance database used?
+is_resistance <- params$is_resistance
+## Get resistance gff filepath
+resistance_gff <- params$resistance_gff
+## Load resistance gff file
+resistance_gff_file <- params$resistance_gff_file
+## Get resistance summary path
+resistance_summary <- params$resistance_summary
+## Loading resistance summary table
+resistance_summary_file <- params$resistance_summary_file
+# Get CARD variables
+## Was CARD executed?
 is_CARD <- params$is_CARD
-is_Resfams <- params$is_Resfams
-resfams_summary <- params$resfams_summary
-resfams_gff <- params$resfams_gff
+## CARD summary table path
+card_summary <- params$card_summary
+## Loading CARD summary file
+card_summary_file <- params$card_summary_file
+# Get Resfinder variables
+## Was Resfinder executed?
+is_Resfinder <- params$is_Resfinder
+# Get ICEberg variables
+## Was ICEberg executed?
 is_ICEberg <- params$is_ICEberg
-is_PHAST <- params$is_PHAST
-is_VFDB <- params$is_VFDB
-is_Victors <- params$is_Victors
+## ICEberg summary table path
 ice_summary <- params$ice_summary
+## Loading ICEberg summary table file
+ice_summary_file <- params$ice_summary_file
+## ICEberg gff filepath
 ice_gff <- params$ice_gff
+## Loading ICEberg gff file
+ice_gff_file <- params$ice_gff_file
+# Get PHAST variables
+## Was PHAST executed?
+is_PHAST <- params$is_PHAST
+# Get VFDB variables
+## Was VFDB executed?
+is_VFDB <- params$is_VFDB
+# Get Victors variables
+## Was Victors executed?
+is_Victors <- params$is_Victors
 ```
 
 # Introduction
@@ -94,7 +142,7 @@ This report contains a summary of the pipeline's most important results, which a
 * Complete GFF file summarization:
 
 ```{r Gff file, comment="", eval=TRUE, echo=FALSE}
-gffFile <- ballgown::gffRead(params$gff)
+gffFile <- ballgown::gffRead(params$gff_file)
 gffFile
 ```
 
@@ -104,7 +152,7 @@ If executed, the blast outputs will all be stored at ``r blast_dir`` directory.
 
 * Was the additional database used to BLAST against?
     * CARD database: ``r is_CARD``
-    * Resfams database: ``r is_Resfams``
+    * Resfinder database: ``r is_Resfinder``
     * ICEberg database: ``r is_ICEberg``
     * PHAST database: ``r is_PHAST``
     * Victors database: ``r is_Victors``
@@ -119,5 +167,5 @@ Therefore, this section can appear blank or it can contain the summary tables pr
 ```{r, ICEberg_conditional_block, echo=FALSE, results='asis', eval=is_ICEberg, child='ices.Rmd'}
 ```
 
-```{r, Resfams_conditional_block, echo=FALSE, results='asis', eval=is_Resfams, child='resfams.Rmd'}
+```{r, resistance_conditional_block, echo=FALSE, results='asis', eval=is_resistance, child='resistance.Rmd'}
 ```

@@ -1,0 +1,17 @@
+---
+title: "CARD"
+params:
+  card_summary:
+---
+```{r echo=FALSE}
+library(magrittr)
+
+card_summary <- params$card_summary
+```
+
+Addtionally, the pipeline produces a summary table of genes annotated from CARD database since it has a comprehensive catalog of AMR genes.
+
+```{r echo=FALSE, comment="", eval=TRUE}
+df <- read.delim(params$card_summary, header = TRUE, sep = "\t")
+df
+```
