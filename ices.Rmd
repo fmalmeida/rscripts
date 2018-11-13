@@ -5,6 +5,7 @@ date: "November 5, 2018"
 output: html_document
 params:
   ice_summary:
+  ice_summary_file:
   ice_gff:
 ---
 ```{r echo=FALSE}
@@ -25,6 +26,6 @@ These elements were annotated from the [ICEberg database](http://db-mml.sjtu.edu
 Summary table overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
-df <- read.delim(params$ice_summary, header = TRUE, sep = "\t")
+df <- read.delim(params$ice_summary_file, header = TRUE, sep = "\t")
 df
 ```

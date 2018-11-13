@@ -2,19 +2,23 @@
 title: "Resistance databases"
 params:
   resistance_summary:
+  resistance_summary_file:
   resistance_gff:
   is_CARD: TRUE
-  is_Resfinder: TRUE
   card_summary:
+  card_summary_file:
+  is_Resfinder: TRUE
 ---
 ```{r echo=FALSE}
 library(magrittr)
 
 resistance_summary <- params$resistance_summary
+resistance_summary_file <- params$resistance_summary_file
 resistance_gff <- params$resistance_gff
 is_CARD <- params$is_CARD
-is_Resfinder <- params$is_Resfinder
 card_summary <- params$card_summary
+card_summary_file <- params$card_summary_file
+is_Resfinder <- params$is_Resfinder
 ```
 
 #### Resistance databases
@@ -26,13 +30,13 @@ In this pipeline, the resistance genes can be annotated from two different datab
 * CARD database.
     * Was this database used? - ``r is_CARD``
 * Files containg genes pottentially related to resistance:
-    * GFF: ``r resistace_gff``
+    * GFF: ``r resistance_gff``
     * Summary table: ``r resistance_summary``
 
 Summary table overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
-df <- read.delim(params$resfinder_summary, header = TRUE, sep = "\t")
+df <- read.delim(params$resistance_summary_file, header = TRUE, sep = "\t")
 df
 ```
 

@@ -22,9 +22,7 @@ suppressMessages(library(dplyr))
 # Load GFF file
 gff <- gffRead(opt$input)
 # Lower case the attributes column
-att <- gff$attributes
-att <- as.list(tolower(att))
-gff$attributes <- att
+gff$attributes <- sapply(gff$attributes, tolower)
 # Write output
 write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
             col.names = FALSE, row.names = FALSE)

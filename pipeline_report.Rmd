@@ -60,8 +60,6 @@ blast_dir <- params$blast_dir
 is_resistance <- params$is_resistance
 ## Get resistance gff filepath
 resistance_gff <- params$resistance_gff
-## Load resistance gff file
-resistance_gff_file <- params$resistance_gff_file
 ## Get resistance summary path
 resistance_summary <- params$resistance_summary
 ## Loading resistance summary table
@@ -85,8 +83,6 @@ ice_summary <- params$ice_summary
 ice_summary_file <- params$ice_summary_file
 ## ICEberg gff filepath
 ice_gff <- params$ice_gff
-## Loading ICEberg gff file
-ice_gff_file <- params$ice_gff_file
 # Get PHAST variables
 ## Was PHAST executed?
 is_PHAST <- params$is_PHAST
