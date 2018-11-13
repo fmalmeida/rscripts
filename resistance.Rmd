@@ -4,10 +4,10 @@ params:
   resistance_summary:
   resistance_summary_file:
   resistance_gff:
-  is_CARD: TRUE
+  is_CARD:
   card_summary:
   card_summary_file:
-  is_Resfinder: TRUE
+  is_Resfinder:
 ---
 ```{r echo=FALSE}
 library(magrittr)
