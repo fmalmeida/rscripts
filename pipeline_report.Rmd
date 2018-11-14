@@ -12,25 +12,19 @@ params:
   fasta: 
   gff: 
   gff_dir:
-  gff_file: 
   gbk:
   command: nextflow run pipeline -c config
   config:
   blast_dir: 
   is_resistance:
   resistance_gff:
-  resistance_gff_file:
   resistance_summary:
-  resistance_summary_file:
   is_CARD: 
   card_summary:
-  card_summary_file:
   is_Resfinder: 
   is_ICEberg: 
   ice_summary:
-  ice_summary_file:
   ice_gff:
-  ice_gff_file:
   is_PHAST: 
   is_VFDB: 
   is_Victors: 
@@ -46,8 +40,6 @@ fasta <- params$fasta
 gff <- params$gff
 # Gff directory name
 gff_dir <- params$gff_dir
-# Gff file load
-gff_file <- params$gff_file
 # Genbank filename
 gbk <- params$gbk
 # Load of configuration file
@@ -62,15 +54,11 @@ is_resistance <- params$is_resistance
 resistance_gff <- params$resistance_gff
 ## Get resistance summary path
 resistance_summary <- params$resistance_summary
-## Loading resistance summary table
-resistance_summary_file <- params$resistance_summary_file
 # Get CARD variables
 ## Was CARD executed?
 is_CARD <- params$is_CARD
 ## CARD summary table path
 card_summary <- params$card_summary
-## Loading CARD summary file
-card_summary_file <- params$card_summary_file
 # Get Resfinder variables
 ## Was Resfinder executed?
 is_Resfinder <- params$is_Resfinder
@@ -79,8 +67,6 @@ is_Resfinder <- params$is_Resfinder
 is_ICEberg <- params$is_ICEberg
 ## ICEberg summary table path
 ice_summary <- params$ice_summary
-## Loading ICEberg summary table file
-ice_summary_file <- params$ice_summary_file
 ## ICEberg gff filepath
 ice_gff <- params$ice_gff
 # Get PHAST variables
@@ -138,7 +124,7 @@ This report contains a summary of the pipeline's most important results, which a
 * Complete GFF file summarization:
 
 ```{r Gff file, comment="", eval=TRUE, echo=FALSE}
-gffFile <- ballgown::gffRead(params$gff_file)
+gffFile <- ballgown::gffRead(params$gff)
 gffFile
 ```
 
