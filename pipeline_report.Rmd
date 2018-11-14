@@ -8,26 +8,26 @@ output:
     toc: true
     df_print: paged
 params:
-  prefix: 
-  fasta: 
-  gff: 
-  gff_dir:
-  gbk:
+  prefix: na
+  fasta: na
+  gff: na
+  gff_dir: na
+  gbk: na
   command: nextflow run pipeline -c config
-  config:
-  blast_dir: 
-  is_resistance:
-  resistance_gff:
-  resistance_summary:
-  is_CARD: 
-  card_summary:
-  is_Resfinder: 
-  is_ICEberg: 
-  ice_summary:
-  ice_gff:
-  is_PHAST: 
-  is_VFDB: 
-  is_Victors: 
+  config: na
+  blast_dir: na 
+  is_resistance: FALSE
+  resistance_gff: na
+  resistance_summary: na
+  is_CARD: FALSE
+  card_summary: na
+  is_Resfinder: FALSE
+  is_ICEberg: FALSE
+  ice_summary: na
+  ice_gff: na
+  is_PHAST: FALSE
+  is_VFDB: FALSE
+  is_Victors: FALSE 
 ---
 ```{r setup, echo=FALSE}
 library(magrittr)
