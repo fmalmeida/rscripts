@@ -21,18 +21,31 @@ suppressMessages(library(stringr))
   
 # Function used to get values from attributes column. It was completely edited
 # to keep all additional findings. I may have to implement on other scripts.
-getAttributeField <- function (df, field, attrsep = ";") {
-  s = strsplit(df, split = attrsep, fixed = TRUE)
-  v <- sapply(s, function(x) {
-    v = str_subset(x, pattern=field)
-    y = strsplit(v, split = "=", fixed = TRUE)
-    m = sapply(y, "[", 2)
-    if (length(m) > 0) {
-    rv = paste(unique(m), collapse = ",") } else { 
+# getAttributeField <- function (df, field, attrsep = ";") {
+#  s = strsplit(df, split = attrsep, fixed = TRUE)
+#  v <- sapply(s, function(x) {
+#    v = str_subset(x, pattern=field)
+#    y = strsplit(v, split = "=", fixed = TRUE)
+#    m = sapply(y, "[", 2)
+#    if (length(m) > 0) {
+#    rv = paste(unique(m), collapse = ",") } else { 
+#      rv = as.character(NA) 
+#    } 
+#  })
+#  return(v)
+#}
+getAttributeField <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
       rv = as.character(NA) 
     } 
-  })
-  return(v)
+    return(rv) 
+  }) 
 }
 
 getAdditionalProducts <- function (vector) {

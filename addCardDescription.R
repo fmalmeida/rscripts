@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 # Setting help
-'usage: addCardDescription.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr> --pident=<int> --scoverage=<int>]
+'usage: addCardDescription.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr> --scoverage=<int>]
 
 options:
   -i, --input=<file>    Tabular Blast to be added to GFF
@@ -8,7 +8,6 @@ options:
   -o, --out=<chr>       Output file name [default: out.gff]
   -d, --database=<chr>  Name of databased which Blast came from
   -t, --type=<chr>      Type of feature blasted. Ex: resistance
-  -p, --pident=<int>    % identity to filter blast [default: 90]
   -c, --scoverage=<int> Minimum subject coverage to keep' -> doc
 
 # Parse parameters
@@ -75,7 +74,8 @@ blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
 
 ## Filter per %Identity
-blast_filtered <- subset(blastFile, pident >= as.integer(opt$pident))
+# blast_filtered <- subset(blastFile, pident >= as.integer(opt$pident))
+blast_filtered <- blastFile
 ssids <- as.vector(blast_filtered$sseqid)
 aroID <- sapply(strsplit(ssids, "\\|"), `[`, 3)
 blast_filtered$ARO <- aroID
