@@ -1,0 +1,21 @@
+---
+title: "VFDB"
+params:
+  vfdb_gff: na
+---
+```{r echo=FALSE}
+library(magrittr)
+
+vfdb_gff <- params$vfdb_gff
+```
+
+##### Virulence Factors database (VFDB)
+
+* GFF: ``r vfdb_gff``
+
+Overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+df <- read.delim(vfdb_gff, header = TRUE, sep = "\t")
+df
+```

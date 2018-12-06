@@ -1,0 +1,21 @@
+---
+title: "Victors"
+params:
+  victors_gff: na
+---
+```{r echo=FALSE}
+library(magrittr)
+
+victors_gff <- params$victors_gff
+```
+
+##### Victors database
+
+* GFF: ``r victors_gff``
+
+Overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+df <- read.delim(victors_gff, header = TRUE, sep = "\t")
+df
+```

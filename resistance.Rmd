@@ -29,7 +29,7 @@ In this pipeline, the resistance genes can be annotated from two different datab
     * GFF: ``r resistance_gff``
     * Summary table: ``r resistance_summary``
 
-Summary table overview:
+##### Summary table overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
 df <- read.delim(params$resistance_summary, header = TRUE, sep = "\t")

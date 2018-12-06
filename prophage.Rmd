@@ -1,0 +1,28 @@
+---
+title: "prophages"
+output: html_document
+params:
+  ice_summary:
+  ice_gff:
+---
+```{r echo=FALSE}
+library(magrittr)
+
+phast_summary <- params$phast_summary
+phast_gff <- params$phast_gff
+```
+
+#### Prophages
+
+These elements were annotated from the [PHAST database](http://phast.wishartlab.com/Download.html), using blastx and blastn methods.
+
+* Files:
+    * GFF: ``r phast_gff``
+    * Summary table: ``r phast_summary``
+
+Summary table overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+df <- read.delim(phast_summary, header = TRUE, sep = "\t")
+df
+```

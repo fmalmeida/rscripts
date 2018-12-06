@@ -1,0 +1,46 @@
+---
+title: "Virulence databases"
+params:
+  virulence_summary: na
+  virulence_gff: na
+  is_VFDB: FALSE
+  vfdb_summary: na
+  vfdb_gff: na
+  is_Victors: FALSE
+  victors_summary: na
+  victors_gff: na
+---
+```{r echo=FALSE}
+library(magrittr)
+
+virulence_summary <- params$virulence_summary
+virulence_gff <- params$virulence_gff
+is_VFDB <- params$is_VFDB
+is_Victors <- params$is_Victors
+```
+
+#### Virulence databases
+
+In this pipeline, the virulence genes could be annotated from two different databases:
+
+* [VFDB database](http://www.phidias.us/victors/) and;
+    * Was this database used? - ``r is_VFDB``
+* [Victors database](http://www.mgc.ac.cn/VFs/).
+    * Was this database used? - ``r is_Victors``
+* Files containg genes pottentially related to virulence:
+    * GFF: ``r virulence_gff``
+    * Summary table: ``r virulence_summary``
+
+##### Summary table overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+df <- read.delim(virulence_summary, header = TRUE, sep = "\t")
+df
+```
+
+##### GFF overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+gffFile <- ballgown::gffRead(virulence_gff)
+gffFile
+```
