@@ -32,8 +32,9 @@ In this pipeline, the resistance genes can be annotated from two different datab
 ##### Summary table overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
+if (file.info(params$resistance_summary)$size > 0) {
 df <- read.delim(params$resistance_summary, header = TRUE, sep = "\t")
-df
+df } else {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")}
 ```
 
 ```{r, CARD_conditional_block, echo=FALSE, results='asis', eval=is_CARD, child='CARD.Rmd'}

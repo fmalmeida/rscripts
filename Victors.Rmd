@@ -16,6 +16,7 @@ victors_gff <- params$victors_gff
 Overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
+if (file.info(victors_gff)$size > 0) {
 df <- read.delim(victors_gff, header = TRUE, sep = "\t")
-df
+df } else {cat("The gff file for this database is empty. Or the database was not used, or no element were found!")}
 ```
