@@ -23,7 +23,7 @@ These elements were annotated from the [PHAST database](http://phast.wishartlab.
 Summary table overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
-if (file.info(phast_summary)$size > 0) {
+if (!is.na(file.info(phast_summary)$size) && phast_summary != 'na') {
 df <- read.delim(phast_summary, header = TRUE, sep = "\t")
 df } else {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")}
 ```

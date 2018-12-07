@@ -16,7 +16,7 @@ vfdb_gff <- params$vfdb_gff
 Overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
-if (file.info(vfdb_gff)$size > 0) {
+if (!is.na(file.info(vfdb_gff)$size) && vfdb_gff != 'na') {
 df <- read.delim(vfdb_gff, header = TRUE, sep = "\t")
 df } else {cat("The gff file for this database is empty. Or the database was not used, or no element were found!")}
 ```

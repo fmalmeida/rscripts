@@ -32,7 +32,7 @@ In this pipeline, the resistance genes can be annotated from two different datab
 ##### Summary table overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
-if (file.info(params$resistance_summary)$size > 0) {
+if (!is.na(file.info(params$resistance_summary)$size) && params$resistance_summary != 'na') {
 df <- read.delim(params$resistance_summary, header = TRUE, sep = "\t")
 df } else {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")}
 ```

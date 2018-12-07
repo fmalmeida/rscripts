@@ -14,7 +14,7 @@ card_summary <- params$card_summary
 Addtionally, the pipeline produces a summary table of genes annotated from [CARD database](https://card.mcmaster.ca/) since it has a comprehensive catalog of AMR genes.
 
 ```{r echo=FALSE, comment="", eval=TRUE}
-if (file.info(params$card_summary)$size > 0) {
+if (!is.na(file.info(params$card_summary)$size) && params$card_summary != 'na') {
   df <- read.delim(params$card_summary, header = TRUE, sep = "\t")
   df } else {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")}
 ```
