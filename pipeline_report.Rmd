@@ -184,6 +184,6 @@ Therefore, this section can appear blank or it can contain the summary tables pr
 [JBROWSE](http://jbrowse.org/) is a Genome Browser which we use in this pipeline in order to create a easier and fast way to identify elements throughout genomic regions.
 
 * JBROWSE directory path: ``r jbrowse_dir``
-    * [JBROWSE local genome browser link](``r jbrowse_html``)
+    * [JBROWSE local genome browser link](`r jbrowse_html`)
     
 ### SQL Database
