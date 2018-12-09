@@ -12,8 +12,8 @@ options:
   -s, --start=<int>     OPTIONAL: retrieve elements from this start position.
   -e, --end=<int>       OPTIONAL: retrieve elements until this end position.
   -f, --fofn=<file>     OPTIONAL: retrieve elements based on ids from fofn file.
-  -r, --regex=<chr>     OPTIONAL: retrieve elements based on searching a pattern in specific column of GFF file. Example: feature|resistance will search for elements that \
-                        have the pattern resistance in the feature column. GFF Columns: chr|source|feature|attributes.
+  -r, --regex=<chr>     OPTIONAL: retrieve elements based on searching a pattern in specific column of GFF file. Example: "feature|resistance" will search for elements that \
+                        have the pattern resistance in the feature column. GFF Columns: chr|source|feature|attributes. This input must be given inside double quotes.
   -t, --type=<chr>      Type of FASTA to output: nt|aa|both [default: both]
   -p, --prefix=<chr>    Output prefix
   -d, --outdir=<chr>    Output directory. Default: Current directory

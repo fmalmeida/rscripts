@@ -190,3 +190,7 @@ Therefore, this section can appear blank or it can contain the summary tables pr
 > The pipeline report should always stay in the outdir directory in order to have properly working links.
     
 ### SQL Database
+
+In order to properly extract information from the .sql file produced in the end of the annotation pipeline I recommend using my `parse_sql.R` file available in my [rscripts repository](https://github.com/fmalmeida/rscripts).
+
+Checking help: `./parse_sql.R -h`
