@@ -25,7 +25,7 @@ These elements were annotated from the [ICEberg database](http://db-mml.sjtu.edu
 Summary table overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
-if (!is.na(file.info(ice_summary)$size) && ice_summary != 'na') {
-df <- read.delim(ice_summary, header = TRUE, sep = "\t")
+if (!is.na(file.info(params$ice_summary)$size) && ice_summary != 'na') {
+df <- read.delim(params$ice_summary, header = TRUE, sep = "\t")
 df } else {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")}
 ```
