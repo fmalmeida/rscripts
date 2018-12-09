@@ -139,7 +139,7 @@ This report contains a summary of the pipeline's most important results, which a
 ### Final GFF
 
 * GFF filepath: ``r gff`` ;
-* GFF dir: `` r gff_dir`` ;
+* GFF dir: ``r gff_dir`` ;
     * In this directory are stored the final gff file and the subseted gffs (e.g. _prefix_\_**resistance**.gff)
 * Genbank file filepath: ``r gbk``.
 * Complete GFF file summarization:

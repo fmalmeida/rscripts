@@ -6,6 +6,7 @@ suppressMessages(library(DataCombine))
 
 # Setting Help
 'usage: parse_sql.R [--input=<file> --start=<int> --end=<int> --fofn=<file> --regex=<chr> --type=<chr> --prefix=<chr> --outdir=<chr>]
+
 options:
   -i, --input=<file>    sqlite database outputed
   -s, --start=<int>     OPTIONAL: retrieve elements from this start position.
