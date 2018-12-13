@@ -15,7 +15,7 @@ Addtionally, the pipeline produces a summary table of genes annotated from [CARD
 
 ```{r echo=FALSE, comment="", eval=TRUE}
 if (!is.na(file.info(params$card_summary)$size) && params$card_summary != 'na') {
-  df <- read.delim(params$card_summary, header = TRUE, sep = "\t")
+  df <- tryCatch(read.delim(params$card_summary, header = TRUE, sep = "\t"), warning = function(w) {df <- data.frame()}, error = function(w) {df <- data.frame()})
   if (!nrow(df)) {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")} else {df} 
   } else {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")}
 ```

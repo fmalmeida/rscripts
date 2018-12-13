@@ -33,7 +33,7 @@ In this pipeline, the resistance genes can be annotated from two different datab
 
 ```{r echo=FALSE, comment="", eval=TRUE}
 if (!is.na(file.info(params$resistance_summary)$size) && params$resistance_summary != 'na') {
-df <- read.delim(params$resistance_summary, header = TRUE, sep = "\t")
+df <- tryCatch(read.delim(params$resistance_summary, header = TRUE, sep = "\t"), warning = function(w) {df <- data.frame()}, error = function(w) {df <- data.frame()})
 if (!nrow(df)) {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")} else {df} 
 } else {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")}
 ```
