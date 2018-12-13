@@ -36,13 +36,15 @@ In this pipeline, the virulence genes could be annotated from two different data
 ```{r echo=FALSE, comment="", eval=TRUE}
 if (!is.na(file.info(virulence_summary)$size) && virulence_summary != 'na') {
 df <- read.delim(virulence_summary, header = TRUE, sep = "\t")
-df } else {cat("The summary table for these databases is empty. Or the databases were not used, or no element was found!")}
+if (!nrow(df)) {cat("The summary table for these databases is empty. Or the databases were not used, or no element was found!")} else {df} 
+} else {cat("The summary table for these databases is empty. Or the databases were not used, or no element was found!")}
 ```
 
 ##### GFF overview:
 
 ```{r echo=FALSE, comment="", eval=TRUE}
 if (!is.na(file.info(virulence_gff)$size) && virulence_gff != 'na') {
-gffFile <- ballgown::gffRead(virulence_gff)
-gffFile } else {cat("The gff file for these databases is empty. Or the databases were not used, or no element was found!")}
+df <- ballgown::gffRead(virulence_gff)
+if (!nrow(df)) {cat("The gff file for these databases is empty. Or the databases were not used, or no element was found!")} else {df} 
+} else {cat("The gff file for these databases is empty. Or the databases were not used, or no element was found!")}
 ```

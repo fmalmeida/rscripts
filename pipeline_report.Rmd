@@ -5,7 +5,7 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
     theme: readable
-    toc: false
+    toc: true
     df_print: paged
 params:
   prefix: na
@@ -139,7 +139,7 @@ This report contains a summary of the pipeline's most important results, which a
 ### Final GFF
 
 * GFF filepath: ``r gff`` ;
-* GFF dir: ``r gff_dir`` ;
+* GFF dir: `` r gff_dir`` ;
     * In this directory are stored the final gff file and the subseted gffs (e.g. _prefix_\_**resistance**.gff)
 * Genbank file filepath: ``r gbk``.
 * Complete GFF file summarization:
@@ -184,13 +184,6 @@ Therefore, this section can appear blank or it can contain the summary tables pr
 [JBROWSE](http://jbrowse.org/) is a Genome Browser which we use in this pipeline in order to create a easier and fast way to identify elements throughout genomic regions.
 
 * JBROWSE directory path: ``r jbrowse_dir``
-    * [JBROWSE local genome browser link](jbrowse/www/index.html)
-
-
-> The pipeline report should always stay in the outdir directory in order to have properly working links.
+    * [JBROWSE local genome browser link](``r jbrowse_html``)
     
 ### SQL Database
-
-In order to properly extract information from the .sql file produced in the end of the annotation pipeline I recommend using my `parse_sql.R` file available in my [rscripts repository](https://github.com/fmalmeida/rscripts).
-
-Checking help: `./parse_sql.R -h`
