@@ -147,7 +147,7 @@ if (opt$type == 'both') {
     glue('>{out$ID} {out$Comment}\n{out$Sequence}')
   outname <- glue("{outdir}/subseted_nt.fasta")
   write(out_fasta, file = outname, sep = "\n")
-} else if (opt$type == nt) {
+} else if (opt$type == 'nt') {
   # Get nt FASTA
   ids <- getAttributeField(out$attributes, "id", ";")
   ids <- toupper(ids)
@@ -157,7 +157,7 @@ if (opt$type == 'both') {
     glue('>{out$ID} {out$Comment}\n{out$Sequence}')
   outname <- glue("{outdir}/subseted_nt.fasta")
   write(out_fasta, file = outname, sep = "\n")
-} else if (opt$type == aa) {
+} else if (opt$type == 'aa') {
   # Get aa FASTA
   ids <- getAttributeField(out$attributes, "id", ";")
   ids <- toupper(ids)
