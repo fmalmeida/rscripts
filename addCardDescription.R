@@ -67,7 +67,7 @@ if (!is.null(opt$scoverage)) {
 blastFile$scov <- (blastFile$length / blastFile$slen) * 100
 blastFile <- dplyr::filter(blastFile, scov >= as.integer(opt$scoverage))}
 
-if (!is.null(blastFile)) {
+if (nrow(blastFile) > 0) {
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
