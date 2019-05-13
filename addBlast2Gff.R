@@ -59,12 +59,14 @@ blastFile$scov <- (blastFile$length / blastFile$slen) * 100
 blastFile <- dplyr::filter(blastFile, scov >= as.integer(opt$scoverage))
 }
 
+if (nrow(blastFile) > 0) {
+  
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
 
-if (!is.null(blastFile)) {
+# Create GFF Attribute Entry
 att <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=", 
              blastFile$sseqid, ";", opt$database, "_Target=", blastFile$stitle, sep = "")
 
