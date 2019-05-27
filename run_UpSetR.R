@@ -23,5 +23,5 @@ df <- read.delim(opt$input, header=TRUE)
 
 # Run UpSetR
 png(opt$out)
-upset(movies, order.by="freq", sets.bar.color=opt$setsColor, main.bar.color=opt$mainColor, keep.order = TRUE)
+upset(df, order.by="freq", sets.bar.color=opt$setsColor, main.bar.color=opt$mainColor, keep.order = TRUE)
 dev.off()
