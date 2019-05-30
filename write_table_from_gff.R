@@ -100,6 +100,7 @@ if (length(opt$type) && opt$type != "card") {
   gff$Resistance_Mechanism <- getAttributeField(gff$attributes, "resistance_mechanism", ";")
   gff$Domain <- getAttributeField(gff$attributes, "protein_motif", ";")
   gff$Prokka_product <- getAttributeField(gff$attributes, "product", ";")
+  gff$Prokka_ID <- getAttributeField(gff$attributes, "id", ";")
   gff$Prokka_inference <- getAttributeField(gff$attributes, "inference", ";")
   gff$Additional_DB <- getAttributeField(gff$attributes, "additional_database", ";")
   gff$Additional_product <- getAdditionalProducts(gff$attributes)
@@ -107,7 +108,7 @@ if (length(opt$type) && opt$type != "card") {
   #### Give columns a name
   col = c("seqname", "start", "end", "feature", "source", "ARO_Accession", 
         "Gene_Family", "Name", "Drug_Class", "Resistance_Mechanism", 
-        "Domain", "Prokka_product", "Prokka_inference", "Additional_DB", "Additional_product")
+        "Domain", "Prokka_product", "Prokka_ID", "Prokka_inference", "Additional_DB", "Additional_product")
   
   ### Write document
   table <- gff[, col]
