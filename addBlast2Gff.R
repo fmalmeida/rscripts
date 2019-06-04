@@ -63,6 +63,7 @@ if (nrow(blastFile) > 0) {
   
 # Remove duplicates based on bitscore
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$bitscore) ), ]
+blastFile <- dplyr::filter(blastFile, bitscore >= 500)
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
 
