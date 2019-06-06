@@ -28,7 +28,7 @@ reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
-
+# Function to get Attribute Fields
 getAttributeField <- function (x, field, attrsep = ";") { 
   s = strsplit(x, split = attrsep, fixed = TRUE) 
   sapply(s, function(atts) { 
@@ -42,6 +42,8 @@ getAttributeField <- function (x, field, attrsep = ";") {
     return(rv) 
   }) 
 }
+# Operator to discard patterns found
+'%ni%' <- Negate('%in%')
 
 # Check if file is empty
 
@@ -80,8 +82,8 @@ gff <- gffRead(opt$gff)
 gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 
 # Subset based on gene IDs
-sub <- grepl.sub(gff, pattern = ids, Var = "ID") %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
-not <- grepl.sub(gff, pattern = ids, Var = "ID", keep.found = FALSE) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
+sub <- gff %>% filter(ID %in% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
+not <- gff %>% filter(ID %ni% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
 # Change fields values
 ## source
