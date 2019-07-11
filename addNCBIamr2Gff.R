@@ -20,6 +20,7 @@ if (is.null(opt$gff)){
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
 suppressMessages(library(dplyr))
+suppressMessages(library(stringr))
 
 # Function used to remove redundancy
 reduce_row = function(i) {
@@ -45,15 +46,16 @@ getAttributeField <- function (x, field, attrsep = ";") {
 
 # Load GFF File
 gff <- gffRead(opt$gff)
-gff$ID <- getAttributeField(gff$attributes, "ID", ";")
+gff$ID <- getAttributeField(gff$attributes, "id", ";")
 
 # Filter Entries that are annotated from NCBI AMR hmm
-NCBIamr <- dplyr::filter(gff, str_detect(attributes, "NCBIfam-AMR"))
+NCBIamr <- filter(gff, str_detect(attributes, "ncbifam-amr"))
 
 if (is.null(NCBIamr) == FALSE & dim(NCBIamr)[1] != 0) {
   
 # Get its ids
-ids <- NCBIamr#ID
+NCBIamr$ID <- getAttributeField(NCBIamr$attributes, "id", ";")
+ids <- NCBIamr$ID
     
 # Subset based on gene IDs
 sub <- gff %>% filter(ID %in% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
