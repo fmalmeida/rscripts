@@ -46,15 +46,15 @@ getAttributeField <- function (x, field, attrsep = ";") {
 
 # Load GFF File
 gff <- gffRead(opt$gff)
-gff$ID <- getAttributeField(gff$attributes, "id", ";")
+gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 
 # Filter Entries that are annotated from NCBI AMR hmm
-NCBIamr <- filter(gff, str_detect(attributes, "ncbifam-amr"))
+NCBIamr <- filter(gff, str_detect(attributes, "NCBIfam-AMR"))
 
 if (is.null(NCBIamr) == FALSE & dim(NCBIamr)[1] != 0) {
   
 # Get its ids
-NCBIamr$ID <- getAttributeField(NCBIamr$attributes, "id", ";")
+NCBIamr$ID <- getAttributeField(NCBIamr$attributes, "ID", ";")
 ids <- NCBIamr$ID
     
 # Subset based on gene IDs
