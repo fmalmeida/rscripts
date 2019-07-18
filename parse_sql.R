@@ -118,7 +118,7 @@ if (!is.null(opt$start) && is.null(opt$end)) {
 
 ### Searching elements by ids
 if (!is.null(opt$fofn)) {
-  fil <- file("ids.fofn")
+  fil <- file(opt$fofn)
   ids <- readLines(fil, n = -1)
   ids <- toupper(ids)
   suppressWarnings(res <- lapply(ids, get_gff_from_ids))
