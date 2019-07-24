@@ -4,7 +4,7 @@ params:
   card_summary:
 ---
 ```{r}
-card_summary <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_card.tsv")
+card_summary <- read.delim(params$card_summary)
 ```
 
 # CARD results

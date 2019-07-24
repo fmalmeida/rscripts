@@ -2,10 +2,9 @@
 title: "Antimicrobial Resistance Genes Report"
 params:
   resistance_summary:
-  resistance_gff:
   is_CARD:
   card_summary:
-  is_Resfinder:
+  ncbi_amr:
 output:
   bookdown::pdf_document2:
     df_print: kable
@@ -24,13 +23,11 @@ library(knitr)
 library(tidyr)
 library(kableExtra)
 library(dplyr)
-library(ballgown)
 library(stringr)
-resistance_summary <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_resistance.tsv")
-ncbi_amr <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_ncbi-amr.tsv")
-is_CARD <- TRUE
-card_summary <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_card.tsv")
-is_Resfinder <- TRUE
+resistance_summary <- read.delim(params$resistance_summary)
+ncbi_amr <- read.delim(params$ncbi_amr)
+is_CARD <- params$is_CARD
+card_summary <- read.delim(params$card_summary)
 ```
 
 # About
