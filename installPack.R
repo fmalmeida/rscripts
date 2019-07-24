@@ -1,7 +1,9 @@
 #!/usr/bin/Rscript
 
 install.packages("sf", repos = "https://cloud.r-project.org/", dependencies = TRUE) ;
-install.packages(c("DataCombine", "glue", "docopt", "dplyr", "stringr", "kableExtra"), repos = "https://cloud.r-project.org/", dependencies = TRUE) ;
+install.packages(c("DataCombine", "glue", "docopt", "dplyr", 
+                   "stringr", "kableExtra", "ggplot2",
+                   "bookdown", "plyr"), repos = "https://cloud.r-project.org/", dependencies = TRUE) ;
 
 
 # Install bioc packages

@@ -4,6 +4,8 @@ params:
   card_summary:
 ---
 ```{r}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
+options(knitr.table.format = "latex")
 card_summary <- read.delim(params$card_summary)
 ```
 
@@ -15,13 +17,18 @@ In Table \@ref(tab:card-resistance-pattern) we can clearly see all resistance ge
 
 In summary, the query genome possesses the following resistance genes: **`r card_summary %>% pull(Name)`**. And, these genes together confer resistance to the following drug classes: **`r card_summary %>% separate_rows(Drug_Class, sep = ":") %>% pull(Drug_Class) %>% unique()`**
 
-```{r card-resistance-pattern}
-card_summary %>%
-  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession") %>%
-  separate_rows(Drug_Class, sep = ":") %>%
-  group_by(Name) %>%
-  kable(caption = "CARD resistance genes annotated and its target drug classes", booktabs = T, linesep = "") %>%
-  kable_styling(latex_options = "hold_position", font_size = 14, position = "center") %>%
-  collapse_rows(columns = 1:4, valign = "middle", latex_hline = "none") %>%
-  landscape()
+In Figure \@ref(fig:card-resistome-png) it is summarised the amount of genes found that target a specific antibiotic class.
+
+
+```{r card-resistome-png, fig.align='center', fig.show='hold', fig.cap="Drug Classes to which the query genome is resistant", out.width="60%"}
+card_summary <- card_summary %>%
+  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession") %>% separate_rows(Drug_Class, sep = ":") %>% group_by(Name)
+drugs <- plyr::count(card_summary, "Drug_Class")
+ggplot(drugs, aes(x=Drug_Class, y=freq, fill=Drug_Class)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  xlab("Drug Classes") +
+  ylab("Frequency") +
+  guides(fill=guide_legend(title = "Drug Classes"))
 ```
