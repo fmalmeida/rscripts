@@ -3,19 +3,25 @@ title: "CARD"
 params:
   card_summary:
 ---
-```{r echo=FALSE}
-library(magrittr)
-
-card_summary <- params$card_summary
+```{r}
+card_summary <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_card.tsv")
 ```
 
-##### CARD database
+# CARD results
 
-Addtionally, the pipeline produces a summary table of genes annotated from [CARD database](https://card.mcmaster.ca/) since it has a comprehensive catalog of AMR genes.
+CARD is a curated database which hosts drug resistance genes of pathogenic bacteria. Therefore, an antibiogram can be infered using data provenient from this database.
 
-```{r echo=FALSE, comment="", eval=TRUE}
-if (!is.na(file.info(params$card_summary)$size) && params$card_summary != 'na') {
-  df <- tryCatch(read.delim(params$card_summary, header = TRUE, sep = "\t"), warning = function(w) {df <- data.frame()}, error = function(w) {df <- data.frame()})
-  if (!nrow(df)) {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")} else {df} 
-  } else {cat("The summary table for this database is empty. Or the database was not used, or no element were found!")}
+In Table \@ref(tab:card-resistance-pattern) we can clearly see all resistance gene names found in the query genome and its target drug classes. In addition, each ARO accession are disponibilized to the user in order to gather more information about each gene. This ARO can be searched in CARD database.
+
+In summary, the query genome possesses the following resistance genes: **`r card_summary %>% pull(Name)`**. And, these genes together confer resistance to the following drug classes: **`r card_summary %>% separate_rows(Drug_Class, sep = ":") %>% pull(Drug_Class) %>% unique()`**
+
+```{r card-resistance-pattern}
+card_summary %>%
+  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession") %>%
+  separate_rows(Drug_Class, sep = ":") %>%
+  group_by(Name) %>%
+  kable(caption = "CARD resistance genes annotated and its target drug classes", booktabs = T, linesep = "") %>%
+  kable_styling(latex_options = "hold_position", font_size = 14, position = "center") %>%
+  collapse_rows(columns = 1:4, valign = "middle", latex_hline = "none") %>%
+  landscape()
 ```

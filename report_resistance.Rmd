@@ -1,0 +1,68 @@
+---
+title: "Antimicrobial Resistance Genes Report"
+params:
+  resistance_summary:
+  resistance_gff:
+  is_CARD:
+  card_summary:
+  is_Resfinder:
+output:
+  bookdown::pdf_document2:
+    df_print: kable
+    number_sections: true
+    toc: true
+    toc_depth: 4
+urlcolor: blue
+font_size: 16
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
+options(knitr.table.format = "latex")
+library(magrittr)
+library(knitr)
+library(tidyr)
+library(kableExtra)
+library(dplyr)
+library(ballgown)
+library(stringr)
+resistance_summary <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_resistance.tsv")
+ncbi_amr <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_ncbi-amr.tsv")
+is_CARD <- TRUE
+card_summary <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_card.tsv")
+is_Resfinder <- TRUE
+```
+
+# About
+
+This report contains all the resistance related genes found when searching the genome with [CARD](https://card.mcmaster.ca/), [NCBI-amr](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047) and [Resfams](http://www.dantaslab.org/resfams) datases. Additionally, Resfams hmm file have been addded to Prokka datases, thus, this report also contains a general report of non drug related resistance genes.
+
+# NCBI-amr
+
+NCBI has produced a hmm file of curated AMR genes. This database was incorporated into Prokka databases. Therefore, we are able to easily retrieve genes annotated from this curated dataset.
+
+This dataset is not exclusive to drug related genes and it contains several types of resistance factors such as resistance against heavy metals. Therefore, it not possible to create an antibiogram from this dataset. However, all resistance genes from this dataset and its protein ID (local protein ID) are shown in Table \@ref(tab:ncbi-amr-resistance-genes).
+
+# Resfams
+
+These elements were annotated from the [Resfams database](http://www.dantaslab.org/resfams/). This database contains genes related to antibiotic resistance genes as well as genes related to environmental stress resistance. Similar to NCBI-amr results, we can't create an antibiogram using this database but it is extremely informative in terms of environmental resistance to stress. This data are summarised in Table \@ref(resfams-resistance-table).
+
+```{r, CARD_conditional_block, echo=FALSE, results='asis', eval=is_CARD, child='CARD.Rmd'}
+```
+
+```{r ncbi-amr-resistance-genes}
+ncbi_amr %>%
+  select(Prokka_ID, Prokka_product) %>%
+  kable(caption = "Resistance genes annotated from NCBI-amr curated database", booktabs = T, linesep = "", longtable = TRUE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
+  kable_styling(latex_options = c("hold_position", "repear_header"), font_size = 14, position = "center") %>%
+  landscape()
+```
+
+```{r resfams-resistance-table}
+resistance_summary %>%
+  filter(str_detect(Prokka_inference, "resfams")) %>%
+  select(Prokka_ID, Prokka_product) %>%
+  kable(caption = "Resistance genes annotated from Resfams database", booktabs = TRUE, linesep = "", longtable = TRUE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
+  kable_styling(latex_options = c("hold_position", "repear_header"), font_size = 14, position = "center") %>%
+  landscape()
+```

@@ -1,0 +1,17 @@
+---
+title: "Resfinder"
+params:
+  resistance_summary:
+---
+```{r}
+resistance_summary <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/summary/Kp31_resistance.tsv")
+```
+
+# Resfinder results
+
+[Resfinder](https://cge.cbs.dtu.dk/services/ResFinder/) is a database that hosts acquired antimicrobial resistance genes and chromosomal mutations. This database has been queryed through BLASTx with the query predicted protein sequences.
+
+```{r resfinder-resistance-pattern}
+resistance_summary %>%
+  filter(str_detect(source, pattern = "resfinder"))
+```
