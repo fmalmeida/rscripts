@@ -22,6 +22,7 @@ if (is.null(opt$input)){
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
 suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
 
 # Function used to remove redundancy
 reduce_row = function(i) {
@@ -69,7 +70,7 @@ blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
 
 # Create GFF Attribute Entry
-att <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=", 
+blastFile$NEW_attributes <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=", 
              blastFile$sseqid, ";", opt$database, "_Target=", blastFile$stitle, sep = "")
 
 # Get gene names
@@ -82,7 +83,7 @@ gff <- gffRead(opt$gff)
 gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 
 # Subset based on gene IDs
-sub <- gff %>% filter(ID %in% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
+sub <- gff %>% filter(ID %in% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes, ID)
 not <- gff %>% filter(ID %ni% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
 # Change fields values
@@ -99,10 +100,10 @@ fnew <- paste(f, fn, sep = ",")
 sub$feature <- fnew
 
 ## attributes
-a <- sub$attributes
-an <- att
-anew <- paste(a, an, sep = ";")
-sub$attributes <- anew
+sub <- merge.data.frame(sub, blastFile, by.x = "ID", 
+                        by.y = "qseqid", all = TRUE)
+sub <- unite(sub, "attributes", c("attributes", "NEW_attributes"), sep = ";") %>%
+  select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
 # Merge files
 merged_df <- merge.data.frame(sub, not, all = TRUE)

@@ -21,6 +21,7 @@ if (is.null(opt$input)){
 suppressMessages(library(DataCombine))
 suppressMessages(library(ballgown))
 suppressMessages(library(dplyr))
+suppressMessages(library(tidyr))
 
 # Load CARD entries index. These will be used to write
 # the attributes columns of CARD entries.
@@ -105,7 +106,7 @@ description <- paste("Additional_database=", opt$database, ";",
                      ";", "Resistance_Mechanism=", card_subset$Resistance.Mechanism, ";", 
                      "DB_Name=", card_subset$Model.Name, sep = "")
 
-card_subset$attributes <- description
+card_subset$CARD_attributes <- description
 
 # Concatenate new attributes values
 blast_filtered <- merge.data.frame(blast_filtered, card_subset, by.x = "ARO", 
@@ -117,7 +118,7 @@ blast_filtered <- blast_filtered[order(blastFile$qseqid),]
 ids <- blast_filtered$qseqid
 
 # Subset based on gene IDs
-sub <- grepl.sub(gff, pattern = ids, Var = "ID") %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
+sub <- grepl.sub(gff, pattern = ids, Var = "ID") %>% select(seqname, source, feature, start, end, score, strand, frame, attributes, ID)
 not <- grepl.sub(gff, pattern = ids, Var = "ID", keep.found = FALSE) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
 # Change fields - Add database source and feature type
@@ -134,11 +135,10 @@ fnew <- paste(f, fn, sep = ",")
 sub$feature <- fnew
 
 ## attributes
-blast_filtered <- blast_filtered[order(blast_filtered$qseqid),]
-a <- sub$attributes
-an <- blast_filtered$attributes
-anew <- paste(a, an, sep = ";")
-sub$attributes <- anew
+sub <- merge.data.frame(sub, blast_filtered, by.x = "ID", 
+                        by.y = "qseqid", all = TRUE)
+sub <- unite(sub, "attributes", c("attributes", "CARD_attributes"), sep = ";") %>%
+  select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
 # Merge files
 merged_df <- merge.data.frame(sub, not, all = TRUE)
