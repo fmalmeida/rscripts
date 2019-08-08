@@ -1,0 +1,71 @@
+---
+title: "Virulence Report"
+params:
+  victors_blast:
+  vfdb_blast:
+output:
+  bookdown::html_document2:
+    df_print: paged
+    number_sections: false
+    syntax: tango
+    self_contained: yes
+    theme: journal
+    toc: yes
+    toc_collapsed: yes
+    toc_depth: 4
+    toc_float: yes
+---
+
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 20px;
+  }
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
+options(knitr.table.format = "html")
+library(magrittr)
+library(knitr)
+library(tidyr)
+library(plyr)
+library(kableExtra)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+#victors_blast <- read.delim(params$victors_blast)
+#vfdb_blast <- read.delim(params$vfdb_blast)
+```
+
+# About
+
+This report contains virulence genes annotated through BLAST against [VFDB](http://www.mgc.ac.cn/VFs/main.htm) and [Victors](http://www.phidias.us/victors/) databases. Here, we summarise the genes found in the query genome.
+
+## VFDB
+
+```{r}
+blast <- read.delim("/workspace/falmeida/projeto_k.varricola/ANNOTATION/18L/blasts/virulence_vfdb_predictedGenes.tsv", header = FALSE) %>% select(V1, V14)
+blast$V14 <- gsub(blast$V14, pattern = "\\) \\(", replacement = "\\)#\\(")
+blast$V14 <- gsub(blast$V14, pattern = "\\) ", replacement = "\\)#")
+blast$V14 <- gsub(blast$V14, pattern = " \\[", replacement = "#\\[")
+blast <- separate(blast, V14, c("VF ID", "Gene Name", "Description", "Virulence Factor Name", "Subject Species"), sep = "#", extra = "merge")
+
+# Get urls
+
+ids <- blast$`Virulence Factor Name`
+ids <- str_match(ids, "VF.*[0-9]+")
+
+urls <- lapply(ids, function(x){paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", x, "#", x)})
+
+# Produce Table
+blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species") %>%
+  mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
+  kable(caption = "CARD resistance genes annotated and its target drug classes", booktabs = T, linesep = "", "html", escape = FALSE) %>%
+  kable_styling(bootstrap_options = c("hover", "condensed"), full_width = T) %>%
+  collapse_rows(columns = 1:4, valign = "middle") %>%
+  scroll_box(height = "500px", width = "900px")
+```
+
+
