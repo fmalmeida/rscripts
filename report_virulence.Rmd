@@ -62,7 +62,7 @@ urls <- lapply(ids, function(x){paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi
 # Produce Table
 blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species") %>%
   mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
-  kable(caption = "CARD resistance genes annotated and its target drug classes", booktabs = T, linesep = "", "html", escape = FALSE) %>%
+  kable(caption = "Virulence Genes annotated from VFDB", booktabs = T, linesep = "", "html", escape = FALSE) %>%
   kable_styling(bootstrap_options = c("hover", "condensed"), full_width = T) %>%
   collapse_rows(columns = 1:4, valign = "middle") %>%
   scroll_box(height = "500px", width = "900px")
