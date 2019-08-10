@@ -104,7 +104,7 @@ description <- paste("Additional_database=", opt$database, ";",
                      "ARO=", card_subset$ARO.Accession, ";", "Gene_Family=", 
                      card_subset$AMR.Gene.Family, ";", "Drug_Class=", card_subset$Drug.Class, 
                      ";", "Resistance_Mechanism=", card_subset$Resistance.Mechanism, ";", 
-                     "DB_Name=", card_subset$Model.Name, "CVTERM=", card_subset$CVTERM, sep = "")
+                     "DB_Name=", card_subset$Model.Name, ";CVTERM=", card_subset$CVTERM, sep = "")
 
 card_subset$CARD_attributes <- description
 
