@@ -46,6 +46,8 @@ This dataset is not exclusive to drug related genes and it contains several type
 
 These elements were annotated from the [Resfams database](http://www.dantaslab.org/resfams/). This database contains genes related to antibiotic resistance genes as well as genes related to environmental stress resistance. Similar to NCBI-amr results, we can't create an antibiogram using this database but it is extremely informative in terms of environmental resistance to stress. This data is summarised in Table \@ref(tab:resfams-resistance-table).
 
+> Resfams database have no searchable online dabatase. Therefore, its results have no links and are only showed here two inform the users gene products annotated from this database.
+
 ```{r, CARD_conditional_block, echo=FALSE, results='asis', eval=is_CARD, child='CARD.Rmd'}
 ```
 
@@ -71,8 +73,10 @@ kable(caption = "Resistance genes annotated from NCBI-amr curated database", esc
 resistance_summary %>%
   filter(str_detect(Prokka_inference, "resfams")) %>%
   select(Prokka_ID, Prokka_product) %>%
+  arrange(Prokka_product) %>%
   kable(caption = "Resistance genes annotated from Resfams database", escape = FALSE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10)
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10) %>%
+  collapse_rows(columns = 1:2, valign = "middle")
 ```
 
 ```{r card-resistance-pattern, eval=is_CARD}
