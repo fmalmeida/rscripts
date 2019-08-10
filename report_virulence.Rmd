@@ -1,7 +1,11 @@
 ---
-title: "Virulence Report"
+title: "Annotation Report"
+author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+subtitle: "Virulence genes annotated from VFDB"
 params:
-  victors_blast:
+  blast_id:
+  blast_cov:
   vfdb_blast:
 output:
   bookdown::html_document2:
@@ -10,10 +14,6 @@ output:
     syntax: tango
     self_contained: yes
     theme: journal
-    toc: yes
-    toc_collapsed: yes
-    toc_depth: 4
-    toc_float: yes
 ---
 
 <style type="text/css">
@@ -27,6 +27,7 @@ body{ /* Normal  */
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
 options(knitr.table.format = "html")
+bt_opt =  c("hover", "condensed", "responsive")
 library(magrittr)
 library(knitr)
 library(tidyr)
@@ -36,17 +37,23 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 #victors_blast <- read.delim(params$victors_blast)
-#vfdb_blast <- read.delim(params$vfdb_blast)
+vfdb_blast <- read.delim(params$vfdb_blast, header = FALSE)
+
+# Example usage
+# Rscript -e 'rmarkdown::render("/work/rscripts/report_virulence.Rmd" , params = list( vfdb_blast = "/media/falmeida/falmeidaEXT/k.variicola/ANNOTATION/18L/blasts/virulence_vfdb_predictedGenes.tsv", blast_id = 90 , blast_cov = 90))'
 ```
 
 # About
 
-This report contains virulence genes annotated through BLAST against [VFDB](http://www.mgc.ac.cn/VFs/main.htm) and [Victors](http://www.phidias.us/victors/) databases. Here, we summarise the genes found in the query genome.
+In this report are summarised all genes annotated using [VFDB](http://www.mgc.ac.cn/VFs/main.htm) database. All genes were annotated via BLASTx, using the following thresholds:
 
-## VFDB
+* Blast % identity: `> `r params$blast_id`%`
+* Blast % query coverage: `> `r params$blast_cov`%`
 
-```{r}
-blast <- read.delim("/workspace/falmeida/projeto_k.varricola/ANNOTATION/18L/blasts/virulence_vfdb_predictedGenes.tsv", header = FALSE) %>% select(V1, V14)
+# Annotated genes.
+
+```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
+blast <- vfdb_blast %>% select(V1, V14)
 blast$V14 <- gsub(blast$V14, pattern = "\\) \\(", replacement = "\\)#\\(")
 blast$V14 <- gsub(blast$V14, pattern = "\\) ", replacement = "\\)#")
 blast$V14 <- gsub(blast$V14, pattern = " \\[", replacement = "#\\[")
@@ -58,14 +65,37 @@ ids <- blast$`Virulence Factor Name`
 ids <- str_match(ids, "VF.*[0-9]+")
 
 urls <- lapply(ids, function(x){paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", x, "#", x)})
+```
 
+All virulence factors that were found to have at least one gene in the query genome are showed in the list below. The results are showed as [VFDB virulence factor name (VFDB virulence factor ID)]. All of them are linked to the database for further investigations.
+
+```{r results='asis'}
+string.list <- blast %>% pull("Virulence Factor Name") %>% unique()
+string.list <- lapply(string.list, function(x){y = str_match(x, "VF.*[0-9]+") ;  paste0("[", x, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", y, "#", y, ")")})
+cat("- Virulence factors found in the query genome:\n")
+cat(paste("\t-", string.list), sep = '\n')
+```
+
+All the genes that were annotated are described in Table \@ref(tab:write-table). In there are described the gene product, source and name of each gene related to a Virulence Factor found in the query genome. Additionally, Figure \@ref(fig:vfs-png) summarises the amount of annotated genes of each virulence factor.
+
+```{r vfs-png, fig.align='center', fig.show='hold', fig.cap="Virulence Factors annotated from [VFDB](http://www.mgc.ac.cn/VFs/main.htm) database", out.width="60%"}
+summary <- blast %>%
+  select("Virulence Factor Name", "Gene Name")
+colnames(summary) <- c("Virulence_Factor_Name", "Gene_Name")
+vfs <- plyr::count(summary, "Virulence_Factor_Name")
+ggplot(vfs, aes(x=Virulence_Factor_Name, y=freq, fill=Virulence_Factor_Name)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  xlab("Virulence Factors") +
+  ylab("Number of annotated genes") +
+  guides(fill=guide_legend(title = "Virulence Factors"))
+```
+
+```{r write-table}
 # Produce Table
 blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species") %>%
   mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
-  kable(caption = "Virulence Genes annotated from VFDB", booktabs = T, linesep = "", "html", escape = FALSE) %>%
-  kable_styling(bootstrap_options = c("hover", "condensed"), full_width = T) %>%
-  collapse_rows(columns = 1:4, valign = "middle") %>%
-  scroll_box(height = "500px", width = "900px")
+  kable(caption = "Virulence Genes annotated from VFDB", escape = FALSE) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T) %>%
+  collapse_rows(columns = 1:4, valign = "middle")
 ```
-
-
