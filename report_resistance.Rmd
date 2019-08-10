@@ -50,10 +50,21 @@ These elements were annotated from the [Resfams database](http://www.dantaslab.o
 ```
 
 ```{r ncbi-amr-resistance-genes}
-ncbi_amr %>%
-  select(Prokka_ID, Prokka_product) %>%
-  kable(caption = "Resistance genes annotated from NCBI-amr curated database", escape = FALSE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10)
+genes <- ncbi_amr %>% select(Prokka_ID, Prokka_product, Prokka_inference)
+genes <- separate(genes, Prokka_inference, c("method", "prog", "ver", "motif", "db_id"), sep = ":", extra = "merge")
+genes <- genes %>% select("Prokka_ID", "Prokka_product", "db_id")
+
+# Create urls
+urls <- lapply(genes$db_id, function(x){paste0("https://www.ncbi.nlm.nih.gov/protein/?term=", x)})
+
+# Produce Table
+genes %>%
+  mutate("db_id" = cell_spec(db_id, "html", link = urls)) %>%
+  arrange(Prokka_product) %>%
+kable(caption = "Resistance genes annotated from NCBI-amr curated database", escape = FALSE, col.names = c("Local Protein ID", "Annotated Gene Product", "Reference Motif")) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10) %>%
+  collapse_rows(columns = 1:3, valign = "middle") %>%
+  footnote(general = "The last column contains a link to NCBI showing the resulting protein. Note that, the result shows all species that have that protein annotated using this motif. It is not a similarity search.")
 ```
 
 ```{r resfams-resistance-table}
@@ -65,11 +76,17 @@ resistance_summary %>%
 ```
 
 ```{r card-resistance-pattern, eval=is_CARD}
+# Create urls
+urls <- lapply(card_summary$CVTerm, function(x){paste0("https://card.mcmaster.ca/ontology/", x)})
+
+# Produce Table
 card_summary %>%
   select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession", "CVTerm") %>%
+  mutate("CVTerm" = cell_spec(CVTerm, "html", link = urls)) %>%
   separate_rows(Drug_Class, sep = ":") %>%
   group_by(Name) %>%
   kable(caption = "CARD resistance genes annotated and its target drug classes", escape = FALSE) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10) %>%
-  collapse_rows(columns = 1:4, valign = "middle")
+  collapse_rows(columns = 1:5, valign = "middle") %>%
+  footnote(general = "CVTerms are the gene IDs that direct link the results to CARD database")
 ```

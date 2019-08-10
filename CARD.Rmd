@@ -20,9 +20,9 @@ In Figure \@ref(fig:card-resistome-png) it is summarised the amount of genes fou
 
 
 ```{r card-resistome-png, fig.align='center', fig.show='hold', fig.cap="Drug Classes to which the query genome is resistant", out.width="60%"}
-card_summary <- card_summary %>%
+card_count <- card_summary %>%
   select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession") %>% separate_rows(Drug_Class, sep = ":") %>% group_by(Name)
-drugs <- plyr::count(card_summary, "Drug_Class")
+drugs <- plyr::count(card_count, "Drug_Class")
 ggplot(drugs, aes(x=Drug_Class, y=freq, fill=Drug_Class)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_blank(),
