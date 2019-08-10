@@ -6,23 +6,18 @@ params:
   card_summary:
   ncbi_amr:
 output:
-  bookdown::pdf_document2:
-    df_print: kable
-    number_sections: true
-    toc: true
-    toc_depth: 4
-urlcolor: blue
-font_size: 16
-header-includes:
-   - \usepackage{pdflscape}
-   - \usepackage{multirow}
-   - \usepackage{array}
-   - \usepackage{float}
+  bookdown::html_document2:
+    df_print: paged
+    number_sections: false
+    syntax: tango
+    self_contained: yes
+    theme: journal
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
-options(knitr.table.format = "latex")
+options(knitr.table.format = "html")
+bt_opt =  c("hover", "condensed", "responsive")
 library(magrittr)
 library(knitr)
 library(tidyr)
@@ -57,27 +52,24 @@ These elements were annotated from the [Resfams database](http://www.dantaslab.o
 ```{r ncbi-amr-resistance-genes}
 ncbi_amr %>%
   select(Prokka_ID, Prokka_product) %>%
-  kable(caption = "Resistance genes annotated from NCBI-amr curated database", booktabs = T, linesep = "", longtable = TRUE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
-  kable_styling(latex_options = c("hold_position", "repeat_header"), font_size = 14, position = "center") %>%
-  landscape()
+  kable(caption = "Resistance genes annotated from NCBI-amr curated database", escape = FALSE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10)
 ```
 
 ```{r resfams-resistance-table}
 resistance_summary %>%
   filter(str_detect(Prokka_inference, "resfams")) %>%
   select(Prokka_ID, Prokka_product) %>%
-  kable(caption = "Resistance genes annotated from Resfams database", booktabs = TRUE, linesep = "", longtable = TRUE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
-  kable_styling(latex_options = c("hold_position", "repeat_header"), font_size = 14, position = "center") %>%
-  landscape()
+  kable(caption = "Resistance genes annotated from Resfams database", escape = FALSE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10)
 ```
 
 ```{r card-resistance-pattern, eval=is_CARD}
 card_summary %>%
-  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession") %>%
+  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession", "CVTerm") %>%
   separate_rows(Drug_Class, sep = ":") %>%
   group_by(Name) %>%
-  kable(caption = "CARD resistance genes annotated and its target drug classes", booktabs = T, linesep = "") %>%
-  kable_styling(latex_options = "hold_position", font_size = 14, position = "center") %>%
-  collapse_rows(columns = 1:4, valign = "middle", latex_hline = "none") %>%
-  landscape()
+  kable(caption = "CARD resistance genes annotated and its target drug classes", escape = FALSE) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10) %>%
+  collapse_rows(columns = 1:4, valign = "middle")
 ```

@@ -38,9 +38,6 @@ library(stringr)
 library(ggplot2)
 #victors_blast <- read.delim(params$victors_blast)
 vfdb_blast <- read.delim(params$vfdb_blast, header = FALSE)
-
-# Example usage
-# Rscript -e 'rmarkdown::render("/work/rscripts/report_virulence.Rmd" , params = list( vfdb_blast = "/media/falmeida/falmeidaEXT/k.variicola/ANNOTATION/18L/blasts/virulence_vfdb_predictedGenes.tsv", blast_id = 90 , blast_cov = 90))'
 ```
 
 # About
