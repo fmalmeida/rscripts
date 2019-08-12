@@ -7,7 +7,10 @@ params:
   blast_id:
   blast_cov:
   phigaro_dir:
+  phigaro_txt:
+  phigaro_html:
   virsorter_dir:
+  virsorter_csv:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -38,10 +41,10 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 phigaro_dir <- params$phigaro_dir
-phigaro_html <- paste0(phigaro_dir, "/assembly.phg.html", collapse = "")
-phigaro_txt <- paste0(phigaro_dir, "/assembly.phg", collapse = "")
+phigaro_html <- params$phigaro_html
+phigaro_txt <- params$phigaro_txt
 virsorter_dir <- params$virsorter_dir
-virsorter_csv <- paste0(virsorter_dir, "/VIRSorter_global-phage-signal.csv", collapse = "")
+virsorter_csv <- params$virsorter_csv
 ```
 
 # About
