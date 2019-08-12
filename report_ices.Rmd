@@ -19,7 +19,7 @@ output:
 <style type="text/css">
 
 body{ /* Normal  */
-      font-size: 14px;
+      font-size: 16px;
   }
 </style>
 
@@ -73,7 +73,7 @@ blast %>% select("ICE_id", "qseqid", "name") %>%
   arrange(ICE_id) %>%
   mutate("ICE_id" = cell_spec(ICE_id, "html", link = urls)) %>%
   kable(caption = "ICEs genes annotated from ICEberg database", escape = FALSE, col.names = c("ICE id", "Query protein tag", "ICE's gene names")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 10) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
   collapse_rows(columns = 1:3, valign = "middle")
 ```
 
