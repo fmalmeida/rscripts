@@ -91,13 +91,16 @@ gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 card_subset <- grepl.sub(card_indexes, pattern = aroID, Var = "ARO.Accession")
 card_subset$Drug.Class <- gsub(";", ":", card_subset$Drug.Class)
 card_subset$Drug.Class <- gsub(" ", "_", card_subset$Drug.Class)
+card_subset$Drug.Class <- gsub("\t", "_", card_subset$Drug.Class)
 card_subset$Drug.Class <- gsub("-", "_", card_subset$Drug.Class)
 card_subset$AMR.Gene.Family <- gsub(";", ":", card_subset$AMR.Gene.Family)
 card_subset$AMR.Gene.Family <- gsub(" ", "_", card_subset$AMR.Gene.Family)
+card_subset$AMR.Gene.Family <- gsub("\t", "_", card_subset$AMR.Gene.Family)
 card_subset$AMR.Gene.Family <- gsub("-", "_", card_subset$AMR.Gene.Family)
 card_subset$Resistance.Mechanism <- gsub(";", ":", card_subset$Resistance.Mechanism)
 card_subset$Resistance.Mechanism <- gsub(" ", "_", card_subset$Resistance.Mechanism)
 card_subset$Resistance.Mechanism <- gsub("-", "_", card_subset$Resistance.Mechanism)
+card_subset$Resistance.Mechanism <- gsub("\t", "_", card_subset$Resistance.Mechanism)
 
 # Get desired values for attributes columns
 description <- paste("Additional_database=", opt$database, ";", 
@@ -107,6 +110,8 @@ description <- paste("Additional_database=", opt$database, ";",
                      "DB_Name=", card_subset$Model.Name, ";CVTERM=", card_subset$CVTERM, sep = "")
 
 card_subset$CARD_attributes <- description
+card_subset$CARD_attributes <- gsub(" ", "_", card_subset$CARD_attributes)
+card_subset$CARD_attributes <- gsub("\t", "_", card_subset$CARD_attributes)
 
 # Concatenate new attributes values
 blast_filtered <- merge.data.frame(blast_filtered, card_subset, by.x = "ARO", 
