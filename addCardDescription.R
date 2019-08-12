@@ -112,6 +112,9 @@ description <- paste("Additional_database=", opt$database, ";",
 card_subset$CARD_attributes <- description
 card_subset$CARD_attributes <- gsub(" ", "_", card_subset$CARD_attributes)
 card_subset$CARD_attributes <- gsub("\t", "_", card_subset$CARD_attributes)
+card_subset$Model.Name <- gsub(" ", "_", card_subset$Model.Name)
+card_subset$Model.Name <- gsub("\t", "_", card_subset$Model.Name)
+card_subset$Model.Name <- gsub("-", "_", card_subset$Model.Name)
 
 # Concatenate new attributes values
 blast_filtered <- merge.data.frame(blast_filtered, card_subset, by.x = "ARO", 
