@@ -8,7 +8,6 @@ params:
   blast_cov:
   phigaro_dir:
   phigaro_txt:
-  phigaro_html:
   virsorter_dir:
   virsorter_csv:
 output:
@@ -41,7 +40,7 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 phigaro_dir <- params$phigaro_dir
-phigaro_html <- params$phigaro_html
+phigaro_html <- paste0(phigaro_dir, "/assembly.phg.html", collapse = "")
 phigaro_txt <- params$phigaro_txt
 virsorter_dir <- params$virsorter_dir
 virsorter_csv <- params$virsorter_csv
