@@ -44,7 +44,9 @@ colnames(ice_prot_blast) <- blastHeader
 
 # About
 
-In this report are summarised all the ICEs annotated in the query genome. This features were annotated through BLASTx and BLASTn against [ICEberg](http://202.120.12.136:7913/ICEberg2/) database. Blast thresholds where the following:
+Integrative and conjugative element (ICE) is an integrative mobile genetic element that encodes a conjugation machinery. It can confer selective advantages and can also encode resistance determinants and virulence factors.
+
+In this report are summarised all the ICEs annotated in the query genome. This features were annotated through BLASTx and BLASTn against [ICEberg](http://202.120.12.136:7913/ICEberg2/) database. ICEs genes were annotated through BLASTx and ICE genomic regions were identified via BLASTn. Blast thresholds where the following:
 
 * Blast % identity: `> `r params$blast_id`%`
 * Blast % query coverage: `> `r params$blast_cov`%`
