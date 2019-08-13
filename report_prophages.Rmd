@@ -10,6 +10,7 @@ params:
   phigaro_txt:
   virsorter_dir:
   virsorter_csv:
+  phast_blast:
   query:
 output:
   bookdown::html_document2:
@@ -67,7 +68,7 @@ if (class(virsorter_csv) != 'try_error' & nrow(virsorter_csv) > 0) {
 }
 
 ## Read PHAST
-phast_blast <- try(read.delim("/media/falmeida/falmeidaEXT/k.variicola/ANNOTATION/18L/blasts/prophage_phast_predictedGenes.tsv", header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+phast_blast <- try(read.delim(params$phast_blast, header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
 if (class(phast_blast) != 'try_error' & nrow(phast_blast) > 0) {
   phast_not_null <- TRUE
   phast_null <- FALSE
