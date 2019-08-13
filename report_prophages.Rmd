@@ -1,5 +1,5 @@
 ---
-title: "Annotation Report"
+title: "Annotation Report of query genome `r params$query`"
 author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 subtitle: "Prophages summary."
@@ -10,6 +10,7 @@ params:
   phigaro_txt:
   virsorter_dir:
   virsorter_csv:
+  query:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -44,46 +45,75 @@ phigaro_html <- paste0(phigaro_dir, "/assembly.phg.html", collapse = "")
 phigaro_txt <- params$phigaro_txt
 virsorter_dir <- params$virsorter_dir
 virsorter_csv <- params$virsorter_csv
+
+## Read phigaro
+phigaro_txt <- try(read.delim(phigaro_txt), silent = TRUE)
+if (class(phigaro_txt) != 'try_error' & nrow(phigaro_txt) > 0) {
+  phigaro_not_null <- TRUE
+  phigaro_null <- FALSE
+} else {
+  phigaro_not_null <- FALSE
+  phigaro_null <- TRUE
+}
+
+## Read virsorter
+virsorter_csv <- try(read.csv(virsorter_csv, comment.char = "#", header = FALSE, col.names = c("Contig_id", "Nb genes contigs", "Fragment", "Nb genes", "Category", "Nb phage hallmark genes", "Phage gene enrichment sig", "Non-Caudovirales phage gene enrichment sig", "Pfam depletion sig", "Uncharacterized enrichment sig", "Strand switch depletion sig", "Short genes enrichment sig")), silent = TRUE)
+if (class(virsorter_csv) != 'try_error' & nrow(virsorter_csv) > 0) {
+  virsorter_not_null <- TRUE
+  virsorter_null <- FALSE
+} else {
+  virsorter_not_null <- FALSE
+  virsorter_null <- TRUE
+}
+
+## Read PHAST
+phast_blast <- try(read.delim("/media/falmeida/falmeidaEXT/k.variicola/ANNOTATION/18L/blasts/prophage_phast_predictedGenes.tsv", header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+if (class(phast_blast) != 'try_error' & nrow(phast_blast) > 0) {
+  phast_not_null <- TRUE
+  phast_null <- FALSE
+} else {
+  phast_not_null <- FALSE
+  phast_null <- TRUE
+}
 ```
 
 # About
 
-Prophages were annotated using PHAST database, virsorter and phigaro software. PHAST database was serched with BLAST to annotate all genes that are know to be found in prophages and were also found in query genome.
+Prophage is a bacteriophage that have been inserted and integrated into the bacterial chromosome or plasmid. It is the latent form of a phage.
+
+Prophages were annotated using [PHAST](https://phaster.ca) database, [virsorter](https://github.com/simroux/VirSorter) and [phigaro](https://github.com/bobeobibo/phigaro) software. PHAST database was searched with BLAST to annotate all genes found in the query genome that are known to be found in prophages.
+
+Blast thresholds were the following:
+
+* Blast % identity: `> `r params$blast_id`%`
+* Blast % query coverage: `> `r params$blast_cov`%`
 
 Additionally, virsorter and phigaro software are used to identify the genomic regions of prophages within the query genome and to extract its DNA sequences.
 
-Therefore, this report is a combination of identified genomic regions of prophages using virsorter and phigaro with the gene functional annotation using PHAST database.
+Therefore, this report is a combination of identified prophage's genomic regions (using virsorter and phigaro) and its gene functional annotation (using PHAST database).
 
-# Prophages
+# Results
 
 ## Phigaro
 
-Genomic regions identyfied as prophages by the software phigaro are all showed in its [html report file](`r phigaro_html`) stored at ``r phigaro_dir``. Its genomic regions are summarised in Table \@ref(tab:phigaro-table)
+```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=phigaro_not_null, child='yes_phigaro.Rmd'}
+```
 
-```{r phigaro-table}
-phigaro_txt <- read.delim(phigaro_txt)
-# Produce Table
-phigaro_txt %>%
-  kable(caption = "Prophages annotated with phigaro software", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12)
+```{r, phigaro_conditional_block_FALSE, echo=FALSE, results='asis', eval=phigaro_null, child='no_phigaro.Rmd'}
 ```
 
 ## Virsorter
 
-Outputs of virsorter software are in ``r virsorter_dir`` directory. Within this directory, all predicted prophages are stored in a single fasta file at `fasta` dir. A summary of virsorter annotatation is showed in Table \@ref(tab:virsorter-table). All features can fall within three categories. They are:
+```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=visorter_not_null, child='yes_virsorter.Rmd'}
+```
 
-* **Category 1 = sure**
-* **Category 2 = somewhat sure**
-* **Category 3 = not sure**
-
-```{r virsorter-table}
-virsorter_csv <- read.csv(virsorter_csv, comment.char = "#", header = FALSE, col.names = c("Contig_id", "Nb genes contigs", "Fragment", "Nb genes", "Category", "Nb phage hallmark genes", "Phage gene enrichment sig", "Non-Caudovirales phage gene enrichment sig", "Pfam depletion sig", "Uncharacterized enrichment sig", "Strand switch depletion sig", "Short genes enrichment sig"))
-# Produce Table
-virsorter_csv %>%
-  arrange(Contig_id) %>%
-  kable(caption = "Prophages annotated with phigaro software", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  scroll_box(width = "1000px", height = "400px")
+```{r, phigaro_conditional_block_FALSE, echo=FALSE, results='asis', eval=virsorter_null, child='no_virsorter.Rmd'}
 ```
 
 ## PHAST
+
+```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=phast_not_null, child='yes_phast.Rmd'}
+```
+
+```{r, phigaro_conditional_block_FALSE, echo=FALSE, results='asis', eval=phast_null, child='no_phast.Rmd'}
+```

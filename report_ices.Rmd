@@ -1,5 +1,5 @@
 ---
-title: "Annotation Report"
+title: "Annotation Report of query genome `r params$query`"
 author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 subtitle: "Integrative and conjugative elements (ICEs) annotated from ICEberg database"
@@ -7,6 +7,7 @@ params:
   blast_id:
   blast_cov:
   ice_prot_blast:
+  query:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -36,58 +37,32 @@ library(kableExtra)
 library(dplyr)
 library(stringr)
 library(ggplot2)
-ice_prot_blast <- read.delim(params$ice_prot_blast, header = FALSE)
-#ice_prot_blast <- read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/blasts/ice_iceberg_predictedGenes.tsv", header = FALSE)
-blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")
-colnames(ice_prot_blast) <- blastHeader
+#ice_prot_blast <- read.delim(params$ice_prot_blast, header = FALSE)
+ice_prot_blast <- try(read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/blasts/ice_iceberg_predictedGenes.tsv", header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+
+# Check if blast is empty
+if (nrow(class(ice_prot_blast) != 'try_error' & ice_prot_blast) > 0) {
+  not_null <- TRUE
+  null <- FALSE
+} else {
+  not_null <- FALSE
+  null <- TRUE
+}
 ```
 
 # About
 
 Integrative and conjugative element (ICE) is an integrative mobile genetic element that encodes a conjugation machinery. It can confer selective advantages and can also encode resistance determinants and virulence factors.
 
-In this report are summarised all the ICEs annotated in the query genome. This features were annotated through BLASTx and BLASTn against [ICEberg](http://202.120.12.136:7913/ICEberg2/) database. ICEs genes were annotated through BLASTx and ICE genomic regions were identified via BLASTn. Blast thresholds where the following:
+In this report are summarised all the ICEs annotated in the query genome. This features were annotated through BLASTx and BLASTn against [ICEberg](http://202.120.12.136:7913/ICEberg2/) database. ICEs genes were annotated through BLASTx and ICE genomic regions were identified via BLASTn. Blast thresholds were the following:
 
 * Blast % identity: `> `r params$blast_id`%`
 * Blast % query coverage: `> `r params$blast_cov`%`
 
-# Annotated ICEs
+# Results
 
-```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
-ice_prot_blast <- ice_prot_blast[!grepl("complete chromossome", ice_prot_blast$stitle),]
-ice_prot_blast <- ice_prot_blast[order(ice_prot_blast$qseqid, -abs(ice_prot_blast$pident), -abs(ice_prot_blast$bitscore) ), ]
-ice_prot_blast <-ice_prot_blast[ !duplicated(ice_prot_blast$qseqid), ]
-ice_prot_blast <- ice_prot_blast[order(ice_prot_blast$qseqid),]
-blast <- ice_prot_blast %>% select(qseqid, sseqid, stitle)
-blast$name <- str_split(blast$stitle, pattern = "\\|", simplify = TRUE )[,6]
-blast <- separate(blast, sseqid, c("Database", "ICE_id"), sep = "\\|")
-
-# Get urls
-
-urls <- lapply(blast$ICE_id, function(x){paste0("http://202.120.12.136:7913/ICEberg2/feature_page.php?ice_id=", x)})
+```{r, ICEberg_conditional_block, echo=FALSE, results='asis', eval=not_null, child='yes_ice.Rmd'}
 ```
 
-All anotated ICEs are showed in Table \@ref(tab:write-table) where it summarises the ICE name and all its genes that were found in the query genome. All of them are linked to the database for further investigations. Additionally, Figure \@ref(fig:ices-png) shows the amount of genes annotated within each ICE.
-
-```{r write-table}
-# Produce Table
-blast %>% select("ICE_id", "qseqid", "name") %>%
-  arrange(ICE_id) %>%
-  mutate("ICE_id" = cell_spec(ICE_id, "html", link = urls)) %>%
-  kable(caption = "ICEs genes annotated from ICEberg database", escape = FALSE, col.names = c("ICE id", "Query protein tag", "ICE's gene names")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:3, valign = "middle")
-```
-
-```{r ices-png, fig.align='center', fig.show='hold', fig.cap="ICEs annotated from [VFDB](http://www.mgc.ac.cn/VFs/main.htm) database and the amount of genes found within each.", out.width="60%"}
-summary <- blast %>%
-  select("ICE_id", "name") %>% arrange(ICE_id)
-colnames(summary) <- c("ICE_id", "name")
-ices <- plyr::count(summary, "ICE_id")
-ggplot(ices, aes(x=ICE_id, y=freq, fill=ICE_id)) + geom_bar(stat = "identity") +
-  theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  xlab("Integrative and Conjugative Elements") +
-  ylab("Number of annotated genes") +
-  guides(fill=guide_legend(title = "ICEs"))
+```{r, ICEberg_conditional_block_2, echo=FALSE, results='asis', eval=null, child='no_ice.Rmd'}
 ```

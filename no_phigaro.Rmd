@@ -1,0 +1,1 @@
+Not a single prophage was annotated using phigaro. If you truly believe that at least one prophage should be present in the query genome, please use the [PHASTER web tool](http://phast.wishartlab.com/).
