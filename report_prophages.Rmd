@@ -105,7 +105,7 @@ Therefore, this report is a combination of identified prophage's genomic regions
 
 ## Virsorter
 
-```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=visorter_not_null, child='yes_virsorter.Rmd'}
+```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=virsorter_not_null, child='yes_virsorter.Rmd'}
 ```
 
 ```{r, phigaro_conditional_block_FALSE, echo=FALSE, results='asis', eval=virsorter_null, child='no_virsorter.Rmd'}
