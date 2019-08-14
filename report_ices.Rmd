@@ -41,7 +41,7 @@ library(ggplot2)
 ice_prot_blast <- try(read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/blasts/ice_iceberg_predictedGenes.tsv", header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
 
 # Check if blast is empty
-if (nrow(class(ice_prot_blast) != 'try_error' & ice_prot_blast) > 0) {
+if (class(ice_prot_blast) != 'try_error' & nrow(ice_prot_blast) > 0) {
   not_null <- TRUE
   null <- FALSE
 } else {
