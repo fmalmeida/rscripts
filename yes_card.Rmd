@@ -27,7 +27,7 @@ ggplot(drugs, aes(x=Drug_Class, y=freq, fill=Drug_Class)) +
   guides(fill=guide_legend(title = "Drug Classes"))
 ```
 
-```{r card-resistance-pattern, eval=is_CARD}
+```{r card-resistance-pattern}
 # Create urls
 urls <- lapply(card_summary$CVTerm, function(x){paste0("https://card.mcmaster.ca/ontology/", x)})
 
