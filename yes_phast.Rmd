@@ -1,5 +1,7 @@
 All prophage genes that were found in the query genome using PHAST database are showed in Table \@ref(tab:phast-table). In this table it is presented the query protein tag, its source prophage and gene function.
 
+> Unfortunately, PHASTER database have no searchable interface to visualize its prophages. Therefore, this table has no links to external sources.
+
 ```{r phast-table}
 # Produce Table
 phast_blast$stitle <- gsub(phast_blast$stitle, pattern = " \\[", replacement = "\\|[")
@@ -7,8 +9,8 @@ phast_blast %>%
   select(qseqid, stitle) %>%
   separate(stitle, c("prophage", "id", "tag", "contig", "product", "species"), sep = "\\|") %>%
   select(prophage, species, qseqid, product) %>%
+  arrange(prophage) %>%
   kable(caption = "Prophage genes annotated using [PHASTER database](https://phaster.ca).", escape = FALSE, col.names = c("Prophage Name", "Species source", "Query Protein Tag", "Gene Product")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12)
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1:4, valign = "middle")
 ```
-
-> Unfortunately, PHASTER database have no searchable interface to visualize its prophages. Therefore, this table has no links to external sources.

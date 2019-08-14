@@ -94,6 +94,14 @@ This report contains all the resistance genes, found in the query genome, from [
 
 # Results
 
+## CARD
+
+```{r, CARD_conditional_block, echo=FALSE, results='asis', eval=card_not_null, child='yes_card.Rmd'}
+```
+
+```{r, CARD_conditional_block2, echo=FALSE, results='asis', eval=card_null, child='no_card.Rmd'}
+```
+
 ## NCBI-amr
 
 ```{r, NCBI_conditional_block, echo=FALSE, results='asis', eval=ncbi_not_null, child='yes_ncbi.Rmd'}
@@ -108,12 +116,4 @@ This report contains all the resistance genes, found in the query genome, from [
 ```
 
 ```{r, Resfams_conditional_block_2, echo=FALSE, results='asis', eval=resfams_null, child='no_resfams.Rmd'}
-```
-
-## CARD
-
-```{r, CARD_conditional_block, echo=FALSE, results='asis', eval=card_not_null, child='yes_card.Rmd'}
-```
-
-```{r, CARD_conditional_block2, echo=FALSE, results='asis', eval=card_null, child='no_card.Rmd'}
 ```
