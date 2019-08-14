@@ -37,8 +37,8 @@ library(kableExtra)
 library(dplyr)
 library(stringr)
 library(ggplot2)
-#ice_prot_blast <- read.delim(params$ice_prot_blast, header = FALSE)
-ice_prot_blast <- try(read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/blasts/ice_iceberg_predictedGenes.tsv", header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+ice_prot_blast <- try(read.delim(params$ice_prot_blast, header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+#ice_prot_blast <- try(read.delim("/media/falmeida/falmeidaEXT/mestrado_Klebsiellas/projeto_klebsiella_felipe/analysis/kp31/annotation/canu/blasts/ice_iceberg_predictedGenes.tsv", header = FALSE), silent = TRUE)
 
 # Check if blast is empty
 if (class(ice_prot_blast) != 'try_error' & nrow(ice_prot_blast) > 0) {
