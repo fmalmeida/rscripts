@@ -1,0 +1,12 @@
+These elements were annotated from the [Resfams database](http://www.dantaslab.org/resfams/). This database contains genes related to antibiotic resistance genes as well as environmental stress. We can't create an antibiogram using this database but it is extremely informative in terms of environmental resistance to stress. This data is summarized in Table \@ref(tab:resfams-resistance-table).
+
+> Resfams database have no searchable online dabatase. Therefore, its results have no links and are only showed here two inform the users gene products annotated from this database.
+
+```{r resfams-resistance-table}
+resfams_summary %>%
+  select(Prokka_ID, Prokka_product) %>%
+  arrange(Prokka_product) %>%
+  kable(caption = "Resistance genes annotated from Resfams database", escape = FALSE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1:2, valign = "middle")
+```

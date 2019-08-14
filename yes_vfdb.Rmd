@@ -1,0 +1,49 @@
+```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
+blast <- vfdb_blast %>% select(V1, V14)
+blast$V14 <- gsub(blast$V14, pattern = "\\) \\(", replacement = "\\)#\\(")
+blast$V14 <- gsub(blast$V14, pattern = "\\) ", replacement = "\\)#")
+blast$V14 <- gsub(blast$V14, pattern = " \\[", replacement = "#\\[")
+blast <- separate(blast, V14, c("VF ID", "Gene Name", "Description", "Virulence Factor Name", "Subject Species"), sep = "#", extra = "merge")
+
+# Get urls
+
+ids <- blast$`Virulence Factor Name`
+ids <- str_match(ids, "VF.*[0-9]+")
+
+urls <- lapply(ids, function(x){paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", x, "#", x)})
+```
+
+All virulence factors that were found to have at least one gene in the query genome are shown in the list below. All of them are linked to the database for further investigations.
+
+> The results are showed as: **[VFDB virulence factor name (VFDB virulence factor ID)]**.
+
+```{r results='asis'}
+string.list <- blast %>% pull("Virulence Factor Name") %>% unique()
+string.list <- lapply(string.list, function(x){y = str_match(x, "VF.*[0-9]+") ;  paste0("[", x, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", y, "#", y, ")")})
+cat("- Virulence factors found in the query genome:\n")
+cat(paste("\t-", string.list), sep = '\n')
+```
+
+Virulence genes are more detailed in Table \@ref(tab:write-table). It shows the gene product, source and name of each gene related to a Virulence Factor found in the query genome. Additionally, Figure \@ref(fig:vfs-png) summarizes the amount of annotated genes of each virulence factor.
+
+```{r vfs-png, fig.align='center', fig.show='hold', fig.cap="Virulence Factors annotated from [VFDB](http://www.mgc.ac.cn/VFs/main.htm) database", out.width="60%"}
+summary <- blast %>%
+  select("Virulence Factor Name", "Gene Name")
+colnames(summary) <- c("Virulence_Factor_Name", "Gene_Name")
+vfs <- plyr::count(summary, "Virulence_Factor_Name")
+ggplot(vfs, aes(x=Virulence_Factor_Name, y=freq, fill=Virulence_Factor_Name)) + geom_bar(stat = "identity") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  xlab("Virulence Factors") +
+  ylab("Number of annotated genes") +
+  guides(fill=guide_legend(title = "Virulence Factors"))
+```
+
+```{r write-table}
+# Produce Table
+blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species") %>%
+  mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
+  kable(caption = "Virulence Genes annotated from VFDB", escape = FALSE) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1:4, valign = "middle")
+```

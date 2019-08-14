@@ -1,10 +1,15 @@
 ---
-title: "Antimicrobial Resistance Genes Report"
+title: "Annotation Report of query genome `r params$query`"
+author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+subtitle: "Resistance genes and determinants annotated from NCBI-amr, Resfams and CARD databases"
 params:
   resistance_summary:
-  is_CARD:
   card_summary:
+  query:
   ncbi_amr:
+  blast_id:
+  blast_cov:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -33,71 +38,82 @@ library(kableExtra)
 library(dplyr)
 library(stringr)
 library(ggplot2)
-resistance_summary <- read.delim(params$resistance_summary)
-ncbi_amr <- read.delim(params$ncbi_amr)
-is_CARD <- params$is_CARD
-card_summary <- read.delim(params$card_summary)
+resfams_summary <- try(read.delim(params$resistance_summary) %>% filter(str_detect(Prokka_inference, "resfams")), silent = TRUE)
+
+# Check if Resfams is empty
+if (class(resfams_summary) != 'try_error' & nrow(resfams_summary) > 0) {
+  resfams_not_null <- TRUE
+  resfams_null <- FALSE
+} else {
+  resfams_not_null <- FALSE
+  resfams_null <- TRUE
+}
+
+ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
+
+# Check if NCBI is empty
+if (class(ncbi_amr) != 'try_error' & nrow(ncbi_amr) > 0) {
+  ncbi_not_null <- TRUE
+  ncbi_null <- FALSE
+} else {
+  ncbi_not_null <- FALSE
+  ncbi_null <- TRUE
+}
+
+card_summary <- try(read.delim(params$card_summary), silent = TRUE)
+
+# Check if CARD is empty
+if (class(card_summary) != 'try_error' & nrow(card_summary) > 0) {
+  card_not_null <- TRUE
+  card_null <- FALSE
+} else {
+  card_not_null <- FALSE
+  card_null <- TRUE
+}
+
 ```
 
 # About
 
-This report contains all the resistance related genes found when searching the genome with [CARD](https://card.mcmaster.ca/), [NCBI-amr](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047) and [Resfams](http://www.dantaslab.org/resfams) datases. Additionally, Resfams hmm file have been addded to Prokka datases, thus, this report also contains a general report of non drug related resistance genes.
+Resistance determinants or genes are characteristics that confer to the bacteria resistance against antibiotics or antimicrobials. Which means, these characteristics makes the bacteria less resistance to its effects.
 
-# NCBI-amr
+[Resfams](http://www.dantaslab.org/resfams) is a curated databases of protein families and associate hidden Markov models (HMM), confirmed for antibiotic resistance function. Having an hmm file, makes it easy to add this database inside [Prokka](https://github.com/tseemann/prokka) which makes its search easier. The last update was in 2015.
 
-NCBI has produced a hmm file of curated AMR genes. This database was incorporated into Prokka databases. Therefore, we are able to easily retrieve genes annotated from this curated dataset.
+[NCBI-amr](https://ftp.ncbi.nlm.nih.gov/hmm/NCBIfam-AMR/latest/) is the NCBI's Bacterial Antimicrobial Resistance Reference Gene Database that is used by their tool [AMRFinder](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/AMRFinder/). This database contains over 4000 curated AMR protein sequences and are made available through HMM files.
 
-This dataset is not exclusive to drug related genes and it contains several types of resistance factors such as resistance against heavy metals. Therefore, it not possible to create an antibiogram from this dataset. However, all resistance genes from this dataset and its protein ID (local protein ID) are shown in Table \@ref(tab:ncbi-amr-resistance-genes).
+[CARD](https://card.mcmaster.ca/), the Comprehensive Antibiotic Resistance Database, is a curated database of resistance genes. To date, this is the one that keeps being frequently updated.
 
-# Resfams
+[CARD](https://card.mcmaster.ca/) database was blasted via BLASTx, using the thresholds below. This report summarizes its results.
 
-These elements were annotated from the [Resfams database](http://www.dantaslab.org/resfams/). This database contains genes related to antibiotic resistance genes as well as genes related to environmental stress resistance. Similar to NCBI-amr results, we can't create an antibiogram using this database but it is extremely informative in terms of environmental resistance to stress. This data is summarised in Table \@ref(tab:resfams-resistance-table).
+* Blast % identity: `> `r params$blast_id`%`
+* Blast % query coverage: `> `r params$blast_cov`%`
 
-> Resfams database have no searchable online dabatase. Therefore, its results have no links and are only showed here two inform the users gene products annotated from this database.
+This report contains all the resistance genes, found in the query genome, from [CARD](https://card.mcmaster.ca/), [NCBI-amr](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047) and [Resfams](http://www.dantaslab.org/resfams) databases.
 
-```{r, CARD_conditional_block, echo=FALSE, results='asis', eval=is_CARD, child='CARD.Rmd'}
+> HMM databases were added to Prokka resources and were automatically annotated by Prokka.
+
+# Results
+
+## NCBI-amr
+
+```{r, NCBI_conditional_block, echo=FALSE, results='asis', eval=ncbi_not_null, child='yes_ncbi.Rmd'}
 ```
 
-```{r ncbi-amr-resistance-genes}
-genes <- ncbi_amr %>% select(Prokka_ID, Prokka_product, Prokka_inference)
-genes <- separate(genes, Prokka_inference, c("method", "prog", "ver", "motif", "db_id"), sep = ":", extra = "merge")
-genes <- genes %>% select("Prokka_ID", "Prokka_product", "db_id")
-
-# Create urls
-urls <- lapply(genes$db_id, function(x){paste0("https://www.ncbi.nlm.nih.gov/protein/?term=", x)})
-
-# Produce Table
-genes %>%
-  mutate("db_id" = cell_spec(db_id, "html", link = urls)) %>%
-  arrange(Prokka_product) %>%
-kable(caption = "Resistance genes annotated from NCBI-amr curated database", escape = FALSE, col.names = c("Local Protein ID", "Annotated Gene Product", "Reference Motif")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:3, valign = "middle") %>%
-  footnote(general = "The last column contains a link to NCBI showing the resulting protein. Note that, the result shows all species that have that protein annotated using this motif. It is not a similarity search.")
+```{r, NCBI_conditional_block_2, echo=FALSE, results='asis', eval=ncbi_null, child='no_ncbi.Rmd'}
 ```
 
-```{r resfams-resistance-table}
-resistance_summary %>%
-  filter(str_detect(Prokka_inference, "resfams")) %>%
-  select(Prokka_ID, Prokka_product) %>%
-  arrange(Prokka_product) %>%
-  kable(caption = "Resistance genes annotated from Resfams database", escape = FALSE, col.names = c("Local Protein ID", "Annotated Gene Product")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:2, valign = "middle")
+## Resfams
+
+```{r, Resfams_conditional_block, echo=FALSE, results='asis', eval=resfams_not_null, child='yes_resfams.Rmd'}
 ```
 
-```{r card-resistance-pattern, eval=is_CARD}
-# Create urls
-urls <- lapply(card_summary$CVTerm, function(x){paste0("https://card.mcmaster.ca/ontology/", x)})
+```{r, Resfams_conditional_block_2, echo=FALSE, results='asis', eval=resfams_null, child='no_resfams.Rmd'}
+```
 
-# Produce Table
-card_summary %>%
-  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession", "CVTerm") %>%
-  mutate("CVTerm" = cell_spec(CVTerm, "html", link = urls)) %>%
-  separate_rows(Drug_Class, sep = ":") %>%
-  group_by(Name) %>%
-  kable(caption = "CARD resistance genes annotated and its target drug classes", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:5, valign = "middle") %>%
-  footnote(general = "CVTerms are the gene IDs that direct link the results to CARD database")
+## CARD
+
+```{r, CARD_conditional_block, echo=FALSE, results='asis', eval=card_not_null, child='yes_card.Rmd'}
+```
+
+```{r, CARD_conditional_block2, echo=FALSE, results='asis', eval=card_null, child='no_card.Rmd'}
 ```
