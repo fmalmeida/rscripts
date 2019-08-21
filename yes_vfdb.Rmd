@@ -1,9 +1,9 @@
 ```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
 blast <- vfdb_blast %>% select(V1, V14)
-blast$V14 <- gsub(blast$V14, pattern = " \\(", replacement = "#\\(")
-blast$V14 <- gsub(blast$V14, pattern = "\\) ", replacement = "\\)#")
-blast$V14 <- gsub(blast$V14, pattern = " \\[", replacement = "#\\[")
-blast <- separate(blast, V14, c("VF ID", "Gene Name", "Description", "Virulence Factor Name", "Subject Species"), sep = "#", extra = "merge")
+blast <- separate(blast, V14, c("VF ID", "other"), sep = " ", extra = "merge")
+blast <- separate(blast, other, c("Gene Name", "other"), sep = " ", extra = "merge")
+blast$other <- gsub(blast$other, pattern = " \\[", replacement = "#\\[")
+blast <- separate(blast, other, c("Description", "Virulence Factor Name", "Subject Species"), sep = "#", extra = "merge")
 
 # Get urls
 
