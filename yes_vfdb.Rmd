@@ -42,8 +42,8 @@ ggplot(vfs, aes(x=Virulence_Factor_Name, y=freq, fill=Virulence_Factor_Name)) + 
 ```{r write-table}
 # Produce Table
 blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species") %>%
-  arrange(`Virulence Factor Name`, `Gene Name`) %>%
   mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
+  arrange(`Virulence Factor Name`, `Gene Name`) %>%
   kable(caption = "Virulence Genes annotated from VFDB", escape = FALSE) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
   collapse_rows(columns = 1:4, valign = "middle")
