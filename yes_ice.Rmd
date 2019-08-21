@@ -17,8 +17,8 @@ All anotated genes from known ICEs are showed in Table \@ref(tab:write-table). I
 ```{r write-table}
 # Produce Table
 blast %>% select("ICE_id", "qseqid", "name") %>%
-  arrange(ICE_id) %>%
   mutate("ICE_id" = cell_spec(ICE_id, "html", link = urls)) %>%
+  arrange(ICE_id) %>%
   kable(caption = "ICEs genes annotated from ICEberg database", escape = FALSE, col.names = c("ICE id", "Query protein tag", "ICE's gene names")) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
   collapse_rows(columns = 1:3, valign = "middle")
