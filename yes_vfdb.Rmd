@@ -1,6 +1,6 @@
 ```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
 blast <- vfdb_blast %>% select(V1, V14)
-blast$V14 <- gsub(blast$V14, pattern = "\\) \\(", replacement = "\\)#\\(")
+blast$V14 <- gsub(blast$V14, pattern = " \\(", replacement = "#\\(")
 blast$V14 <- gsub(blast$V14, pattern = "\\) ", replacement = "\\)#")
 blast$V14 <- gsub(blast$V14, pattern = " \\[", replacement = "#\\[")
 blast <- separate(blast, V14, c("VF ID", "Gene Name", "Description", "Virulence Factor Name", "Subject Species"), sep = "#", extra = "merge")
