@@ -20,7 +20,7 @@ getAttributeField <- function (x, field, attrsep = ";") {
 }
 
 # Create ID Column
-gff$ID <- getAttributeField(gff$V9, "id", ";")
+gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
 
 # To upper
 gff$ID <- toupper(gff$ID)
