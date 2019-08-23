@@ -8,6 +8,7 @@ params:
   blast_cov:
   vfdb_blast:
   query:
+  gff:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -39,6 +40,7 @@ library(stringr)
 library(ggplot2)
 #victors_blast <- read.delim(params$victors_blast)
 vfdb_blast <- try(read.delim(params$vfdb_blast, header = FALSE), silent = TRUE)
+gff_blast <- try(read.delim(params$gff, header = FALSE), silent = TRUE)
 
 # Check if blast is empty
 if (class(vfdb_blast) != 'try_error' & nrow(vfdb_blast) > 0) {

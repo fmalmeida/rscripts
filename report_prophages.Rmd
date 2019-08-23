@@ -12,6 +12,7 @@ params:
   virsorter_csv:
   phast_blast:
   query:
+  gff:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -46,6 +47,9 @@ phigaro_html <- paste0(phigaro_dir, "/assembly.phg.html", collapse = "")
 phigaro_txt <- params$phigaro_txt
 virsorter_dir <- params$virsorter_dir
 virsorter_csv <- params$virsorter_csv
+
+## Read GFF
+gff <- read.delim(params$gff, header = FALSE)
 
 ## Read phigaro
 phigaro_txt <- try(read.delim(phigaro_txt), silent = TRUE)

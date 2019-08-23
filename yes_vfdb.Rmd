@@ -1,5 +1,33 @@
 ```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
-blast <- vfdb_blast %>% select(V1, V14)
+# Function to get Attribute Fields
+getAttributeField <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
+      rv = as.character(NA) 
+    } 
+    return(rv) 
+  }) 
+}
+
+# Create ID Column
+gff$ID <- getAttributeField(gff$V9, "id", ";")
+
+# To upper
+gff$ID <- toupper(gff$ID)
+
+# Data Complete
+full_info <- merge.data.frame(vfdb_blast, gff, by.x = "V1", by.y = "ID")
+
+# Create Position Column
+full_info$position <- paste(full_info$V1.y, ":", full_info$V4.y, "-", full_info$V5.y, sep = "")
+
+# Create DF for kable
+blast <- full_info %>% select(V1, V14, position)
 blast <- separate(blast, V14, c("VF ID", "other"), sep = " ", extra = "merge")
 blast <- separate(blast, other, c("Gene Name", "other"), sep = " ", extra = "merge")
 blast$other <- gsub(blast$other, pattern = " \\[", replacement = "#\\[")
@@ -41,7 +69,8 @@ ggplot(vfs, aes(x=Virulence_Factor_Name, y=freq, fill=Virulence_Factor_Name)) + 
 
 ```{r write-table}
 # Produce Table
-blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species") %>%
+colnames(blast) <- c("Query Protein ID", "VF ID", "Gene Name", "Description", "Virulence Factor Name", "Subject Species", "Query Protein Coordinates")
+blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species", "Query Protein ID", "Query Protein Coordinates") %>%
   mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
   arrange(`Virulence Factor Name`, `Gene Name`) %>%
   kable(caption = "Virulence Genes annotated from VFDB", escape = FALSE) %>%

@@ -16,29 +16,35 @@ In Figure \@ref(fig:card-resistome-png) it is summarised the amount of genes fou
 
 ```{r card-resistome-png, fig.align='center', fig.show='hold', fig.cap="Drug Classes to which the query genome is resistant (CARD)", out.width="60%"}
 card_count <- card_summary %>%
-  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession") %>% separate_rows(Drug_Class, sep = ":") %>% group_by(Name)
+  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession") %>%
+  arrange(Drug_Class) %>%
+  separate_rows(Drug_Class, sep = ":") %>% group_by(Name)
 drugs <- plyr::count(card_count, "Drug_Class")
 ggplot(drugs, aes(x=Drug_Class, y=freq, fill=Drug_Class)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   xlab("Drug Classes") +
-  ylab("Frequency") +
+  ylab("Number of related genes found") +
   guides(fill=guide_legend(title = "Drug Classes"))
 ```
 
 ```{r card-resistance-pattern}
+# Create a position column
+card_summary$`Query Protein Coordinates` <- paste(card_summary$seqname, ":", card_summary$start, "-", card_summary$end, sep = "")
+card_summary$`Query Protein ID` <- toupper(card_summary$Prokka_ID)
+
 # Create urls
 urls <- lapply(card_summary$CVTerm, function(x){paste0("https://card.mcmaster.ca/ontology/", x)})
 
 # Produce Table
 card_summary %>%
-  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession", "CVTerm") %>%
+  select("Name", "Drug_Class", "Resistance_Mechanism", "ARO_Accession", "CVTerm", "Query Protein ID", "Query Protein Coordinates") %>%
   mutate("CVTerm" = cell_spec(CVTerm, "html", link = urls)) %>%
   separate_rows(Drug_Class, sep = ":") %>%
   group_by(Name) %>%
   kable(caption = "CARD resistance genes annotated and its target drug classes", escape = FALSE) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:5, valign = "middle") %>%
+  collapse_rows(columns = 1:7, valign = "middle") %>%
   footnote(general = "CVTerms are the gene IDs that direct link the results to CARD database")
 ```

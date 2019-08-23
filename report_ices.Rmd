@@ -8,6 +8,7 @@ params:
   blast_cov:
   ice_prot_blast:
   query:
+  gff:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -38,6 +39,9 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 ice_prot_blast <- try(read.delim(params$ice_prot_blast, header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+
+## Read GFF
+gff <- read.delim(params$gff, header = FALSE)
 
 # Check if blast is empty
 if (class(ice_prot_blast) != 'try_error' & nrow(ice_prot_blast) > 0) {
