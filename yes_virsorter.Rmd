@@ -10,7 +10,7 @@ A summary of virsorter annotation is showed in Table \@ref(tab:virsorter-table).
 # Produce Table
 virsorter_csv %>%
   arrange(Contig_id) %>%
-  kable(caption = "Prophages annotated with phigaro software", escape = FALSE) %>%
+  kable(caption = "Prophages annotated with VirSorter software", escape = FALSE) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
   scroll_box(width = "1000px", height = "400px")
 ```
