@@ -41,6 +41,10 @@ if (is.null(opt$outdir)) {
   outdir <- "."
 } else { outdir <- opt$outdir }
 
+if (is.null(opt$prefix)) {
+  outdir <- "output"
+} else { prefix <- opt$prefix }
+
 ## Creating functions
 ### To retrieve attribute information
 getAttributeField <- function (x, field, attrsep = ";") { 
@@ -82,7 +86,7 @@ if (!is.null(opt$regex)) {
   list    <- strsplit(opt$regex, "|", fixed = TRUE)
   string  <- glue("SELECT * FROM FinalGFF WHERE {list[[1]][1]} LIKE '%{list[[1]][2]}%'")
   out     <- suppressWarnings(dbGetQuery(con, string))
-  outname <- glue("{outdir}/subseted.gff")
+  outname <- glue("{outdir}/{prefix}.gff")
   write.table(out, file = outname, quote = FALSE, sep = "\t", 
               col.names = TRUE, row.names = FALSE)
 }
@@ -94,7 +98,7 @@ if (!is.null(opt$start) && is.null(opt$end)) {
   start <- opt$start
   string <- glue("SELECT * FROM FinalGFF WHERE start > {start}")
   out     <- suppressWarnings(dbGetQuery(con, string))
-  outname <- glue("{outdir}/subseted.gff")
+  outname <- glue("{outdir}/{prefix}.gff")
   write.table(out, file = outname, quote = FALSE, sep = "\t", 
               col.names = TRUE, row.names = FALSE)
 } else if (is.null(opt$start) && !is.null(opt$end)) {
@@ -102,7 +106,7 @@ if (!is.null(opt$start) && is.null(opt$end)) {
   end <- opt$end
   string <- glue("SELECT * FROM FinalGFF WHERE end < {end}")
   out     <- suppressWarnings(dbGetQuery(con, string))
-  outname <- glue("{outdir}/subseted.gff")
+  outname <- glue("{outdir}/{prefix}.gff")
   write.table(out, file = outname, quote = FALSE, sep = "\t", 
               col.names = TRUE, row.names = FALSE)
 } else if (!is.null(opt$start) && !is.null(opt$end)) {
@@ -111,7 +115,7 @@ if (!is.null(opt$start) && is.null(opt$end)) {
   end <- opt$end
   string <- glue("SELECT * FROM FinalGFF WHERE start > {start} AND end < {end}")
   out     <- suppressWarnings(dbGetQuery(con, string))
-  outname <- glue("{outdir}/subseted.gff")
+  outname <- glue("{outdir}/{prefix}.gff")
   write.table(out, file = outname, quote = FALSE, sep = "\t", 
               col.names = TRUE, row.names = FALSE)
 }
@@ -124,7 +128,7 @@ if (!is.null(opt$fofn)) {
   suppressWarnings(res <- lapply(ids, get_gff_from_ids))
   out <- suppressWarnings(data.frame(t(sapply(res,c))))
   df <- apply(out,2,as.character)
-  outname <- glue("{outdir}/subseted.gff")
+  outname <- glue("{outdir}/{prefix}.gff")
   write.table(df, file = outname, quote = FALSE, sep = "\t", 
               col.names = TRUE, row.names = FALSE)
 }
@@ -138,14 +142,14 @@ if (opt$type == 'both') {
   out <- suppressWarnings(data.frame(t(sapply(res,c))))
   out_fasta <- 
     glue('>{out$ID} {out$Comment}\n{out$Sequence}')
-  outname <- glue("{outdir}/subseted_aa.fasta")
+  outname <- glue("{outdir}/{prefix}_aa.fasta")
   write(out_fasta, file = outname, sep = "\n")
   # Get nt FASTA
   suppressWarnings(res <- lapply(ids, get_from_ids, x = "NucleotideFasta"))
   out <- suppressWarnings(data.frame(t(sapply(res,c))))
   out_fasta <- 
     glue('>{out$ID} {out$Comment}\n{out$Sequence}')
-  outname <- glue("{outdir}/subseted_nt.fasta")
+  outname <- glue("{outdir}/{prefix}_nt.fasta")
   write(out_fasta, file = outname, sep = "\n")
 } else if (opt$type == 'nt') {
   # Get nt FASTA
@@ -155,7 +159,7 @@ if (opt$type == 'both') {
   out <- suppressWarnings(data.frame(t(sapply(res,c))))
   out_fasta <- 
     glue('>{out$ID} {out$Comment}\n{out$Sequence}')
-  outname <- glue("{outdir}/subseted_nt.fasta")
+  outname <- glue("{outdir}/{prefix}_nt.fasta")
   write(out_fasta, file = outname, sep = "\n")
 } else if (opt$type == 'aa') {
   # Get aa FASTA
@@ -165,6 +169,6 @@ if (opt$type == 'both') {
   out <- suppressWarnings(data.frame(t(sapply(res,c))))
   out_fasta <- 
     glue('>{out$ID} {out$Comment}\n{out$Sequence}')
-  outname <- glue("{outdir}/subseted_aa.fasta")
+  outname <- glue("{outdir}/{prefix}_aa.fasta")
   write(out_fasta, file = outname, sep = "\n")
 }
