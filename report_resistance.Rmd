@@ -10,6 +10,7 @@ params:
   ncbi_amr:
   blast_id:
   blast_cov:
+  amrfinder:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -39,9 +40,11 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 resfams_summary <- try(read.delim(params$resistance_summary) %>% filter(str_detect(Prokka_inference, "resfams")), silent = TRUE)
+# Read result
+amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,7,9,15), silent = TRUE)
 
 # Check if Resfams is empty
-if (class(resfams_summary) != 'try_error' & nrow(resfams_summary) > 0) {
+if (class(resfams_summary) != 'try-error' && !is.null(nrow(resfams_summary))) {
   resfams_not_null <- TRUE
   resfams_null <- FALSE
 } else {
@@ -52,7 +55,7 @@ if (class(resfams_summary) != 'try_error' & nrow(resfams_summary) > 0) {
 ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
 
 # Check if NCBI is empty
-if (class(ncbi_amr) != 'try_error' & nrow(ncbi_amr) > 0) {
+if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {
   ncbi_not_null <- TRUE
   ncbi_null <- FALSE
 } else {
@@ -63,7 +66,7 @@ if (class(ncbi_amr) != 'try_error' & nrow(ncbi_amr) > 0) {
 card_summary <- try(read.delim(params$card_summary), silent = TRUE)
 
 # Check if CARD is empty
-if (class(card_summary) != 'try_error' & nrow(card_summary) > 0) {
+if (class(card_summary) != 'try-error' && !is.null(nrow(card_summary) > 0)) {
   card_not_null <- TRUE
   card_null <- FALSE
 } else {
@@ -71,6 +74,7 @@ if (class(card_summary) != 'try_error' & nrow(card_summary) > 0) {
   card_null <- TRUE
 }
 
+amrFinder_not_null <- TRUE
 ```
 
 # About
@@ -98,6 +102,11 @@ This report contains all the resistance genes, found in the query genome, from [
 ```
 
 ```{r, CARD_conditional_block2, echo=FALSE, results='asis', eval=card_null, child='no_card.Rmd'}
+```
+
+## AMRFinder
+
+```{r, AMRFinder_conditional_block, echo=FALSE, results='asis', eval=amrFinder_not_null, child='yes_AMRfinder.Rmd'}
 ```
 
 ## Resfams
