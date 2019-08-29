@@ -1,0 +1,2 @@
+Not a single resistance gene from NCBI-amr database was found in the query genome.
+If you truly believe that at least one should be present in the query genome, please use the [CARD web tool](https://card.mcmaster.ca/analyze/rgi).

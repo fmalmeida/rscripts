@@ -1,0 +1,40 @@
+This database was searched with hmmsearch under Prokka pipeline. Since it searchs for protein motifs. Hence, some genes might not be complete and not fully functional. Therefore, I recommend the user to select the gene sequence of interest and do a [blast search](https://blast.ncbi.nlm.nih.gov/Blast.cgi) to confirm its product. Not because the database is not good, but because the annotation may have failed.
+
+All resistance genes from this dataset and its protein ID (local protein ID) are shown in Table \@ref(tab:ncbi-amr-resistance-genes). Aditionally, Figure \@ref(fig:ncbi-resistome-png) shows all gene families annotated using NCBI-amr database and its number of genes.
+
+```{r results='asis'}
+# Read result
+tab <- read.delim("/workspace/falmeida/projeto_k.varricola/analysis/Kv57/ncbi-amr/teste_amrfinder.tsv") %>% select(1,2,3,7,9,15)
+
+# Create List
+string.list <- tab %>% pull(2) %>% unique()
+cat("- Resistance genes found in the query genome:\n")
+cat(paste("\t-", string.list), sep = '\n')
+```
+
+```{r ncbi-amr-resistance-genes}
+# Create urls
+urls <- lapply(tab$Accession.of.closest.sequence, function(x){paste0("https://www.ncbi.nlm.nih.gov/gene/?term=", x)})
+
+# Produce Table
+tab %>%
+  mutate("Accession.of.closest.sequence" = cell_spec(Accession.of.closest.sequence, "html", link = urls)) %>%
+  arrange(Protein.identifier) %>%
+kable(caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus", escape = FALSE, col.names = c("Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence")) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1:6, valign = "middle") %>%
+  footnote(general = "The last column contains a link to NCBI showing the annotated protein.")
+```
+
+```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
+ncbi_count <- tab %>%
+  select(2,4)
+drugs <- plyr::count(ncbi_count, "Class")
+ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  xlab("Target Drug Classes") +
+  ylab("Number of genes") +
+  guides(fill=guide_legend(title = "Target Drug Classes"))
+```
