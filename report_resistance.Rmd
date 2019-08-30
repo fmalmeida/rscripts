@@ -54,7 +54,7 @@ if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {
 
 Resistance determinants were predicted using [AMRFinderPlus](https://github.com/ncbi/amr/wiki). This is a binary distributed by NCBI that allows users to query the National Database of Antibiotic Resistant Organisms ([NDARO](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/)). This is a NCBI curated database that aggregates resistance genes from other databases such as [Resfams](http://www.dantaslab.org/resfams), [CARD](https://card.mcmaster.ca/), ResFinder, Pasteur Institute Beta Lactamases and orthers. For more information please read the following [link](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047).
 
-NCBI's efforts were in order to standardise and confer reliability to AMR predictions.
+NCBI's efforts were done in order to standardise and confer reliability to AMR predictions.
 
 Resistance determinants or genes are characteristics that confer to the bacteria resistance against antibiotics or antimicrobials. Which means, these characteristics makes the bacteria less resistance to its effects.
 

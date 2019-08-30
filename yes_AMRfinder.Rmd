@@ -1,7 +1,13 @@
 
-The following tables summarizes the results obtained with AMRFinderPlus. It can be divided into two main categories: Genes related to antibiotics (AMR) and those not related to it. This division is addressed in column one of Table \@ref(tab:ncbi-amr-resistance-genes).
+Below it is summarized the result obtained with AMRFinderPlus. Roughly, it can be divided into two main categories: 
 
-Additionally, gene targets are summarised in image \@ref(fig:ncbi-resistome-png)
+1. Genes related to antibiotics, called AMR;
+2. Genes related to stress resistance which can be:
+    + biocide resistance
+    + metal resistance
+    + heat resistance
+
+This is well documented in Table \@ref(tab:ncbi-amr-resistance-genes). Whenever possible, all feature have links to NCBI database marking the closest reference sequence to each annotated gene. Additionally, gene targets are summarised in image \@ref(fig:ncbi-resistome-png). Right below it is presented a small list containing AMR genes found in the query genome. If empty, none has been found.
 
 ```{r results='asis'}
 # Create Position Column
@@ -18,9 +24,11 @@ tab <- amrtsv
 
 # Create List
 string.list <- tab %>% filter(Element.type == "AMR") %>% pull(2) %>% unique()
-cat("- AMR genes found in the query genome:\n")
+cat("- **AMR genes found in the query genome:**\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
+
+### Supporting Data
 
 ```{r ncbi-amr-resistance-genes}
 # Merge tables
