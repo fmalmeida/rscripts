@@ -2,7 +2,7 @@
 title: "Annotation Report of query genome `r params$query`"
 author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-subtitle: "Resistance genes and determinants annotated from NCBI-amr, Resfams and CARD databases"
+subtitle: "Resistance genes and determinants annotated using AMRFinderPlus"
 params:
   query:
   ncbi_amr:
@@ -37,11 +37,8 @@ library(stringr)
 library(ggplot2)
 
 # Read result
-#amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
-amrtsv <- try(read.delim("/home/falmeida/Documents/pipe_testing/output/AMRFinder_output.tsv") %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
-
-#ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
-ncbi_amr <- try(read.delim("/home/falmeida/Documents/pipe_testing/output/teste_amrfinderplus.tsv"), silent = TRUE)
+amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
+ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
 
 # Check if NCBI is empty
 if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {

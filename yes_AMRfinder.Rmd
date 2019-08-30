@@ -1,3 +1,4 @@
+
 The following tables summarizes the results obtained with AMRFinderPlus. It can be divided into two main categories: Genes related to antibiotics (AMR) and those not related to it. This division is addressed in column one of Table \@ref(tab:ncbi-amr-resistance-genes).
 
 Additionally, gene targets are summarised in image \@ref(fig:ncbi-resistome-png)
