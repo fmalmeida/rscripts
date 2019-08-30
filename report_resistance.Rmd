@@ -4,12 +4,8 @@ author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 subtitle: "Resistance genes and determinants annotated from NCBI-amr, Resfams and CARD databases"
 params:
-  resistance_summary:
-  card_summary:
   query:
   ncbi_amr:
-  blast_id:
-  blast_cov:
   amrfinder:
 output:
   bookdown::html_document2:
@@ -29,7 +25,7 @@ body{ /* Normal  */
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
-options(knitr.table.format = "html")
+options(knitr.table.format = "html", knitr.kable.NA = 'NA')
 bt_opt =  c("hover", "condensed", "responsive")
 library(magrittr)
 library(knitr)
@@ -39,80 +35,38 @@ library(kableExtra)
 library(dplyr)
 library(stringr)
 library(ggplot2)
-resfams_summary <- try(read.delim(params$resistance_summary) %>% filter(str_detect(Prokka_inference, "resfams")), silent = TRUE)
+
 # Read result
-amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,7,9,15), silent = TRUE)
+#amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
+amrtsv <- try(read.delim("/home/falmeida/Documents/pipe_testing/output/AMRFinder_output.tsv") %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
 
-# Check if Resfams is empty
-if (class(resfams_summary) != 'try-error' && !is.null(nrow(resfams_summary))) {
-  resfams_not_null <- TRUE
-  resfams_null <- FALSE
-} else {
-  resfams_not_null <- FALSE
-  resfams_null <- TRUE
-}
-
-ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
+#ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
+ncbi_amr <- try(read.delim("/home/falmeida/Documents/pipe_testing/output/teste_amrfinderplus.tsv"), silent = TRUE)
 
 # Check if NCBI is empty
 if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {
-  ncbi_not_null <- TRUE
-  ncbi_null <- FALSE
+  amrFinder_not_null <- TRUE
+  amrFinder_null <- FALSE
 } else {
-  ncbi_not_null <- FALSE
-  ncbi_null <- TRUE
+  amrFinder_not_null <- FALSE
+  amrFinder_null <- TRUE
 }
-
-card_summary <- try(read.delim(params$card_summary), silent = TRUE)
-
-# Check if CARD is empty
-if (class(card_summary) != 'try-error' && !is.null(nrow(card_summary) > 0)) {
-  card_not_null <- TRUE
-  card_null <- FALSE
-} else {
-  card_not_null <- FALSE
-  card_null <- TRUE
-}
-
-amrFinder_not_null <- TRUE
 ```
 
 # About
 
+Resistance determinants were predicted using [AMRFinderPlus](https://github.com/ncbi/amr/wiki). This is a binary distributed by NCBI that allows users to query the National Database of Antibiotic Resistant Organisms ([NDARO](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/)). This is a NCBI curated database that aggregates resistance genes from other databases such as [Resfams](http://www.dantaslab.org/resfams), [CARD](https://card.mcmaster.ca/), ResFinder, Pasteur Institute Beta Lactamases and orthers. For more information please read the following [link](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047).
+
+NCBI's efforts were in order to standardise and confer reliability to AMR predictions.
+
 Resistance determinants or genes are characteristics that confer to the bacteria resistance against antibiotics or antimicrobials. Which means, these characteristics makes the bacteria less resistance to its effects.
 
-[Resfams](http://www.dantaslab.org/resfams) is a curated databases of protein families and associate hidden Markov models (HMM), confirmed for antibiotic resistance function. Having an hmm file, makes it easy to add this database inside [Prokka](https://github.com/tseemann/prokka) which makes its search easier. The last update was in 2015.
-
-[CARD](https://card.mcmaster.ca/), the Comprehensive Antibiotic Resistance Database, is a curated database of resistance genes. To date, this is the one that keeps being frequently updated.
-
-[CARD](https://card.mcmaster.ca/) database was blasted via BLASTx, using the thresholds below. This report summarizes its results.
-
-* Blast % identity: `> `r params$blast_id`%`
-* Blast % query coverage: `> `r params$blast_cov`%`
-
-This report contains all the resistance genes, found in the query genome, from [CARD](https://card.mcmaster.ca/) and [Resfams](http://www.dantaslab.org/resfams) databases.
-
-> HMM databases were added to Prokka resources and were automatically annotated by Prokka.
-
 # Results
-
-## CARD
-
-```{r, CARD_conditional_block, echo=FALSE, results='asis', eval=card_not_null, child='yes_card.Rmd'}
-```
-
-```{r, CARD_conditional_block2, echo=FALSE, results='asis', eval=card_null, child='no_card.Rmd'}
-```
 
 ## AMRFinder
 
 ```{r, AMRFinder_conditional_block, echo=FALSE, results='asis', eval=amrFinder_not_null, child='yes_AMRfinder.Rmd'}
 ```
 
-## Resfams
-
-```{r, Resfams_conditional_block, echo=FALSE, results='asis', eval=resfams_not_null, child='yes_resfams.Rmd'}
-```
-
-```{r, Resfams_conditional_block_2, echo=FALSE, results='asis', eval=resfams_null, child='no_resfams.Rmd'}
+```{r, AMRFinder_conditional_block_2, echo=FALSE, results='asis', eval=amrFinder_null, child='no_AMRfinder.Rmd'}
 ```

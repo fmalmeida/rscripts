@@ -1,9 +1,10 @@
 #!/usr/bin/Rscript
 # Setting Help
-'usage: addNCBIamr2Gff.R [--gff=<file> --out=<chr> --database=<chr> --type=<chr>]
+'usage: addNCBIamr2Gff.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr>]
 
 options:
 -g, --gff=<file>      GFF file to add NCBI AMR Annotations into
+-i, --input=<file>    AMRFinder output
 -o, --out=<chr>       Output file name [default: out.gff]
 -t, --type=<chr>      Type of feature. Ex: resistance
 -d, --database=<chr>  Name of databased which Blast came from' -> doc
@@ -16,17 +17,23 @@ if (is.null(opt$gff)){
   stop("At least one argument must be supplied (gff file)\n", call.=FALSE)
 }
 
+if (is.null(opt$input)){
+  stop("At least one argument must be supplied (AMRFinder output file)\n", call.=FALSE)
+}
+
 # Load libraries
 suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
 suppressMessages(library(dplyr))
 suppressMessages(library(stringr))
+suppressMessages(library(tidyr))
 
 # Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
+
 # Function to get Attribute Fields
 getAttributeField <- function (x, field, attrsep = ";") { 
   s = strsplit(x, split = attrsep, fixed = TRUE) 
@@ -46,20 +53,26 @@ getAttributeField <- function (x, field, attrsep = ";") {
 
 # Load GFF File
 gff <- gffRead(opt$gff)
-gff$ID <- getAttributeField(gff$attributes, "ID", ";")
+gff$ID <- getAttributeField(as.character(gff$attributes), "ID", ";")
 
-# Filter Entries that are annotated from NCBI AMR hmm
-NCBIamr <- filter(gff, str_detect(attributes, "NCBIfam-AMR"))
+# Load NCBI AMRFinder output
+NCBIamr <- read.delim(opt$input)
 
 if (is.null(NCBIamr) == FALSE & dim(NCBIamr)[1] != 0) {
   
 # Get its ids
-NCBIamr$ID <- getAttributeField(NCBIamr$attributes, "ID", ";")
-ids <- NCBIamr$ID
+ids <- NCBIamr$Protein.identifier
     
 # Subset based on gene IDs
 sub <- gff %>% filter(ID %in% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
 not <- gff %>% filter(ID %ni% ids)  %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
+
+# Create Description
+NCBIamr$description <- paste("Additional_database=NDARO;Gene_Name=", NCBIamr$Gene.symbol, ";",
+                     "Gene_Product=", NCBIamr$Sequence.name, ";", "Resistance_Category=",
+                     NCBIamr$Element.type, ";", "Resistance_Target=", NCBIamr$Class, ";",
+                     "Method=", NCBIamr$Method, ";", "Closest_Sequence=", NCBIamr$Name.of.closest.sequence, sep = "")
+NCBIamr$description <- gsub(" ", "_", NCBIamr$description)
     
 ## Add New Source
 s <- sub$source
@@ -72,6 +85,14 @@ f <- sub$feature
 fn <- opt$type
 fnew <- paste(f, fn, sep = ",")
 sub$feature <- fnew
+
+## attributes
+sub$ID <- getAttributeField(as.character(sub$attributes), "ID", ";")
+sub <- merge.data.frame(sub, NCBIamr, by.x = "ID", 
+                        by.y = "Protein.identifier", all = TRUE)
+sub <- unite(sub, "attributes", c("attributes", "description"), sep = ";") %>%
+  select(seqname, source, feature, start, end, score, strand, frame, attributes)
+
 
 # Merge files
 merged_df <- merge.data.frame(sub, not, all = TRUE)

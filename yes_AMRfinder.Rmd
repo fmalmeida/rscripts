@@ -1,40 +1,55 @@
-This database was searched with hmmsearch under Prokka pipeline. Since it searchs for protein motifs. Hence, some genes might not be complete and not fully functional. Therefore, I recommend the user to select the gene sequence of interest and do a [blast search](https://blast.ncbi.nlm.nih.gov/Blast.cgi) to confirm its product. Not because the database is not good, but because the annotation may have failed.
+The following tables summarizes the results obtained with AMRFinderPlus. It can be divided into two main categories: Genes related to antibiotics (AMR) and those not related to it. This division is addressed in column one of Table \@ref(tab:ncbi-amr-resistance-genes).
 
-All resistance genes from this dataset and its protein ID (local protein ID) are shown in Table \@ref(tab:ncbi-amr-resistance-genes). Aditionally, Figure \@ref(fig:ncbi-resistome-png) shows all gene families annotated using NCBI-amr database and its number of genes.
+Additionally, gene targets are summarised in image \@ref(fig:ncbi-resistome-png)
 
 ```{r results='asis'}
+# Create Position Column
+ncbi_amr$`Query Protein Coordinates` <- paste(ncbi_amr$seqname, ":", ncbi_amr$start, "-", ncbi_amr$end)
+
+# Parse again
+genes <- ncbi_amr %>% select(Prokka_ID, `Query Protein Coordinates`)
+
+# To upper
+genes$Prokka_ID <- toupper(ncbi_amr$Prokka_ID)
+
 # Read result
 tab <- amrtsv
 
 # Create List
-string.list <- tab %>% pull(2) %>% unique()
-cat("- Resistance genes found in the query genome:\n")
+string.list <- tab %>% filter(Element.type == "AMR") %>% pull(2) %>% unique()
+cat("- AMR genes found in the query genome:\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
 
 ```{r ncbi-amr-resistance-genes}
+# Merge tables
+tab2 <- merge.data.frame(genes, tab, by.x = "Prokka_ID", by.y = "Protein.identifier")
+
 # Create urls
-urls <- lapply(tab$Accession.of.closest.sequence, function(x){paste0("https://www.ncbi.nlm.nih.gov/gene/?term=", x)})
+urls <- lapply(tab2$Accession.of.closest.sequence, function(x){
+  ifelse(!is.na(x), paste0("https://www.ncbi.nlm.nih.gov/gene/?term=", x),
+         paste0("No Reference"))
+  })
 
 # Produce Table
-tab %>%
-  mutate("Accession.of.closest.sequence" = cell_spec(Accession.of.closest.sequence, "html", link = urls)) %>%
-  arrange(Protein.identifier) %>%
-kable(caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus", escape = FALSE, col.names = c("Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence")) %>%
+tab2 %>%
+  select(Element.type, Prokka_ID, Gene.symbol, Sequence.name, Class, Method, Accession.of.closest.sequence, `Query Protein Coordinates`) %>%
+  mutate("Accession.of.closest.sequence" = ifelse(!is.na(Accession.of.closest.sequence), cell_spec(Accession.of.closest.sequence, "html", link = urls), NA)) %>%
+  arrange(Element.type, Prokka_ID) %>%
+kable(caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus", escape = FALSE, col.names = c("Resistance Type", "Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence", "Genome Coordinates")) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:6, valign = "middle") %>%
-  footnote(general = "The last column contains a link to NCBI showing the annotated protein.")
+  collapse_rows(columns = 1, valign = "middle")
 ```
 
 ```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
-ncbi_count <- tab %>%
-  select(2,4)
+ncbi_count <- tab2 %>%
+  select(3,7)
 drugs <- plyr::count(ncbi_count, "Class")
 ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  xlab("Target Drug Classes") +
+  xlab("Gene Target") +
   ylab("Number of genes") +
-  guides(fill=guide_legend(title = "Target Drug Classes"))
+  guides(fill=guide_legend(title = "Gene Target"))
 ```
