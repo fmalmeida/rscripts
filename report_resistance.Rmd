@@ -56,7 +56,7 @@ Resistance determinants were predicted using [AMRFinderPlus](https://github.com/
 
 NCBI's efforts were done in order to standardise and confer reliability to AMR predictions.
 
-Resistance determinants or genes are characteristics that confer to the bacteria resistance against antibiotics or antimicrobials. Which means, these characteristics makes the bacteria less resistance to its effects.
+Resistance genes or resistance determinants confer to the bacteria the ability to tolerate or resist some antibiotics or antimicrobials. Which means, these characteristics makes the bacteria less susceptible to its effects.
 
 # Results
 
