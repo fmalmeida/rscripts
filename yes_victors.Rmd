@@ -53,7 +53,7 @@ urls <- lapply(ids, function(x){paste0("http://www.phidias.us/victors/gene_detai
 
 All virulence factors that were found to have at least one gene in the query genome are shown in the list below. All of them are linked to the database for further investigations.
 
-Virulence genes are more detailed in Table \@ref(tab:write-table). It shows the gene product, source and name of each gene related to a Virulence Factor found in the query genome. Additionally, Figure \@ref(fig:vfs-png) summarizes the amount of annotated genes of each virulence factor.
+Virulence genes are more detailed in Table \@ref(tab:write-table-victors). It shows the gene product, source and name of each gene related to a Virulence Factor found in the query genome. Additionally, Figure \@ref(fig:vfs-png) summarizes the amount of annotated genes of each virulence factor.
 
 ```{r write-table-victors}
 # Produce Table

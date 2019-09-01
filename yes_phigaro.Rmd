@@ -1,4 +1,4 @@
-All prophages annotated using virsorter are showed in its [html report file](`r phigaro_html`) stored at ``r phigaro_dir``. Its genomic regions are summarized in Table \@ref(tab:phigaro-table).
+All prophages annotated using phigaro are showed in its [html report file](`r phigaro_html`) stored at ``r phigaro_dir``. Its genomic regions are summarized in Table \@ref(tab:phigaro-table).
 
 It is worthy taking notes of prophage's genomic regions for better exploring its data using JBROWSE genome browser. This genome browser was automatically created (stored in a dir called `jbrowse`) and can be be used with [JBROWSE desktop](https://github.com/GMOD/jbrowse).
 
