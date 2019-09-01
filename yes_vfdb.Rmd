@@ -20,6 +20,11 @@ gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
 # To upper
 gff$ID <- toupper(gff$ID)
 
+# Remove duplicates based on bitscore
+vfdb_blast <- vfdb_blast[order(vfdb_blast$V1, -abs(vfdb_blast$V3), -abs(vfdb_blast$V13) ), ]
+vfdb_blast <-vfdb_blast[ !duplicated(vfdb_blast$V1), ]
+vfdb_blast <- vfdb_blast[order(vfdb_blast$V1),]
+
 # Data Complete
 full_info <- merge.data.frame(vfdb_blast, gff, by.x = "V1", by.y = "ID")
 
@@ -34,7 +39,6 @@ blast$other <- gsub(blast$other, pattern = " \\[", replacement = "#\\[")
 blast <- separate(blast, other, c("Description", "Virulence Factor Name", "Subject Species"), sep = "#", extra = "merge")
 
 # Get urls
-
 ids <- blast$`Virulence Factor Name`
 ids <- str_match(ids, "VF.*[0-9]+")
 

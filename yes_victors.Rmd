@@ -1,0 +1,67 @@
+```{r parsing-db-victors, eval=TRUE, include=FALSE, echo=FALSE}
+# Download Victors Metadata
+victors_meta <- read.delim("http://www.phidias.us/victors/export_text.php?c_mc_pathogen_id=&c_phi_function=Virulence%20factor&c_mc_victor_name=&c_gene_locus_tag=&db_type=gene_gi&db_id=&c_max_tmhmm_PredHel=1&c_max_tmhmm_PredHel_check=&c_min_spaan_score_check=&c_min_spaan_score=0.51&keywords=&c_human_alignment=&c_mouse_alignment=&c_localization[]=Any&cog_cat_id[]=")
+
+# Remove duplicates based on bitscore
+victors_blast <- victors_blast[order(victors_blast$V1, -abs(victors_blast$V3), -abs(victors_blast$V13) ), ]
+victors_blast <-victors_blast[ !duplicated(victors_blast$V1), ]
+victors_blast <- victors_blast[order(victors_blast$V1),]
+
+# Find Victors ID in each blast result
+s <- strsplit(as.character(victors_blast$V2), "\\|")
+y <- sapply(s, function(x) { x[2] })
+victors_blast$DB_ID <- y
+
+# Merge annotation with metadata
+victors_full <- merge.data.frame(victors_blast, victors_meta, by.x = "DB_ID", by.y = "NCBI.Protein.GI")
+victors_full <- victors_full[ !duplicated(victors_full$V1), ]
+
+# Function to get Attribute Fields
+getAttributeField <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
+      rv = as.character(NA) 
+    } 
+    return(rv) 
+  }) 
+}
+
+# Create ID Column
+gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
+
+# To upper
+gff$ID <- toupper(gff$ID)
+
+# Merge with GFF
+victors_full <- merge.data.frame(victors_full, gff, by.x = "V1", by.y = "ID")
+
+# Create Position Column
+victors_full$position <- paste(victors_full$V1.y, ":", victors_full$V4.y, "-", victors_full$V5.y, sep = "")
+
+# Create DF for kable
+blast <- victors_full %>% select(V1, Gene.Name, Protein.Name, Protegen.ID, position)
+
+# Get urls
+ids <- blast$Protegen.ID
+urls <- lapply(ids, function(x){paste0("http://www.phidias.us/victors/gene_detail.php?c_mc_victor_id=", x)})
+```
+
+All virulence factors that were found to have at least one gene in the query genome are shown in the list below. All of them are linked to the database for further investigations.
+
+Virulence genes are more detailed in Table \@ref(tab:write-table). It shows the gene product, source and name of each gene related to a Virulence Factor found in the query genome. Additionally, Figure \@ref(fig:vfs-png) summarizes the amount of annotated genes of each virulence factor.
+
+```{r write-table-victors}
+# Produce Table
+colnames(blast) <- c("Query Protein ID", "Gene Name", "Product", "Database ID", "Query Protein Coordinates")
+blast %>%
+  mutate("Database ID" = cell_spec(`Database ID`, "html", link = urls)) %>%
+  arrange(`Query Protein ID`) %>%
+  kable(caption = "Virulence Genes annotated from Victors database", escape = FALSE) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1:5, valign = "middle")
+```

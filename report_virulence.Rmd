@@ -7,6 +7,7 @@ params:
   blast_id:
   blast_cov:
   vfdb_blast:
+  victors_blast:
   query:
   gff:
 output:
@@ -38,17 +39,25 @@ library(kableExtra)
 library(dplyr)
 library(stringr)
 library(ggplot2)
-#victors_blast <- read.delim(params$victors_blast)
+victors_blast <- try(read.delim(params$victors_blast, header = FALSE), silent = TRUE)
 vfdb_blast <- try(read.delim(params$vfdb_blast, header = FALSE), silent = TRUE)
 gff <- try(read.delim(params$gff, header = FALSE), silent = TRUE)
 
 # Check if blast is empty
-if (class(vfdb_blast) != 'try_error' & nrow(vfdb_blast) > 0) {
+if (class(vfdb_blast) != 'try_error' && !is.null(nrow(vfdb_blast)) > 0) {
   vfdb_not_null <- TRUE
   vfdb_null <- FALSE
 } else {
   vfdb_not_null <- FALSE
   vfdb_null <- TRUE
+}
+
+if (class(victors_blast) != 'try_error' && !is.null(nrow(victors_blast)) > 0) {
+  victors_not_null <- TRUE
+  victors_null <- FALSE
+} else {
+  victors_not_null <- FALSE
+  victors_null <- TRUE
 }
 ```
 
@@ -58,15 +67,27 @@ Virulence factors are molecules produced by bacteria that add effectiveness in t
 
 [VFDB](http://www.mgc.ac.cn/VFs/main.htm) (Virulence Factor Database) is a comprehensive resource, created in 2004, of curated information about virulence factors of pathogenic bacteria. To date, it contains a 1080 virulence factors in its database, from 74 _bacteria genera_.
 
-[VFDB](http://www.mgc.ac.cn/VFs/main.htm) database was blasted via BLASTx, using the thresholds below. This report summarizes its results.
+[Victors](http://www.phidias.us/victors/) is a curated database which currently possesses 5296 virulence factors for 194 different pathogens including bacteria, viruses and parasites.
+
+[VFDB](http://www.mgc.ac.cn/VFs/main.htm) and [Victors](http://www.phidias.us/victors/) databases were blasted via BLASTx, using the thresholds below. This report summarizes its results.
 
 * Blast % identity: `> `r params$blast_id`%`
 * Blast % query coverage: `> `r params$blast_cov`%`
 
 # Results
 
+## VFDB
+
 ```{r, VFDB_conditional_block, echo=FALSE, results='asis', eval=vfdb_not_null, child='yes_vfdb.Rmd'}
 ```
 
 ```{r, VFDB_conditional_block_2, echo=FALSE, results='asis', eval=vfdb_null, child='no_vfdb.Rmd'}
+```
+
+## Victors
+
+```{r, Victors_conditional_block, echo=FALSE, results='asis', eval=victors_not_null, child='yes_victors.Rmd'}
+```
+
+```{r, Victors_conditional_block_2, echo=FALSE, results='asis', eval=victors_null, child='no_victors.Rmd'}
 ```
