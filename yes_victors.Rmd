@@ -51,9 +51,9 @@ ids <- blast$Protegen.ID
 urls <- lapply(ids, function(x){paste0("http://www.phidias.us/victors/gene_detail.php?c_mc_victor_id=", x)})
 ```
 
-All virulence factors that were found to have at least one gene in the query genome are shown in the list below. All of them are linked to the database for further investigations.
+All query genes that have a match in Victors database are described in Table \@ref(tab:write-table-victors). In order to make further investigations easier, all genes are linked to its matches in Victors database.
 
-Virulence genes are more detailed in Table \@ref(tab:write-table-victors). It shows the gene product, source and name of each gene related to a Virulence Factor found in the query genome. Additionally, Figure \@ref(fig:vfs-png) summarizes the amount of annotated genes of each virulence factor.
+The results are presented with gene name, gene product, genomics coordinates, query protein name and database ID.
 
 ```{r write-table-victors}
 # Produce Table
