@@ -1,6 +1,6 @@
 ```{r parsing-db-victors, eval=TRUE, include=FALSE, echo=FALSE}
 # Download Victors Metadata
-victors_meta <- read.delim("http://www.phidias.us/victors/export_text.php?c_mc_pathogen_id=&c_phi_function=Virulence%20factor&c_mc_victor_name=&c_gene_locus_tag=&db_type=gene_gi&db_id=&c_max_tmhmm_PredHel=1&c_max_tmhmm_PredHel_check=&c_min_spaan_score_check=&c_min_spaan_score=0.51&keywords=&c_human_alignment=&c_mouse_alignment=&c_localization[]=Any&cog_cat_id[]=")
+victors_meta <- read.delim("/work/victors/victors_metadata.tsv")
 
 # Remove duplicates based on bitscore
 victors_blast <- victors_blast[order(victors_blast$V1, -abs(victors_blast$V3), -abs(victors_blast$V13) ), ]
