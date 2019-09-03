@@ -24,6 +24,11 @@ gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
 # To upper
 gff$ID <- toupper(gff$ID)
 
+# Remove duplicates based on bitscore
+phast_blast <- phast_blast[order(phast_blast$qseqid, -abs(phast_blast$pident), -abs(phast_blast$bitscore) ), ]
+phast_blast <-phast_blast[ !duplicated(phast_blast$qseqid), ]
+phast_blast <- phast_blast[order(phast_blast$qseqid),]
+
 # Produce Table
 phast_blast$stitle <- gsub(phast_blast$stitle, pattern = " \\[", replacement = "\\|[")
 
@@ -40,5 +45,5 @@ full_info %>%
   arrange(prophage) %>%
   kable(caption = "Prophage genes annotated using [PHASTER database](https://phaster.ca).", escape = FALSE, col.names = c("Prophage Name", "Species source", "Query Protein ID", "Gene Product", "Query Protein Coordinates")) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:4, valign = "middle")
+  collapse_rows(columns = 1:5, valign = "middle")
 ```

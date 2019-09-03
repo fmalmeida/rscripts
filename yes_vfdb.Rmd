@@ -38,6 +38,9 @@ blast <- separate(blast, other, c("Gene Name", "other"), sep = " ", extra = "mer
 blast$other <- gsub(blast$other, pattern = " \\[", replacement = "#\\[")
 blast <- separate(blast, other, c("Description", "Virulence Factor Name", "Subject Species"), sep = "#", extra = "merge")
 
+# Sort
+blast <- arrange(blast, `Virulence Factor Name`, `Gene Name`)
+
 # Get urls
 ids <- blast$`Virulence Factor Name`
 ids <- str_match(ids, "VF.*[0-9]+")
@@ -50,7 +53,7 @@ All virulence factors that were found to have at least one gene in the query gen
 > The results are showed as: **[VFDB virulence factor name (VFDB virulence factor ID)]**.
 
 ```{r results='asis'}
-string.list <- blast %>% pull("Virulence Factor Name") %>% unique()
+string.list <- blast %>% pull("Virulence Factor Name") %>% unique() %>% sort()
 string.list <- lapply(string.list, function(x){y = str_match(x, "VF.*[0-9]+") ;  paste0("[", x, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", y, "#", y, ")")})
 cat("- Virulence factors found in the query genome:\n")
 cat(paste("\t-", string.list), sep = '\n')
@@ -76,7 +79,6 @@ ggplot(vfs, aes(x=Virulence_Factor_Name, y=freq, fill=Virulence_Factor_Name)) + 
 colnames(blast) <- c("Query Protein ID", "VF ID", "Gene Name", "Description", "Virulence Factor Name", "Subject Species", "Query Protein Coordinates")
 blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species", "Query Protein ID", "Query Protein Coordinates") %>%
   mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
-  arrange(`Virulence Factor Name`, `Gene Name`) %>%
   kable(caption = "Virulence Genes annotated from VFDB", escape = FALSE) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
   collapse_rows(columns = 1:4, valign = "middle")
