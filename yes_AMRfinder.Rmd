@@ -50,6 +50,14 @@ kable(caption = "Resistance genes annotated from NCBI AMR curated database using
   collapse_rows(columns = 1, valign = "middle")
 ```
 
+```{r ncbi-amr-resistance-genes}
+# Complete AMRFinder Result
+amrtsv %>%
+kable(caption = "Complete AMRFinderPlus Result Table", escape = FALSE) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1, valign = "middle")
+```
+
 ```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
 ncbi_count <- tab2 %>%
   select(3,7)
