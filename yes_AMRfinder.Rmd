@@ -32,7 +32,7 @@ cat(paste("\t-", string.list), sep = '\n')
 
 ```{r ncbi-amr-resistance-genes}
 # Merge tables
-tab2 <- merge.data.frame(genes, tab, by.x = "Prokka_ID", by.y = "Protein.identifier")
+tab2 <- merge.data.frame(genes, tab, by.x = "Prokka_ID", by.y = "Protein.identifier", all.y = TRUE)
 
 # Create urls
 urls <- lapply(tab2$Accession.of.closest.sequence, function(x){
@@ -47,15 +47,8 @@ tab2 %>%
   arrange(Element.type, Prokka_ID) %>%
 kable(caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus", escape = FALSE, col.names = c("Resistance Type", "Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence", "Genome Coordinates")) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1, valign = "middle")
-```
-
-```{r ncbi-amr-resistance-genes-2}
-# Complete AMRFinder Result
-amrtsv %>%
-kable(caption = "Complete AMRFinderPlus Result Table", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1, valign = "middle")
+  collapse_rows(columns = 1, valign = "middle") %>%
+  footnote("All NA genome coordinates entries are due to a merge step with bedtools. Which means, these entries have been merged in the gff and we can not precisely get its coordinates. One might look at the gff file to analyse it.")
 ```
 
 ```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
