@@ -50,7 +50,7 @@ kable(caption = "Resistance genes annotated from NCBI AMR curated database using
   collapse_rows(columns = 1, valign = "middle")
 ```
 
-```{r ncbi-amr-resistance-genes}
+```{r ncbi-amr-resistance-genes-2}
 # Complete AMRFinder Result
 amrtsv %>%
 kable(caption = "Complete AMRFinderPlus Result Table", escape = FALSE) %>%
