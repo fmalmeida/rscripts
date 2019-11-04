@@ -8,6 +8,9 @@ params:
   ncbi_amr:
   amrfinder:
   gff_resistance:
+  rgitool:
+  rgiperfect:
+  rgistrict:
 output:
   bookdown::html_document2:
     df_print: paged
@@ -40,6 +43,8 @@ library(ggplot2)
 # Read result
 amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
 ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
+# Read file
+rgi_tsv <- read.delim(params$rgitool, header = FALSE)
 
 # Check if NCBI is empty
 if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {
@@ -49,15 +54,24 @@ if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {
   amrFinder_not_null <- FALSE
   amrFinder_null <- TRUE
 }
+
+# Check if RGI is empty
+if (class(rgi_tsv) != 'try-error' && !is.null(nrow(rgi_tsv) > 0)) {
+  rgi_not_null <- TRUE
+  rgi_null <- FALSE
+} else {
+  rgi_not_null <- FALSE
+  rgi_null <- TRUE
+}
 ```
 
 # About
 
-Resistance determinants were predicted using [AMRFinderPlus](https://github.com/ncbi/amr/wiki). This is a binary distributed by NCBI that allows users to query the National Database of Antibiotic Resistant Organisms ([NDARO](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/)). This is a NCBI curated database that aggregates resistance genes from other databases such as [Resfams](http://www.dantaslab.org/resfams), [CARD](https://card.mcmaster.ca/), ResFinder, Pasteur Institute Beta Lactamases and orthers. For more information please read the following [link](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047).
-
-NCBI's efforts were done in order to standardise and confer reliability to AMR predictions.
-
 Resistance genes or resistance determinants confer to the bacteria the ability to tolerate or resist some antibiotics or antimicrobials. Which means, these characteristics makes the bacteria less susceptible to its effects.
+
+Resistance determinants were predicted using [AMRFinderPlus](https://github.com/ncbi/amr/wiki). This is a binary distributed by NCBI that allows users to query the National Database of Antibiotic Resistant Organisms ([NDARO](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/)). This is a NCBI curated database that aggregates resistance genes from other databases such as [Resfams](http://www.dantaslab.org/resfams), [CARD](https://card.mcmaster.ca/), ResFinder, Pasteur Institute Beta Lactamases and orthers. For more information please read the following [link](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047). NCBI's efforts were done in order to standardise and confer reliability to AMR predictions.
+
+Additionally, resistance determinants were also detected with [CARD RGI](https://github.com/arpcard/rgi) tool which enables the detection of new variants and mutations that confer resistance to antibiotics. The RGI analyzes genome or proteome sequences under three paradigms: **Perfect**, **Strict**, and **Loose** (a.k.a. Discovery). **The Perfect algorithm** is most often applied to clinical surveillance as it detects perfect matches to the curated reference sequences and mutations in the CARD. In contrast, **the Strict algorithm** detects previously unknown variants of known AMR genes, including secondary screen for key mutations, using detection models with CARD's curated similarity cut-offs to ensure the detected variant is likely a functional AMR gene.
 
 # Results
 
@@ -67,6 +81,14 @@ Resistance genes or resistance determinants confer to the bacteria the ability t
 ```
 
 ```{r, AMRFinder_conditional_block_2, echo=FALSE, results='asis', eval=amrFinder_null, child='no_AMRfinder.Rmd'}
+```
+
+## CARD RGI
+
+```{r, rgi_conditional_block, echo=FALSE, results='asis', eval=rgi_not_null, child='yes_RGI.Rmd'}
+```
+
+```{r, rgi_conditional_block_2, echo=FALSE, results='asis', eval=rgi_null, child='no_RGI.Rmd'}
 ```
 
 ## Prokka
