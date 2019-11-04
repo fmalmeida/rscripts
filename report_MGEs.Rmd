@@ -1,0 +1,132 @@
+---
+title: "Annotation Report of query genome `r params$query`"
+author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+subtitle: "Annotated mobile genetic elements (MGEs)"
+params:
+  blast_id:
+  blast_cov:
+  phigaro_dir:
+  phigaro_txt:
+  virsorter_dir:
+  virsorter_csv:
+  ice_prot_blast:
+  phast_blast:
+  query:
+  gff:
+output:
+  bookdown::html_document2:
+    df_print: paged
+    number_sections: false
+    syntax: tango
+    self_contained: yes
+    theme: journal
+    toc: true
+---
+
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 16px;
+  }
+</style>
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
+options(knitr.table.format = "html")
+bt_opt =  c("hover", "condensed", "responsive")
+library(magrittr)
+library(knitr)
+library(tidyr)
+library(plyr)
+library(kableExtra)
+library(dplyr)
+library(stringr)
+library(ggplot2)
+phigaro_dir <- params$phigaro_dir
+phigaro_html <- paste0(phigaro_dir, "/assembly.phg.html", collapse = "")
+phigaro_txt <- params$phigaro_txt
+
+## Read GFF
+gff <- read.delim(params$gff, header = FALSE)
+
+## Read phigaro
+phigaro_txt <- try(read.delim(phigaro_txt), silent = TRUE)
+if (class(phigaro_txt) != 'try_error' & nrow(phigaro_txt) > 0) {
+  phigaro_not_null <- TRUE
+  phigaro_null <- FALSE
+} else {
+  phigaro_not_null <- FALSE
+  phigaro_null <- TRUE
+}
+
+## Read PHAST
+phast_blast <- try(read.delim(params$phast_blast, header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+if (class(phast_blast) != 'try_error' & nrow(phast_blast) > 0) {
+  phast_not_null <- TRUE
+  phast_null <- FALSE
+} else {
+  phast_not_null <- FALSE
+  phast_null <- TRUE
+}
+
+ice_prot_blast <- try(read.delim(params$ice_prot_blast, header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+
+## Read GFF
+gff <- read.delim(params$gff, header = FALSE)
+
+# Check if blast is empty
+if (class(ice_prot_blast) != 'try_error' & nrow(ice_prot_blast) > 0) {
+  not_null <- TRUE
+  null <- FALSE
+} else {
+  not_null <- FALSE
+  null <- TRUE
+}
+```
+
+# About
+
+Mobile genetic elements (MGEs) are a type of genetic materials that can move around within a genome, or that can be transferred from one species or replicon to another. Newly acquired genes through this mechanism can increase fitness by gaining new or additional functions. On the other hand, MGEs can also decrease fitness by introducing disease-causing alleles or mutations.
+
+In this context, this pipeline automatically annotates prophage sequences and proteins using [PHAST](https://phaster.ca) database and [phigaro](https://github.com/bobeobibo/phigaro) software. Prophage is a bacteriophage that have been inserted and integrated into the bacterial chromosome or plasmid. It is the latent form of a phage. PHAST database was searched with BLAST to annotate all genes found in the query genome that are known to be found in prophages.
+
+Additionally, integrative and conjugative element (ICE) is an integrative mobile genetic element that encodes a conjugation machinery. It can confer selective advantages and can also encode resistance determinants and virulence factors.
+
+In this report are summarised all the ICEs annotated in the query genome. This features were annotated through BLASTx and BLASTn against [ICEberg](http://202.120.12.136:7913/ICEberg2/) database. ICEs genes were annotated through BLASTx and ICE genomic regions were identified via BLASTn. 
+
+Blast thresholds were the following:
+
+* Blast % identity: `> `r params$blast_id`%`
+* Blast % query coverage: `> `r params$blast_cov`%`
+
+# Results
+
+## Genomic Islands prediction
+
+Genomic Islands are annotated with [islandPath](https://github.com/brinkmanlab/islandpath). Its results are all incorporated into JBrowse output and are drawn in yellow. This result shall be seen by using JBrowse output which might be opened with [JBrowse Desktop](https://jbrowse.org/docs/jbrowse_desktop.html). A BED file containing genomic position of GIs can be found in the **predicted_GIs** folder under output directory.
+
+## Phigaro prediction
+
+```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=phigaro_not_null, child='yes_phigaro.Rmd'}
+```
+
+```{r, phigaro_conditional_block_FALSE, echo=FALSE, results='asis', eval=phigaro_null, child='no_phigaro.Rmd'}
+```
+
+## PHAST database annotation
+
+```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=phast_not_null, child='yes_phast.Rmd'}
+```
+
+```{r, phigaro_conditional_block_FALSE, echo=FALSE, results='asis', eval=phast_null, child='no_phast.Rmd'}
+```
+
+## ICEberg database annotation
+
+```{r, ICEberg_conditional_block, echo=FALSE, results='asis', eval=not_null, child='yes_ice.Rmd'}
+```
+
+```{r, ICEberg_conditional_block_2, echo=FALSE, results='asis', eval=null, child='no_ice.Rmd'}
+```

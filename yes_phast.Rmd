@@ -45,5 +45,6 @@ full_info %>%
   arrange(prophage) %>%
   kable(caption = "Prophage genes annotated using [PHASTER database](https://phaster.ca).", escape = FALSE, col.names = c("Prophage Name", "Species source", "Query Protein ID", "Gene Product", "Query Protein Coordinates")) %>%
   kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:5, valign = "middle")
+  collapse_rows(columns = 1:5, valign = "middle") %>%
+  scroll_box(height = "500px")
 ```

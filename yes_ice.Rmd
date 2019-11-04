@@ -41,7 +41,9 @@ blast <- separate(blast, sseqid, c("Database", "ICE_id"), sep = "\\|")
 urls <- lapply(blast$ICE_id, function(x){paste0("http://202.120.12.136:7913/ICEberg2/feature_page.php?ice_id=", x)})
 ```
 
-All anotated genes from known ICEs are showed in Table \@ref(tab:write-table). It is summarised the ICE id and all its genes that were found in the query genome. All of them are linked to the database for further investigations. Additionally, Figure \@ref(fig:ices-png) shows the amount of genes annotated within each ICE.
+All anotated genes from known ICEs are showed in Table \@ref(tab:write-table). It is summarised the ICE id and all its genes that were found in the query genome. All of them are linked to the database for further investigations.
+
+Users are advised to use the [ICEfinder](http://202.120.12.136:7913/ICEfinder/ICEfinder.html) tool to predict genomic position of known ICEs since we are not allowed to include this step under this pipeline.
 
 ```{r write-table}
 # Produce Table
@@ -53,6 +55,7 @@ blast %>% select("ICE_id", "qseqid", "name", "position") %>%
   collapse_rows(columns = 1:4, valign = "middle")
 ```
 
+<!--
 ```{r ices-png, fig.align='center', fig.show='hold', fig.cap="ICEs annotated from [ICEberg](http://202.120.12.136:7913/ICEberg2/) database and the amount of genes found within each.", out.width="60%"}
 summary <- blast %>%
   select("ICE_id", "name") %>% arrange(ICE_id)
@@ -65,3 +68,4 @@ ggplot(ices, aes(x=ICE_id, y=freq, fill=ICE_id)) + geom_bar(stat = "identity") +
   ylab("Number of annotated genes") +
   guides(fill=guide_legend(title = "ICEs"))
 ```
+-->
