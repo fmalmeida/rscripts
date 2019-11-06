@@ -16,6 +16,7 @@ output:
     df_print: paged
     number_sections: false
     syntax: tango
+    toc: true
     self_contained: yes
     theme: journal
 ---
@@ -33,6 +34,7 @@ options(knitr.table.format = "html", knitr.kable.NA = 'NA')
 bt_opt =  c("hover", "condensed", "responsive")
 library(magrittr)
 library(knitr)
+library(stringr)
 library(tidyr)
 library(plyr)
 library(kableExtra)
@@ -44,7 +46,9 @@ library(ggplot2)
 amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
 ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
 # Read file
-rgi_tsv <- read.delim(params$rgitool, header = FALSE)
+rgi_tsv <- try(read.delim(params$rgitool, header = TRUE), silent = TRUE)
+rgi_perfect <- try(read.delim(params$rgiperfect, header = FALSE), silent = TRUE)
+rgi_strict <- try(read.delim(params$rgistrict, header = FALSE), silent = TRUE)
 
 # Check if NCBI is empty
 if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {
@@ -62,6 +66,22 @@ if (class(rgi_tsv) != 'try-error' && !is.null(nrow(rgi_tsv) > 0)) {
 } else {
   rgi_not_null <- FALSE
   rgi_null <- TRUE
+}
+
+if (class(rgi_perfect) != 'try-error' && !is.null(nrow(rgi_perfect) > 0)) {
+  rgi_perfect_not_null <- TRUE
+  rgi_perfect_null <- FALSE
+} else {
+  rgi_perfect_not_null <- FALSE
+  rgi_perfect_null <- TRUE
+}
+
+if (class(rgi_strict) != 'try-error' && !is.null(nrow(rgi_strict) > 0)) {
+  rgi_strict_not_null <- TRUE
+  rgi_strict_null <- FALSE
+} else {
+  rgi_strict_not_null <- FALSE
+  rgi_strict_null <- TRUE
 }
 ```
 
