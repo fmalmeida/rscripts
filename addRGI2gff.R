@@ -5,9 +5,7 @@
 options:
 -g, --gff=<file>      GFF file to add NCBI AMR Annotations into
 -i, --input=<file>    RGI tabular output
--o, --out=<chr>       Output file name [default: out.gff]
--t, --type=<chr>      Type of feature. Ex: resistance
--d, --database=<chr>  Name of databased which Blast came from' -> doc
+-o, --out=<chr>       Output file name [default: out.gff]' -> doc
 
 # Parse parameters
 suppressMessages(library(docopt))
@@ -52,14 +50,12 @@ getAttributeField <- function (x, field, attrsep = ";") {
 '%ni%' <- Negate('%in%')
 
 # Load GFF File
-#gff <- gffRead(opt$gff)
-gff <- gffRead("/work/sample_dataset/annotation/TESTE/resistance/example.gff")
-gff$ID <- getAttributeField(as.character(gff$attributes), "ID", ";")
+gff <- gffRead(opt$gff)
+colnames(gff) <- c("Contig", "Source", "Feature", "Start", "Stop",
+                   "Score", "Orientation", "Frame", "Attributes")
 
 # Load CARD RGI results
-rgi_input <- read.delim(
-  "/work/sample_dataset/annotation/TESTE/resistance/RGI_annotation/RGI_Example.txt",
-  header = TRUE)
+rgi_input <- read.delim(opt$input, header = TRUE)
 ## Rename contigs
 rgi_input$Contig <- gsub(pattern = "_[0-9]*$", replacement = "", rgi_input$Contig)
 
@@ -70,9 +66,9 @@ if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
   rgi_input$Score <- (".")
   rgi_input$Frame <- 0
   rgi_input$Attributes <- 
-    paste("card_name=", rgi_input$Best_Hit_ARO, ";rgi_inference=", rgi_input$Model_type,
-          ";card_product=", rgi_input$AMR.Gene.Family, ";targeted_drug_class=",
-          rgi_input$Drug.Class, ";additional_database=CARD-RGI", sep = "")
+    paste("CARD_name=", rgi_input$Best_Hit_ARO, ";RGI_inference=", rgi_input$Model_type,
+          ";CARD_product=", rgi_input$AMR.Gene.Family, ";Targeted_drug_class=",
+          rgi_input$Drug.Class, ";Additional_database=CARD-RGI", sep = "")
   rgi_input$Attributes <- gsub(pattern = " ", replacement = "_",
                                x = rgi_input$Attributes)
   rgi_input$Attributes <- gsub(pattern = "-", replacement = "_",
@@ -81,6 +77,10 @@ if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
   rgi_gff <- rgi_input %>% 
     select(Contig, Source, Feature, Start, Stop, 
            Score, Orientation, Frame, Attributes)
+  full_gff <- rbind(gff, rgi_gff)
+  
+  write.table(full_gff, file = opt$out, quote = FALSE, sep = "\t", 
+              col.names = FALSE, row.names = FALSE)
   
 } else {
   # Load GFF file
