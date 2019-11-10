@@ -5,6 +5,7 @@ Perfect hits are genes that CARD guarantee its functionality. Which means that t
 ## Name columns
 colnames(rgi_perfect) <- c("Contig", "Start", "Stop", "Orientation", "Cut_Off", "Best_Hit_ARO", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
 ## Fix Contig Names
+rgi_perfect$Contig <- gsub(pattern = " ", replacement = "", rgi_perfect$Contig)
 rgi_perfect$Contig <- gsub(pattern = "_[0-9]*$", replacement = "", rgi_perfect$Contig)
 ## Create Coordinate
 rgi_perfect$Coordinates <- paste(rgi_perfect$Contig, ":", rgi_perfect$Start, "-", rgi_perfect$Stop, sep = '')

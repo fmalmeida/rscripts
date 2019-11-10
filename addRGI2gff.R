@@ -57,7 +57,15 @@ colnames(gff) <- c("Contig", "Source", "Feature", "Start", "Stop",
 # Load CARD RGI results
 rgi_input <- read.delim(opt$input, header = TRUE)
 ## Rename contigs
-rgi_input$Contig <- gsub(pattern = "_[0-9]*$", replacement = "", rgi_input$Contig)
+
+rgi_input <- read.delim("/work/sample_dataset/annotation/EXAMPLE/resistance/RGI_annotation/RGI_Example.txt"
+                        , header = TRUE, stringsAsFactors = FALSE)
+
+rgi_input$Contig <- sub(pattern = " ", 
+                       replacement = "", x = rgi_input$Contig)
+
+rgi_input$Contig <- sub(pattern = "_[[:digit:]]*$", 
+                       replacement = "", x = rgi_input$Contig)
 
 if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
   
