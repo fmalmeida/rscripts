@@ -1,6 +1,6 @@
 #!/usr/bin/Rscript
 # Setting Help
-'usage: addRGI2gff.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr>]
+'usage: addRGI2gff.R [--input=<file> --gff=<file> --out=<chr>]
 
 options:
 -g, --gff=<file>      GFF file to add NCBI AMR Annotations into
