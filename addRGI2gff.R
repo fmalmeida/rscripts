@@ -29,22 +29,22 @@ suppressMessages(library(tidyr))
 # Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
-  paste(unique(d), collapse = ',') 
+  paste(unique(d), collapse = ',')
 }
 
 # Function to get Attribute Fields
-getAttributeField <- function (x, field, attrsep = ";") { 
-  s = strsplit(x, split = attrsep, fixed = TRUE) 
-  sapply(s, function(atts) { 
-    a = strsplit(atts, split = "=", fixed = TRUE) 
-    m = match(field, sapply(a, "[", 1)) 
-    if (!is.na(m)) { rv = a[[m]][2] 
-    } 
-    else { 
-      rv = as.character(NA) 
-    } 
-    return(rv) 
-  }) 
+getAttributeField <- function (x, field, attrsep = ";") {
+  s = strsplit(x, split = attrsep, fixed = TRUE)
+  sapply(s, function(atts) {
+    a = strsplit(atts, split = "=", fixed = TRUE)
+    m = match(field, sapply(a, "[", 1))
+    if (!is.na(m)) { rv = a[[m]][2]
+    }
+    else {
+      rv = as.character(NA)
+    }
+    return(rv)
+  })
 }
 # Operator to discard patterns found
 '%ni%' <- Negate('%in%')
@@ -57,19 +57,19 @@ colnames(gff) <- c("Contig", "Source", "Feature", "Start", "Stop",
 # Load CARD RGI results
 rgi_input <- read.delim(opt$input, header = TRUE)
 ## Rename contigs
-rgi_input$Contig <- sub(pattern = " ", 
+rgi_input$Contig <- sub(pattern = " ",
                        replacement = "", x = rgi_input$Contig)
 
-rgi_input$Contig <- sub(pattern = "_[[:digit:]]*$", 
+rgi_input$Contig <- sub(pattern = "_[[:digit:]]*$",
                        replacement = "", x = rgi_input$Contig)
 
 if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
-  
+
   rgi_input$Source <- ("CARD-RGI")
   rgi_input$Feature <- ("Resistance")
   rgi_input$Score <- (".")
   rgi_input$Frame <- 0
-  rgi_input$Attributes <- 
+  rgi_input$Attributes <-
     paste("CARD_name=", rgi_input$Best_Hit_ARO, ";RGI_inference=", rgi_input$Model_type,
           ";CARD_product=", rgi_input$AMR.Gene.Family, ";Targeted_drug_class=",
           rgi_input$Drug.Class, ";Additional_database=CARD-RGI", sep = "")
@@ -77,31 +77,21 @@ if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
                                x = rgi_input$Attributes)
   rgi_input$Attributes <- gsub(pattern = "-", replacement = "_",
                                x = rgi_input$Attributes)
-  
-  if (rgi_input$Start > rgi_input$Stop) {
-    rgi_input$Orientation <- "-"
-    rgi_gff <- rgi_input %>% 
-    select(Contig, Source, Feature, Stop, Start, 
+
+  dplyr::mutate(rgi_input, Stop = pmax(Start, Stop), Start = pmin(Start, Stop))                               
+
+    rgi_gff <- rgi_input %>%
+      select(Contig, Source, Feature, Start, Stop,
            Score, Orientation, Frame, Attributes)
     full_gff <- rbind(gff, rgi_gff)
-  
-    write.table(full_gff, file = opt$out, quote = FALSE, sep = "\t", 
-              col.names = FALSE, row.names = FALSE)    
-  } else {
-          
-    rgi_gff <- rgi_input %>% 
-      select(Contig, Source, Feature, Start, Stop, 
-           Score, Orientation, Frame, Attributes)
-    full_gff <- rbind(gff, rgi_gff)
-  
-    write.table(full_gff, file = opt$out, quote = FALSE, sep = "\t", 
+
+    write.table(full_gff, file = opt$out, quote = FALSE, sep = "\t",
               col.names = FALSE, row.names = FALSE)
-  }
-  
+
 } else {
   # Load GFF file
   gff <- gffRead(opt$gff)
   # Write output
-  write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
+  write.table(gff, file = opt$out, quote = FALSE, sep = "\t",
               col.names = FALSE, row.names = FALSE)
 }
