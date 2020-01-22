@@ -77,14 +77,25 @@ if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
                                x = rgi_input$Attributes)
   rgi_input$Attributes <- gsub(pattern = "-", replacement = "_",
                                x = rgi_input$Attributes)
-         
-  rgi_gff <- rgi_input %>% 
-    select(Contig, Source, Feature, Start, Stop, 
+  if (rgi_input$Start > rgi_input_Stop) {
+    rgi_input$Orientation <- "-"
+    rgi_gff <- rgi_input %>% 
+    select(Contig, Source, Feature, Stop, Start, 
            Score, Orientation, Frame, Attributes)
-  full_gff <- rbind(gff, rgi_gff)
+    full_gff <- rbind(gff, rgi_gff)
   
-  write.table(full_gff, file = opt$out, quote = FALSE, sep = "\t", 
+    write.table(full_gff, file = opt$out, quote = FALSE, sep = "\t", 
+              col.names = FALSE, row.names = FALSE)    
+  } else {
+          
+    rgi_gff <- rgi_input %>% 
+      select(Contig, Source, Feature, Start, Stop, 
+           Score, Orientation, Frame, Attributes)
+    full_gff <- rbind(gff, rgi_gff)
+  
+    write.table(full_gff, file = opt$out, quote = FALSE, sep = "\t", 
               col.names = FALSE, row.names = FALSE)
+  }
   
 } else {
   # Load GFF file
