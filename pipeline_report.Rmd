@@ -1,189 +1,70 @@
 ---
-title: "Pipeline Report"
-author: "Felipe Marques de Almeida <falmeida@aluno.unb.br>"
+title: "Annotation Report"
+author: "`r params$query` genome assembly"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
-    theme: readable
-    toc: true
+    theme: united
+    toc: false
     df_print: paged
+    self_contained: yes
+    number_sections: false
 params:
-  prefix: na
-  fasta: na
-  gff: na
-  gff_dir: na
-  gbk: na
-  command: nextflow run pipeline -c config
-  config: na
-  blast_dir: na 
-  is_resistance: FALSE
-  resistance_gff: na
-  resistance_summary: na
-  is_CARD: FALSE
-  card_summary: na
-  is_Resfinder: FALSE
-  is_ICEberg: FALSE
-  ice_summary: na
-  ice_gff: na
-  is_PHAST: FALSE
-  phast_summary: na
-  phast_gff: na
-  is_virulence: FALSE
-  virulence_summary: na
-  virulence_gff: na
-  is_VFDB: FALSE
-  is_Victors: FALSE
-  jbrowse_dir: na
-  jbrowse_html: na
+  query: Query
+  output_dir: output
+  input_fasta: Query fasta
+  prefix: Out
 ---
+
+<style type="text/css">
+
+body{ /* Normal  */
+      font-size: 18px;
+}
+.main-container {
+  max-width: 90% !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
 ```{r setup, echo=FALSE}
 library(magrittr)
+library(knitr)
+library(data.table)
 
-# Prefix
-prefix <- params$prefix
-# Fasta file name
-fasta <- params$fasta
-# Gff filename
-gff <- params$gff
-# Gff directory name
-gff_dir <- params$gff_dir
-# Genbank filename
-gbk <- params$gbk
-# Load of configuration file
-config <- params$config
-# Nextflow command used
-command <- params$command
-# Blast directory name
-blast_dir <- params$blast_dir
-# Was some resistance database used?
-is_resistance <- params$is_resistance
-## Get resistance gff filepath
-resistance_gff <- params$resistance_gff
-## Get resistance summary path
-resistance_summary <- params$resistance_summary
-# Get CARD variables
-## Was CARD executed?
-is_CARD <- params$is_CARD
-## CARD summary table path
-card_summary <- params$card_summary
-# Get Resfinder variables
-## Was Resfinder executed?
-is_Resfinder <- params$is_Resfinder
-# Get ICEberg variables
-## Was ICEberg executed?
-is_ICEberg <- params$is_ICEberg
-## ICEberg summary table path
-ice_summary <- params$ice_summary
-## ICEberg gff filepath
-ice_gff <- params$ice_gff
-# Get PHAST variables
-## Was PHAST executed?
-is_PHAST <- params$is_PHAST
-## PHAST summary filepath
-phast_summary <- params$phast_summary
-## PHAST gff filepath
-phast_gff <- params$phast_gff
-# Was some virulence databse used?
-is_virulence <- params$is_virulence
-## Virulence summary filepath
-virulence_summary <- params$virulence_summary
-## Virulence gff filepath
-virulence_gff <- params$virulence_gff
-# Get VFDB variables
-## Was VFDB executed?
-is_VFDB <- params$is_VFDB
-# Get Victors variables
-## Was Victors executed?
-is_Victors <- params$is_Victors
-# Load JBROWSE paths
-## JBROWSE output directory
-jbrowse_dir <- params$jbrowse_dir
-## JBROWSE html file
-jbrowse_html <- params$jbrowse_html
+# Set directory name
+Sys.setenv(dir = params$output_dir)
 ```
 
-# Introduction {.tabset .tabset-fade .tabset-pills}
+# Bacannot Report {.tabset .tabset-fade .tabset-pills}
 
-This pipeline was automatically produced via our [annotation pipeline](https://github.com/fmalmeida/bioinfo/tree/master/pipelines/bac_annotation) (`give a name`) and it contains the results from the annotation of the ``r fasta`` FASTA file.
+## About
 
-Any doubts, please contat me at <falmeida@aluno.unb.br>.
+Annotation report of `r params$query` genome assembly. This report is automatically produced by the [bacannot pipeline](https://github.com/fmalmeida/bacannot). The main annotation results of the pipeline are summarized in this report.
 
-## Execution environment
+This pipeline uses a variety of state-of-the-art pipelines and databases to unravel a given prokaryotic genome. Its annotation workflow is represented in the image below:
 
-Command line: 
-
-The pipeline was successfully executed with the following parameters:
-
-* Fasta: ``r fasta``
-* Output prefix: ``r prefix``
-* Configuration file:
-
-````java
-```{r comment='', echo=FALSE, include=TRUE}
-cat(htmltools::includeText(config), sep = '\n')
-```
-````
-
-## Report Content
-
-This report contains a summary of the pipeline's most important results, which are:
-
-* The final GFF and Genbank File;
-* BLAST storage directory;
-* Summary tables of ices, virulence, prophage and resistance genes;
-* JBROWSE genome browser;
-* And an explanation about how to extract data from the sql database produced.
-
-**Warning**: Since the execution of additional blasts is optional, this report may or not contain a section for some databases.
-
-### Final GFF
-
-* GFF filepath: ``r gff`` ;
-* GFF dir: `` r gff_dir`` ;
-    * In this directory are stored the final gff file and the subseted gffs (e.g. _prefix_\_**resistance**.gff)
-* Genbank file filepath: ``r gbk``.
-* Complete GFF file summarization:
-
-```{r Gff file, comment="", eval=TRUE, echo=FALSE}
-gffFile <- ballgown::gffRead(params$gff)
-gffFile
+```{r pipeline-workflow, out.width="70%",out.height="20%",fig.cap="Bacannot annotation workflow",fig.show='hold',fig.align='center', fig.pos='H', echo=FALSE}
+include_graphics("/home/falmeida/Documents/dataset_1/bacannot_test/spades_test_ecoli/bacannot_workflow.png")
 ```
 
-### Additional BLASTS executed
+### Contact information:
 
-If executed, the blast outputs will all be stored at ``r blast_dir`` directory.
++ Felipe Marques de Almeida
+    + <falmeida@aluno.unb.br>
+    + <almeidafmarques@outlook.com>
 
-* Was some additional database used to BLAST against?
-    * CARD database: ``r is_CARD``
-    * Resfinder database: ``r is_Resfinder``
-    * ICEberg database: ``r is_ICEberg``
-    * PHAST database: ``r is_PHAST``
-    * Victors database: ``r is_Victors``
-    * VFDB database: ``r is_VFDB``
+## Report content information
 
-### Summary tables
+The pipeline was successfully executed. Annotation was executed for the following genome file: ``r params$input_fasta``. This report contains a generic summary of the results. Results are stored in ``r params$output_dir`` directory using the following organization. Each subdirectory contains a specific annotation results, for instance:
+  
+* **Prokka** directory contains all the outputs of `prokka` execution
+* **MLST** directory contains the MLST analysis results produced by the [`mlst`](https://github.com/tseemann/mlst) execution
+* Etc.
 
-This section is based on the blast search above. If no additional database was used then no summary table was produced.
+**Warning**: Since the execution of additional blasts is optional, this report may not contain a section for some databases or steps.
 
-Therefore, this section can appear blank or it can contain the summary tables produced.
-
-```{r, ICEberg_conditional_block, echo=FALSE, results='asis', eval=is_ICEberg, child='ices.Rmd'}
+```{bash}
+tree -d -L 2 $dir
 ```
-
-```{r, resistance_conditional_block, echo=FALSE, results='asis', eval=is_resistance, child='resistance.Rmd'}
-```
-
-```{r, prophages_conditional_block, echo=FALSE, results='asis', eval=is_PHAST, child='prophage.Rmd'}
-```
-
-```{r, virulence_conditional_block, echo=FALSE, results='asis', eval=is_virulence, child='virulence.Rmd'}
-```
-
-### JBROWSE
-
-[JBROWSE](http://jbrowse.org/) is a Genome Browser which we use in this pipeline in order to create a easier and fast way to identify elements throughout genomic regions.
-
-* JBROWSE directory path: ``r jbrowse_dir``
-    * [JBROWSE local genome browser link](jbrowse/www/index.html)
-    
-### SQL Database
