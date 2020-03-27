@@ -1,16 +1,13 @@
 ---
-title: "Annotation Report of query genome `r params$query`"
-author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
+title: "Annotation Report"
+author: "`r params$query` genome assembly"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-subtitle: "Resistance genes and determinants annotated using AMRFinderPlus"
+subtitle: "Resistance genes and determinants annotated using NCBI-AMRFinderPlus and CARD-RGI tools"
 params:
-  query:
-  ncbi_amr:
-  amrfinder:
-  gff_resistance:
-  rgitool:
-  rgiperfect:
-  rgistrict:
+  query: Ecoli
+  amrfinder: /home/falmeida/Documents/dataset_1/bacannot_test/spades_test_ecoli/resistance/AMRFinderPlus/AMRFinder_resistance-only.tsv
+  gff: /home/falmeida/Documents/dataset_1/bacannot_test/spades_test_ecoli/gffs/spades_test_ecoli.gff
+  rgitool: /home/falmeida/Documents/dataset_1/bacannot_test/spades_test_ecoli/resistance/RGI/RGI_spades_test_ecoli.txt
 output:
   bookdown::html_document2:
     df_print: paged
@@ -18,7 +15,7 @@ output:
     syntax: tango
     toc: true
     self_contained: yes
-    theme: journal
+    theme: united
 ---
 
 <style type="text/css">
@@ -35,28 +32,29 @@ body{ /* Normal  */
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
-options(knitr.table.format = "html", knitr.kable.NA = 'NA')
-bt_opt =  c("hover", "condensed", "responsive")
-library(magrittr)
-library(knitr)
-library(stringr)
-library(tidyr)
-library(plyr)
-library(kableExtra)
-library(dplyr)
-library(stringr)
-library(ggplot2)
+suppressMessages(library(magrittr))
+suppressMessages(library(knitr))
+suppressMessages(library(kableExtra))
+suppressMessages(library(stringr))
+suppressMessages(library(ballgown))
+suppressMessages(library(tidyr))
+suppressMessages(library(plyr))
+suppressMessages(library(DT))
+suppressMessages(library(dplyr))
+suppressMessages(library(stringr))
+suppressMessages(library(ggplot2))
 
-# Read result
+# Read GFF file
+gff <- gffRead(params$gff)
+
+# Read AMRFinder results
 amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
-ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
-# Read file
-rgi_tsv <- try(read.delim(params$rgitool, header = TRUE), silent = TRUE)
-rgi_perfect <- try(read.delim(params$rgiperfect, header = FALSE), silent = TRUE)
-rgi_strict <- try(read.delim(params$rgistrict, header = FALSE), silent = TRUE)
 
-# Check if NCBI is empty
-if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {
+# Read RGI results
+rgi_tsv <- try(read.delim(params$rgitool, header = TRUE), silent = TRUE)
+
+# Check if NCBI AMRFinder file is empty
+if (class(amrtsv) != 'try-error' && !is.null(nrow(amrtsv) > 0)) {
   amrFinder_not_null <- TRUE
   amrFinder_null <- FALSE
 } else {
@@ -73,20 +71,19 @@ if (class(rgi_tsv) != 'try-error' && !is.null(nrow(rgi_tsv) > 0)) {
   rgi_null <- TRUE
 }
 
-if (class(rgi_perfect) != 'try-error' && !is.null(nrow(rgi_perfect) > 0)) {
-  rgi_perfect_not_null <- TRUE
-  rgi_perfect_null <- FALSE
-} else {
-  rgi_perfect_not_null <- FALSE
-  rgi_perfect_null <- TRUE
-}
-
-if (class(rgi_strict) != 'try-error' && !is.null(nrow(rgi_strict) > 0)) {
-  rgi_strict_not_null <- TRUE
-  rgi_strict_null <- FALSE
-} else {
-  rgi_strict_not_null <- FALSE
-  rgi_strict_null <- TRUE
+# Function to get Attribute Fields
+getAttributeField <- function (x, field, attrsep = ";") {
+  s = strsplit(x, split = attrsep, fixed = TRUE)
+  sapply(s, function(atts) {
+    a = strsplit(atts, split = "=", fixed = TRUE)
+    m = match(field, sapply(a, "[", 1))
+    if (!is.na(m)) { rv = a[[m]][2]
+    }
+    else {
+      rv = as.character(NA)
+    }
+    return(rv)
+  })
 }
 ```
 
@@ -123,9 +120,5 @@ Additionally, Prokka generically anotates a few proteins that are related to any
 <br>
 
 ```{r prokka-general-resistance, echo=FALSE}
-suppressMessages(library(kableExtra))
-suppressMessages(library(ballgown))
-suppressMessages(library(dplyr))
-df <- gffRead(params$gff_resistance)
-df %>% select("seqname", "start", "end", "attributes") %>% kable(caption = "Prokka Generic Resistance Feature") %>% kable_styling(font_size = 12, bootstrap_options = bt_opt) %>% scroll_box(height = "300px", width = F)
+gff %>% select("seqname", "start", "end", "attributes") %>% kable(caption = "Prokka Generic Resistance Feature") %>% kable_styling(font_size = 12) %>% scroll_box(height = "300px", width = F)
 ```
