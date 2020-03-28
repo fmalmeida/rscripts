@@ -1,58 +1,26 @@
 
+#### Strict Hits
+
 Strict hits genes are genes annotated with looser parameters and are not surely functional or correct. Which means, users should double check genes under this category.
 
 ```{r results='asis'}
-## Name columns
-colnames(rgi_strict) <- c("Contig", "Start", "Stop", "Orientation", "Cut_Off", "Best_Hit_ARO", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
-## Fix Contig Names
-rgi_strict$Contig <- gsub(pattern = "_[0-9]*$", replacement = "", rgi_strict$Contig)
-## Create Coordinate
-rgi_strict$Coordinates <- paste(rgi_strict$Contig, ":", rgi_strict$Start, "-", rgi_strict$Stop, sep = '')
-## Separate rows
-rgi_strict <- rgi_strict %>%
-  separate_rows(`Drug Class`, sep = "; ")
-
 # Create List
-#string.list <- rgi_strict %>% pull(6) %>% sort() %>% unique()
-#cat("- **AMR genes found in the query genome:**\n")
-#cat(paste("\t-", string.list), sep = '\n')
-
-# Create List
-string.list <- rgi_strict %>% pull(8) %>% sort() %>% unique()
+string.list <- rgi_strict %>% separate_rows(`Drug Class`, sep = "; ") %>% pull(`Drug Class`) %>% sort() %>% unique()
 cat("- **Drug Classes targeted by the query genome:**\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
 
-#### Supporting Data
-
 ```{r rgi-strict-resistance-genes}
-# Get metadata
-card_meta <- read.csv("https://github.com/fmalmeida/CARDDB/raw/master/aro.tsv", sep = "\t")
-card_meta$Accession <- str_remove(card_meta$Accession, "ARO:")
-# Change Col name
-names(card_meta)[names(card_meta) == "Accession"] <- 'ARO'
-card_meta$ARO <- as.integer(card_meta$ARO)
-
-# Join
-rgi_strict <- dplyr::left_join(rgi_strict, card_meta, by = c("ARO"))
-
-# Create urls
-urls <- lapply(rgi_strict$ID, function(x){paste0("https://card.mcmaster.ca/ontology/", x)})
-
-# Change Col name
-names(rgi_strict)[names(rgi_strict) == "ID"] <- 'CARD link'
-names(rgi_strict)[names(rgi_strict) == "Best_Hit_ARO"] <- 'Gene'
-
 # Produce Table
 rgi_strict %>%
-  select("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD link", "Coordinates", "Description") %>%
-  mutate("CARD link" = cell_spec(`CARD link`, "html", link = urls)) %>%
+  select("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD Link", "Query Protein Coordinates", "Description") %>%
   group_by(`Resistance Mechanism`) %>%
-  arrange(`Gene`, `CARD link`,`Resistance Mechanism`, `Drug Class`) %>%
-  kable(caption = "CARD resistance genes annotated and its target drug classes", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:7, valign = "middle") %>%
-  scroll_box(height = "500px")
+  arrange(`Gene`, `CARD Link`,`Resistance Mechanism`, `Drug Class`) %>%
+  datatable(caption = "CARD resistance genes annotated and its target drug classes",
+            colnames = c("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD Link", "Genome Coordinates", "Description"),
+          escape = FALSE,
+          rownames = FALSE,
+          options = list(pageLength = 5))
 ```
 
 <br>
@@ -61,7 +29,7 @@ In the image below it is shown the amount of genes found to target these specifi
 
 ```{r rgi-strict-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="80%"}
 rgi_count <- rgi_strict %>%
-  select(1,8)
+  select(`Protein ID`,`Drug Class`)
 colnames(rgi_count) <- c("Contig", "Class")
 drugs <- plyr::count(rgi_count, "Class")
 ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +

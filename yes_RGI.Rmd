@@ -3,23 +3,80 @@ Below it is summarized the result obtained with RGI. Roughly, it can be divided 
 
 1. Perfect hits
     + detects perfect matches to the curated reference sequences and mutations in the CARD
+    + Perfect hits are genes that CARD guarantee its functionality. Which means that these genes are likely functional and might be confering resistance to the bacteria.
 2. Strict hits
     + detects previously unknown variants of known AMR genes, including secondary screen for key mutations, using detection models with CARD's curated similarity cut-offs to ensure the detected variant is likely a functional AMR gene
 
 **Obs:** CARD RGI tool always tries to annotate functional AMR genes, however, depending on the assembly, a not functional gene may yet be annotated. There for, users are advised to double check genes annotated under Strict category.
 
-### Perfect hits
+### Results
 
-```{r, Perfect_RGI_block, echo=FALSE, results='asis', eval=rgi_perfect_not_null, child='yes_RGI_Perfect.Rmd'}
+```{r results='asis'}
+## Name columns
+colnames(rgi_tsv) <- c("Protein ID", "Product", "Cut_Off", "Best_Hit_ARO", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
+rgi_tsv$ARO <- as.integer(rgi_tsv$ARO)
+
+# Get metadata
+card_meta <- read.csv("https://github.com/fmalmeida/CARDDB/raw/master/aro.tsv", sep = "\t")
+card_meta$Accession <- str_remove(card_meta$Accession, "ARO:")
+
+# Change Col name
+names(card_meta)[names(card_meta) == "Accession"] <- 'ARO'
+card_meta$ARO <- as.integer(card_meta$ARO)
+
+# Create urls
+urls <- lapply(rgi_tsv$ID, function(x){paste0("https://card.mcmaster.ca/ontology/", x)})
+
+# Join
+rgi_tsv <- dplyr::left_join(rgi_tsv, card_meta, by = c("ARO")) %>%
+  mutate("ID" = cell_spec(`ID`, "html", link = urls))
+
+# Parse protein coordinates
+gff$ID <- getAttributeField(as.character(gff$attributes), "ID", ";")
+rgi_subset <- gff %>% filter(ID %in% rgi_tsv$`Protein ID`) %>%
+                               select(ID, start, end)
+
+# Create Position Column
+rgi_subset$`Query Protein Coordinates` <- paste(rgi_subset$ID, ":",
+                                                      rgi_subset$start,
+                                                      "-", rgi_subset$end)
+rgi_tsv <- merge.data.frame(rgi_subset, rgi_tsv, by.x = "ID", by.y = "Protein ID", all.y = TRUE)
+
+colnames(rgi_tsv) <- c("Protein ID", "Start", "End", "Query Protein Coordinates", "Product", "Cut_Off", "Gene", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family", "Name", "Description", "CARD Link")
+
+## Separate rows
+rgi_perfect <- rgi_tsv %>%
+  filter(Cut_Off == "Perfect")
+
+if (exists("rgi_perfect") && !is.null(nrow(rgi_perfect) > 0)) {
+  rgi_perfect_not_null <- TRUE
+  rgi_perfect_null <- FALSE
+} else {
+  rgi_perfect_not_null <- FALSE
+  rgi_perfect_null <- TRUE
+}
+
+## Separate rows
+rgi_strict <- rgi_tsv %>%
+  filter(Cut_Off == "Strict")
+
+if (exists("rgi_strict") && !is.null(nrow(rgi_strict) > 0)) {
+  rgi_strict_not_null <- TRUE
+  rgi_strict_null <- FALSE
+} else {
+  rgi_strict_not_null <- FALSE
+  rgi_strict_null <- TRUE
+}
 ```
 
-```{r, Perfect_RGI_block2, echo=FALSE, results='asis', eval=rgi_perfect_null, child='no_RGI_Perfect.Rmd'}
+```{r, rgi_conditional_block, echo=FALSE, results='asis', eval=rgi_perfect_not_null, child='yes_RGI_Perfect.Rmd'}
 ```
 
-### Strict hits
-
-```{r, Strict_RGI_block, echo=FALSE, results='asis', eval=rgi_strict_not_null, child='yes_RGI_Strict.Rmd'}
+```{r, rgi_conditional_block_2, echo=FALSE, results='asis', eval=rgi_perfect_null, child='no_RGI_Perfect.Rmd'}
 ```
 
-```{r, Perfect_RGI_block2, echo=FALSE, results='asis', eval=rgi_strict_null, child='no_RGI_Strict.Rmd'}
+```{r, rgi_conditional_block, echo=FALSE, results='asis', eval=rgi_strict_not_null, child='yes_RGI_Strict.Rmd'}
+```
+
+```{r, rgi_conditional_block_2, echo=FALSE, results='asis', eval=rgi_strict_null, child='no_RGI_Strict.Rmd'}
 ```

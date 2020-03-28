@@ -45,7 +45,8 @@ df <-
 datatable(df, caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus",
             colnames = c("Resistance Type", "Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence", "Genome Coordinates"),
           escape = FALSE,
-          rownames = FALSE)
+          rownames = FALSE,
+          options = list(pageLength = 5))
 ```
 
 ```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}

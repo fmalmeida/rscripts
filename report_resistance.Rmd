@@ -51,7 +51,10 @@ gff <- gffRead(params$gff)
 amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
 
 # Read RGI results
-rgi_tsv <- try(read.delim(params$rgitool, header = TRUE), silent = TRUE)
+rgi_tsv <- try(read.delim(params$rgitool, header = TRUE), silent = TRUE) %>%
+  separate(ORF_ID, into = c("Protein.Identifier", "Product"), sep = "\\s", extra = "merge") %>%
+  select(Protein.Identifier, Product, Cut_Off, Best_Hit_ARO, ARO, Drug.Class,
+         Resistance.Mechanism, AMR.Gene.Family)
 
 # Check if NCBI AMRFinder file is empty
 if (class(amrtsv) != 'try-error' && !is.null(nrow(amrtsv) > 0)) {
