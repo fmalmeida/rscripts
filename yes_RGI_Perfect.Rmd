@@ -1,13 +1,30 @@
-#### Perfect Hits
+### Perfect Hits
 
-Perfect hits are genes that CARD guarantee its functionality. Which means that these genes are likely functional and might be confering resistance to the bacteria.
+Perfect hits are genes that CARD guarantee its functionality. Which means that these genes are likely functional and might be conferring resistance to the bacteria. A summary of the Antibiotic Classes target by ARGs annotated as Perfect hits is shown in Figure \@ref(fig:rgi-perfect-resistome-png).
+
+```{r rgi-perfect-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="60%"}
+rgi_count <- rgi_perfect %>%
+  separate_rows(`Drug Class`, sep = "; ") %>%
+  select(`Protein ID`,`Drug Class`)
+colnames(rgi_count) <- c("Contig", "Class")
+drugs <- plyr::count(rgi_count, "Class")
+ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  xlab("Targeted Drug Class") +
+  ylab("Number of genes") +
+  guides(fill=guide_legend(title = "Drug Classes"))
+```
 
 ```{r results='asis'}
 # Create List
-string.list <- rgi_perfect %>% separate_rows(`Drug Class`, sep = "; ") %>% pull(`Drug Class`) %>% sort() %>% unique()
-cat("- **Drug Classes targeted by the query genome:**\n")
-cat(paste("\t-", string.list), sep = '\n')
+#string.list <- rgi_perfect %>% separate_rows(`Drug Class`, sep = "; ") %>% pull(`Drug Class`) %>% sort() %>% unique()
+#cat("- **Drug Classes targeted by the query genome:**\n")
+#cat(paste("\t-", string.list), sep = '\n')
 ```
+
+#### Supporting data
 
 ```{r rgi-perfect-resistance-genes}
 # Produce Table
@@ -20,22 +37,4 @@ rgi_perfect %>%
           escape = FALSE,
           rownames = FALSE,
           options = list(pageLength = 5))
-```
-
-<br>
-
-In the image below it is shown the amount of genes found to target these specific drug classes.
-
-```{r rgi-perfect-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="80%"}
-rgi_count <- rgi_perfect %>%
-  select(`Protein ID`,`Drug Class`)
-colnames(rgi_count) <- c("Contig", "Class")
-drugs <- plyr::count(rgi_count, "Class")
-ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
-  geom_bar(stat = "identity") +
-  theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  xlab("Targeted Drug Class") +
-  ylab("Number of genes") +
-  guides(fill=guide_legend(title = "Drug Classes"))
 ```

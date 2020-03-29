@@ -4,16 +4,16 @@ author: "`r params$query` genome assembly"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 subtitle: "Resistance genes and determinants annotated using NCBI-AMRFinderPlus and CARD-RGI tools"
 params:
-  query: Ecoli
-  amrfinder: /home/falmeida/Documents/dataset_1/bacannot_test/spades_test_ecoli/resistance/AMRFinderPlus/AMRFinder_resistance-only.tsv
-  gff: /home/falmeida/Documents/dataset_1/bacannot_test/spades_test_ecoli/gffs/spades_test_ecoli.gff
-  rgitool: /home/falmeida/Documents/dataset_1/bacannot_test/spades_test_ecoli/resistance/RGI/RGI_spades_test_ecoli.txt
+  query: na
+  amrfinder: na
+  gff: na
+  rgitool: na
 output:
   bookdown::html_document2:
     df_print: paged
     number_sections: false
     syntax: tango
-    toc: true
+    toc: false
     self_contained: yes
     theme: united
 ---
@@ -21,10 +21,10 @@ output:
 <style type="text/css">
 
 body{ /* Normal  */
-      font-size: 16px;
+      font-size: 14px;
   }
 .main-container {
-  max-width: 90% !important;
+  max-width: 85% !important;
   margin-left: auto;
   margin-right: auto;
 }
@@ -92,13 +92,13 @@ getAttributeField <- function (x, field, attrsep = ";") {
 
 # About
 
-Resistance genes or resistance determinants confer to the bacteria the ability to tolerate or resist some antibiotics or antimicrobials. Which means, these characteristics makes the bacteria less susceptible to its effects.
+Resistance genes or resistance determinants confer to the bacteria the ability to tolerate or resist antimicrobial molecules. Which means, these characteristics makes the bacteria less susceptible to its effects.
 
-Resistance determinants were predicted using [AMRFinderPlus](https://github.com/ncbi/amr/wiki). This is a binary distributed by NCBI that allows users to query the National Database of Antibiotic Resistant Organisms ([NDARO](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/)). This is a NCBI curated database that aggregates resistance genes from other databases such as [Resfams](http://www.dantaslab.org/resfams), [CARD](https://card.mcmaster.ca/), ResFinder, Pasteur Institute Beta Lactamases and orthers. For more information please read the following [link](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047). NCBI's efforts were done in order to standardise and confer reliability to AMR predictions.
+Resistance determinants were predicted using [AMRFinderPlus](https://github.com/ncbi/amr/wiki). This is a binary distributed by NCBI that allows users to query the National Database of Antibiotic Resistant Organisms ([NDARO](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/)). This is a NCBI curated database that aggregates resistance genes from other databases such as [Resfams](http://www.dantaslab.org/resfams), [CARD](https://card.mcmaster.ca/), ResFinder, Pasteur Institute Beta Lactamases and others. For more information please read the following [link](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047). NCBI's efforts were done in order to standardize and confer reliability to AMR predictions.
 
 Additionally, resistance determinants were also detected with [CARD RGI](https://github.com/arpcard/rgi) tool which enables the detection of new variants and mutations that confer resistance to antibiotics. The RGI analyzes genome or proteome sequences under three paradigms: **Perfect**, **Strict**, and **Loose** (a.k.a. Discovery). **The Perfect algorithm** is most often applied to clinical surveillance as it detects perfect matches to the curated reference sequences and mutations in the CARD. In contrast, **the Strict algorithm** detects previously unknown variants of known AMR genes, including secondary screen for key mutations, using detection models with CARD's curated similarity cut-offs to ensure the detected variant is likely a functional AMR gene.
 
-# Results
+# Results {.tabset .tabset-fade .tabset-pills}
 
 ## AMRFinder
 
@@ -114,14 +114,4 @@ Additionally, resistance determinants were also detected with [CARD RGI](https:/
 ```
 
 ```{r, rgi_conditional_block_2, echo=FALSE, results='asis', eval=rgi_null, child='no_RGI.Rmd'}
-```
-
-## Prokka
-
-Additionally, Prokka generically anotates a few proteins that are related to any type of resistance. One must take cautin when evaluating this result because this annotation can be very generic and therefore not so meaningful. Because it uses hmms, it can happen to anotate a multidrug resistance efflux pumps but it must be checked wheter it is correctly annotated or functional. These are showed in Table \@ref(tab:prokka-general-resistance).
-
-<br>
-
-```{r prokka-general-resistance, echo=FALSE}
-gff %>% select("seqname", "start", "end", "attributes") %>% kable(caption = "Prokka Generic Resistance Feature") %>% kable_styling(font_size = 12) %>% scroll_box(height = "300px", width = F)
 ```

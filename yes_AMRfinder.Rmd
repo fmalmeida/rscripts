@@ -1,5 +1,5 @@
 
-Below it is summarized the result obtained with AMRFinderPlus. Roughly, it can be divided into two main categories: 
+Below it is summarized the result obtained with **AMRFinderPlus**. Roughly, it can be divided into two main categories: 
 
 1. Genes related to antibiotics, called AMR;
 2. Genes related to stress resistance which can be:
@@ -7,18 +7,10 @@ Below it is summarized the result obtained with AMRFinderPlus. Roughly, it can b
     + metal resistance
     + heat resistance
 
-This is well documented in Table \@ref(tab:ncbi-amr-resistance-genes). Whenever possible, all feature have links to NCBI database marking the closest reference sequence to each annotated gene. Additionally, gene targets are summarised in image \@ref(fig:ncbi-resistome-png). Right below it is presented a small list containing AMR genes found in the query genome. If empty, none has been found.
+This is well documented in the Table below. Whenever possible, all feature have links to NCBI database marking the closest reference sequence to each annotated gene. A summary of the Antibiotic Classes target by ARGs annotated is shown in Figure \@ref(fig:ncbi-resistome-png).
 
-```{r results='asis'}
-# Create List
-string.list <- amrtsv %>% filter(Element.type == "AMR") %>% pull(2) %>% unique()
-cat("- **AMR genes found in the query genome:**\n")
-cat(paste("\t-", string.list), sep = '\n')
-```
+```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
 
-### Supporting Data
-
-```{r ncbi-amr-resistance-genes}
 # Create urls of reference genomes
 urls <- lapply(amrtsv$Accession.of.closest.sequence, function(x){
   ifelse(!is.na(x), paste0("https://www.ncbi.nlm.nih.gov/gene/?term=", x),
@@ -42,14 +34,7 @@ df <-
   mutate("Accession.of.closest.sequence" = ifelse(!is.na(Accession.of.closest.sequence), cell_spec(Accession.of.closest.sequence, "html", link = urls), NA)) %>%
   arrange(Element.type, ID)
 
-datatable(df, caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus",
-            colnames = c("Resistance Type", "Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence", "Genome Coordinates"),
-          escape = FALSE,
-          rownames = FALSE,
-          options = list(pageLength = 5))
-```
-
-```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
+# Render image
 ncbi_count <- df %>%
   select(3,5)
 drugs <- plyr::count(ncbi_count, "Class")
@@ -60,4 +45,22 @@ ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   xlab("Gene Target") +
   ylab("Number of genes") +
   guides(fill=guide_legend(title = "Gene Target"))
+```
+
+```{r results='asis'}
+# Create List
+#string.list <- amrtsv %>% filter(Element.type == "AMR") %>% pull(2) %>% unique()
+#cat("- **AMR genes found in the query genome:**\n")
+#cat(paste("\t-", string.list), sep = '\n')
+```
+
+### Supporting Data
+
+```{r ncbi-amr-resistance-genes}
+datatable(df, caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus",
+            colnames = c("Resistance Type", "Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence", "Genome Coordinates"),
+          escape = FALSE,
+          rownames = FALSE,
+          options = list(pageLength = 5,
+                         width = '80%'))
 ```
