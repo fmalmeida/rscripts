@@ -1,25 +1,10 @@
-All prophage genes that were found in the query genome using PHAST database are showed in Table \@ref(tab:phast-table). In this table it is presented the query protein tag, its source prophage and gene function.
+All prophage genes that were found in the query genome using PHAST database are showed in the Table below. In this table it is presented the query protein tag, its source prophage and gene function.
 
 > Unfortunately, PHASTER database have no searchable interface to visualize its prophages. Therefore, this table has no links to external sources.
 
 ```{r phast-table}
-# Function to get Attribute Fields
-getAttributeField <- function (x, field, attrsep = ";") { 
-  s = strsplit(x, split = attrsep, fixed = TRUE) 
-  sapply(s, function(atts) { 
-    a = strsplit(atts, split = "=", fixed = TRUE) 
-    m = match(field, sapply(a, "[", 1)) 
-    if (!is.na(m)) { rv = a[[m]][2] 
-    } 
-    else { 
-      rv = as.character(NA) 
-    } 
-    return(rv) 
-  }) 
-}
-
 # Create ID Column
-gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
+gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 
 # To upper
 gff$ID <- toupper(gff$ID)
@@ -36,15 +21,16 @@ phast_blast$stitle <- gsub(phast_blast$stitle, pattern = " \\[", replacement = "
 full_info <- merge.data.frame(phast_blast, gff, by.x = "qseqid", by.y = "ID")
 
 # Create Position Column
-full_info$position <- paste(full_info$V1, ":", full_info$V4, "-", full_info$V5, sep = "")
+full_info$position <- paste(full_info$seqname, ":", full_info$start, "-", full_info$end, sep = "")
 
 full_info %>%
   select(qseqid, stitle, position) %>%
   separate(stitle, c("prophage", "id", "tag", "contig", "product", "species"), sep = "\\|") %>%
   select(prophage, species, qseqid, product, position) %>%
-  arrange(prophage) %>%
-  kable(caption = "Prophage genes annotated using [PHASTER database](https://phaster.ca).", escape = FALSE, col.names = c("Prophage Name", "Species source", "Query Protein ID", "Gene Product", "Query Protein Coordinates")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:5, valign = "middle") %>%
-  scroll_box(height = "500px")
+  arrange(prophage, position, species) %>%
+  datatable(caption = "Prophage genes annotated using PHASTER database",
+            colnames = c("Prophage Name", "Species source", "Query Protein ID", "Gene Product", "Query Protein Coordinates"),
+          escape = FALSE,
+          rownames = FALSE,
+          options = list(pageLength = 5))
 ```

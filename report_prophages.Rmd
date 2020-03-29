@@ -1,8 +1,8 @@
 ---
-title: "Annotation Report of query genome `r params$query`"
-author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
+title: "Annotation Report"
+author: "`r params$query` genome assembly"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-subtitle: "Prophages summary."
+subtitle: "MGEs annotated using Phigaro, PHAST and ICEberg databases"
 params:
   blast_id:
   blast_cov:

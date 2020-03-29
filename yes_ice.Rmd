@@ -1,35 +1,20 @@
 ```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
-ice_prot_blast <- ice_prot_blast[!grepl("complete chromossome", ice_prot_blast$stitle),]
-ice_prot_blast <- ice_prot_blast[order(ice_prot_blast$qseqid, -abs(ice_prot_blast$pident), -abs(ice_prot_blast$bitscore) ), ]
-ice_prot_blast <-ice_prot_blast[ !duplicated(ice_prot_blast$qseqid), ]
-ice_prot_blast <- ice_prot_blast[order(ice_prot_blast$qseqid),]
-
-# Function to get Attribute Fields
-getAttributeField <- function (x, field, attrsep = ";") { 
-  s = strsplit(x, split = attrsep, fixed = TRUE) 
-  sapply(s, function(atts) { 
-    a = strsplit(atts, split = "=", fixed = TRUE) 
-    m = match(field, sapply(a, "[", 1)) 
-    if (!is.na(m)) { rv = a[[m]][2] 
-    } 
-    else { 
-      rv = as.character(NA) 
-    } 
-    return(rv) 
-  }) 
-}
+ice_blast <- ice_blast[!grepl("complete chromossome", ice_blast$stitle),]
+ice_blast <- ice_blast[order(ice_blast$qseqid, -abs(ice_blast$pident), -abs(ice_blast$bitscore) ), ]
+ice_blast <-ice_blast[ !duplicated(ice_blast$qseqid), ]
+ice_blast <- ice_blast[order(ice_blast$qseqid),]
 
 # Create ID Column
-gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
+gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 
 # To upper
 gff$ID <- toupper(gff$ID)
 
 # Data Complete
-full_info <- merge.data.frame(ice_prot_blast, gff, by.x = "qseqid", by.y = "ID")
+full_info <- merge.data.frame(ice_blast, gff, by.x = "qseqid", by.y = "ID")
 
 # Create Position Column
-full_info$position <- paste(full_info$V1, ":", full_info$V4, "-", full_info$V5, sep = "")
+full_info$position <- paste(full_info$seqname, ":", full_info$start, "-", full_info$end, sep = "")
 
 
 blast <- full_info %>% select(qseqid, sseqid, stitle, position)
@@ -41,7 +26,7 @@ blast <- separate(blast, sseqid, c("Database", "ICE_id"), sep = "\\|")
 urls <- lapply(blast$ICE_id, function(x){paste0("http://202.120.12.136:7913/ICEberg2/feature_page.php?ice_id=", x)})
 ```
 
-All anotated genes from known ICEs are showed in Table \@ref(tab:write-table). It is summarised the ICE id and all its genes that were found in the query genome. All of them are linked to the database for further investigations.
+All anotated genes from known ICEs are showed in the Table below. It is summarised the ICE id and all its genes that were found in the query genome. All of them are linked to the database for further investigations.
 
 Users are advised to use the [ICEfinder](http://202.120.12.136:7913/ICEfinder/ICEfinder.html) tool to predict genomic position of known ICEs since we are not allowed to include this step under this pipeline.
 
@@ -49,23 +34,10 @@ Users are advised to use the [ICEfinder](http://202.120.12.136:7913/ICEfinder/IC
 # Produce Table
 blast %>% select("ICE_id", "qseqid", "name", "position") %>%
   mutate("ICE_id" = cell_spec(ICE_id, "html", link = urls)) %>%
-  arrange(ICE_id) %>%
-  kable(caption = "ICEs genes annotated from ICEberg database", escape = FALSE, col.names = c("ICE id", "Query Protein ID", "ICE's gene names", "Query Protein Coordinates")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:4, valign = "middle")
+  arrange(ICE_id, position) %>%
+  datatable(caption = "ICEs genes annotated from ICEberg database",
+            colnames = c("ICE id", "Query Protein ID", "ICE's gene names", "Query Protein Coordinates"),
+          escape = FALSE,
+          rownames = FALSE,
+          options = list(pageLength = 5))
 ```
-
-<!--
-```{r ices-png, fig.align='center', fig.show='hold', fig.cap="ICEs annotated from [ICEberg](http://202.120.12.136:7913/ICEberg2/) database and the amount of genes found within each.", out.width="60%"}
-summary <- blast %>%
-  select("ICE_id", "name") %>% arrange(ICE_id)
-colnames(summary) <- c("ICE_id", "name")
-ices <- plyr::count(summary, "ICE_id")
-ggplot(ices, aes(x=ICE_id, y=freq, fill=ICE_id)) + geom_bar(stat = "identity") +
-  theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) +
-  xlab("Integrative and Conjugative Elements") +
-  ylab("Number of annotated genes") +
-  guides(fill=guide_legend(title = "ICEs"))
-```
--->
