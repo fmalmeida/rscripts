@@ -60,6 +60,7 @@ if (nrow(blastFile) > 0) {
 blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$pident), -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
+blastFile$stitle <- gsub("; ", ", ", x = blastFile$stitle)
 
 # Create GFF Attribute Entry
 blastFile$NEW_attributes <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=",
