@@ -1,6 +1,21 @@
 ```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
+# Function to get Attribute Fields
+getAttributeField <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
+      rv = as.character(NA) 
+    } 
+    return(rv) 
+  }) 
+}
+
 # Create ID Column
-gff$ID <- getAttributeField(as.character(gff$attributes), "ID", ";")
+gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
 
 # To upper
 gff$ID <- toupper(gff$ID)
@@ -14,7 +29,7 @@ vfdb_blast <- vfdb_blast[order(vfdb_blast$V1),]
 full_info <- merge.data.frame(vfdb_blast, gff, by.x = "V1", by.y = "ID")
 
 # Create Position Column
-full_info$position <- paste(full_info$seqname, ":", full_info$start, "-", full_info$end, sep = "")
+full_info$position <- paste(full_info$V1.y, ":", full_info$V4.y, "-", full_info$V5.y, sep = "")
 
 # Create DF for kable
 blast <- full_info %>% select(V1, V14, position)
@@ -33,7 +48,18 @@ ids <- str_match(ids, "VF.*[0-9]+")
 urls <- lapply(ids, function(x){paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", x, "#", x)})
 ```
 
-A summary of all the virulence factors which had at least on gene found in the query genome is shown in the figure below (Figure \@ref(fig:vfs-png). Virulence genes are more detailed in Table below. It shows the gene product, source and name of each gene related to a Virulence Factor found in the query genome. The annotation shown is linked to the database for further investigations.
+All virulence factors that were found to have at least one gene in the query genome are shown in the list below. All of them are linked to the database for further investigations.
+
+> The results are showed as: **[VFDB virulence factor name (VFDB virulence factor ID)]**.
+
+```{r results='asis'}
+string.list <- blast %>% pull("Virulence Factor Name") %>% unique() %>% sort()
+string.list <- lapply(string.list, function(x){y = str_match(x, "VF.*[0-9]+") ;  paste0("[", x, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", y, "#", y, ")")})
+cat("- Virulence factors found in the query genome:\n")
+cat(paste("\t-", string.list), sep = '\n')
+```
+
+Virulence genes are more detailed in Table \@ref(tab:write-table). It shows the gene product, source and name of each gene related to a Virulence Factor found in the query genome. Additionally, Figure \@ref(fig:vfs-png) summarizes the amount of annotated genes of each virulence factor.
 
 ```{r vfs-png, fig.align='center', fig.show='hold', fig.cap="Virulence Factors annotated from [VFDB](http://www.mgc.ac.cn/VFs/main.htm) database", out.width="60%"}
 summary <- blast %>%
@@ -48,20 +74,12 @@ ggplot(vfs, aes(x=Virulence_Factor_Name, y=freq, fill=Virulence_Factor_Name)) + 
   guides(fill=guide_legend(title = "Virulence Factors"))
 ```
 
-### Supporting data
-
 ```{r write-table}
 # Produce Table
-## Rename Columns
 colnames(blast) <- c("Query Protein ID", "VF ID", "Gene Name", "Description", "Virulence Factor Name", "Subject Species", "Query Protein Coordinates")
-## Subset dataframe
-blast %>%
-  select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species", "Query Protein ID", "Query Protein Coordinates") %>%
-  arrange(`Virulence Factor Name`, `VF ID`,`Gene Name`) %>%
+blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species", "Query Protein ID", "Query Protein Coordinates") %>%
   mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
-  datatable(caption = "Virulence Genes annotated from VFDB",
-            colnames = c("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species", "Query Protein ID", "Query Protein Coordinates"),
-          escape = FALSE,
-          rownames = FALSE,
-          options = list(pageLength = 5))
+  kable(caption = "Virulence Genes annotated from VFDB", escape = FALSE) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1:4, valign = "middle")
 ```

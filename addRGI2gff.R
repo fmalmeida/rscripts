@@ -51,74 +51,41 @@ getAttributeField <- function (x, field, attrsep = ";") {
 
 # Load GFF File
 gff <- gffRead(opt$gff)
-
-# Create a column in gff with ids
-gff$ID <- getAttributeField(gff$attributes, "ID", ";")
+colnames(gff) <- c("Contig", "Source", "Feature", "Start", "Stop",
+                   "Score", "Orientation", "Frame", "Attributes")
 
 # Load CARD RGI results
 rgi_input <- read.delim(opt$input, header = TRUE)
+## Rename contigs
+rgi_input$Contig <- sub(pattern = " ",
+                       replacement = "", x = rgi_input$Contig)
+
+rgi_input$Contig <- sub(pattern = "_[[:digit:]]*$",
+                       replacement = "", x = rgi_input$Contig)
 
 if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
-  
-  # Drop unused ID column
-  rgi_input <- rgi_input %>%
-    select(-ID)
-  
-  # Fix ORF_ID
-  rgi_input <- rgi_input %>% mutate(ORF_ID = str_replace(ORF_ID, "\\s", "|")) %>%
-    separate(ORF_ID, into = c("Protein_ID", "Protein_Product"), sep = "\\|")
-  
-  # Fix Drug Classes and Resistance mechanism
-  rgi_input$Drug.Class <- gsub(pattern = ";\\s", replacement = "/",
-                               x = rgi_input$Drug.Class)
-  rgi_input$Resistance.Mechanism <- gsub(pattern = ";\\s", replacement = "/",
-                               x = rgi_input$Resistance.Mechanism)
-  
-  # Remove low identity hits
-  rgi_input <- rgi_input[rgi_input$Best_Identities >= 85, ]
-  
-  # Create Attributes
-  rgi_input$NEW_attributes <-
-    paste("CARD_ID=", rgi_input$ARO, ";CARD_Target=", rgi_input$Best_Hit_ARO, ";RGI_inference=", rgi_input$Model_type,
-          ";CARD_Resistance_Mechanism=", rgi_input$Resistance.Mechanism, ";CARD_drug_class=",
-          rgi_input$Drug.Class, ";Additional_database=CARD", sep = "")
-  
-  # Get ids
-  ids <- rgi_input$Protein_ID
-  
-  # Subset based on gene IDs
-  sub <- gff %>% filter(ID %in% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes, ID)
-  not <- gff %>% filter(ID %ni% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
-  
-  # Change fields values
-  ## source
-  s <- sub$source
-  sn <- "CARD"
-  snew <- paste(s, sn, sep = ",")
-  sub$source <- snew
-  
-  ## feature
-  f <- sub$feature
-  fn <- "Resistance"
-  fnew <- paste(f, fn, sep = ",")
-  sub$feature <- fnew
-  
-  ## attributes
-  sub <- merge.data.frame(sub, rgi_input, by.x = "ID",
-                          by.y = "Protein_ID", all = TRUE)
-  sub <- unite(sub, "attributes", c("attributes", "NEW_attributes"), sep = ";") %>%
-    select(seqname, source, feature, start, end, score, strand, frame, attributes)
-  
-  # Merge files
-  merged_df <- merge.data.frame(sub, not, all = TRUE)
-  feat <- merged_df$feature
-  merged_df$feature <- sapply(feat, reduce_row)
-  source <- merged_df$source
-  merged_df$source <- sapply(source, reduce_row)
-  merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 
-  # Write output
-  write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t",
+  rgi_input$Source <- ("CARD-RGI")
+  rgi_input$Feature <- ("Resistance")
+  rgi_input$Score <- (".")
+  rgi_input$Frame <- 0
+  rgi_input$Attributes <-
+    paste("CARD_name=", rgi_input$Best_Hit_ARO, ";RGI_inference=", rgi_input$Model_type,
+          ";CARD_product=", rgi_input$AMR.Gene.Family, ";Targeted_drug_class=",
+          rgi_input$Drug.Class, ";Additional_database=CARD-RGI", sep = "")
+  rgi_input$Attributes <- gsub(pattern = " ", replacement = "_",
+                               x = rgi_input$Attributes)
+  rgi_input$Attributes <- gsub(pattern = "-", replacement = "_",
+                               x = rgi_input$Attributes)
+
+  dplyr::mutate(rgi_input, Stop = pmax(Start, Stop), Start = pmin(Start, Stop))                               
+
+    rgi_gff <- rgi_input %>%
+      select(Contig, Source, Feature, Start, Stop,
+           Score, Orientation, Frame, Attributes)
+    full_gff <- rbind(gff, rgi_gff)
+
+    write.table(full_gff, file = opt$out, quote = FALSE, sep = "\t",
               col.names = FALSE, row.names = FALSE)
 
 } else {

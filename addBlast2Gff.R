@@ -1,13 +1,14 @@
 #!/usr/bin/Rscript
 # Setting Help
-'usage: addBlast2Gff.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr>]
+'usage: addBlast2Gff.R [--input=<file> --gff=<file> --out=<chr> --database=<chr> --type=<chr> --scoverage=<int>]
 
 options:
   -i, --input=<file>    Tabular Blast to be added to GFF
   -g, --gff=<file>      GFF file to add Blast hits into
   -o, --out=<chr>       Output file name [default: out.gff]
   -d, --database=<chr>  Name of databased which Blast came from
-  -t, --type=<chr>      Type of feature blasted. Ex: resistance' -> doc
+  -t, --type=<chr>      Type of feature blasted. Ex: resistance
+  -c, --scoverage=<int> Minimum subject coverage to keep' -> doc
 
 # Parse parameters
 suppressMessages(library(docopt))
@@ -26,21 +27,21 @@ suppressMessages(library(tidyr))
 # Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
-  paste(unique(d), collapse = ',')
+  paste(unique(d), collapse = ',') 
 }
 # Function to get Attribute Fields
-getAttributeField <- function (x, field, attrsep = ";") {
-  s = strsplit(x, split = attrsep, fixed = TRUE)
-  sapply(s, function(atts) {
-    a = strsplit(atts, split = "=", fixed = TRUE)
-    m = match(field, sapply(a, "[", 1))
-    if (!is.na(m)) { rv = a[[m]][2]
-    }
-    else {
-      rv = as.character(NA)
-    }
-    return(rv)
-  })
+getAttributeField <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
+      rv = as.character(NA) 
+    } 
+    return(rv) 
+  }) 
 }
 # Operator to discard patterns found
 '%ni%' <- Negate('%in%')
@@ -49,21 +50,27 @@ getAttributeField <- function (x, field, attrsep = ";") {
 
 if (file.info(opt$input)$size > 0 ) {
 # Load blast tabular file
-blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart",
+blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", 
                  "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")
 
 blastFile <- read.delim(opt$input, header = FALSE)
 colnames(blastFile) <- blastHeader
 
+# Filter blast based on subject coverage
+if (!is.null(opt$scoverage)) {
+blastFile$scov <- (blastFile$length / blastFile$slen) * 100
+blastFile <- dplyr::filter(blastFile, scov >= as.integer(opt$scoverage))
+}
+
 if (nrow(blastFile) > 0) {
+  
 # Remove duplicates based on bitscore
-blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$pident), -abs(blastFile$bitscore) ), ]
+blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$pident), -abs(blastFile$scov), -abs(blastFile$bitscore) ), ]
 blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
 blastFile <- blastFile[order(blastFile$qseqid),]
-blastFile$stitle <- gsub("; ", ", ", x = blastFile$stitle)
 
 # Create GFF Attribute Entry
-blastFile$NEW_attributes <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=",
+blastFile$NEW_attributes <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=", 
              blastFile$sseqid, ";", opt$database, "_Target=", blastFile$stitle, sep = "")
 
 # Get gene names
@@ -93,7 +100,7 @@ fnew <- paste(f, fn, sep = ",")
 sub$feature <- fnew
 
 ## attributes
-sub <- merge.data.frame(sub, blastFile, by.x = "ID",
+sub <- merge.data.frame(sub, blastFile, by.x = "ID", 
                         by.y = "qseqid", all = TRUE)
 sub <- unite(sub, "attributes", c("attributes", "NEW_attributes"), sep = ";") %>%
   select(seqname, source, feature, start, end, score, strand, frame, attributes)
@@ -107,18 +114,18 @@ merged_df$source <- sapply(source, reduce_row)
 merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
 
 # Write output
-write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t",
+write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", 
             col.names = FALSE, row.names = FALSE)
 } else {
   # Load GFF file
   gff <- gffRead(opt$gff)
   # Write output
-  write.table(gff, file = opt$out, quote = FALSE, sep = "\t",
+  write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
               col.names = FALSE, row.names = FALSE)
 }} else {
   # Load GFF file
   gff <- gffRead(opt$gff)
   # Write output
-  write.table(gff, file = opt$out, quote = FALSE, sep = "\t",
+  write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
               col.names = FALSE, row.names = FALSE)
 }

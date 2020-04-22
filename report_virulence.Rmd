@@ -1,54 +1,47 @@
 ---
-title: "Annotation Report"
-author: "`r params$query` genome assembly"
+title: "Annotation Report of query genome `r params$query`"
+author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-subtitle: "Virulence genes annotated using VFDB and Victors databases"
+subtitle: "Virulence genes annotated from VFDB"
 params:
-  blast_id: na
-  blast_cov: na
-  vfdb_blast: na
-  victors_blast: na
-  query: na
-  gff: na
+  blast_id:
+  blast_cov:
+  vfdb_blast:
+  victors_blast:
+  query:
+  gff:
 output:
   bookdown::html_document2:
     df_print: paged
     number_sections: false
     syntax: tango
     self_contained: yes
-    theme: united
+    theme: journal
 ---
 
 <style type="text/css">
 
 body{ /* Normal  */
-      font-size: 14px;
+      font-size: 16px;
   }
-.main-container {
-  max-width: 85% !important;
-  margin-left: auto;
-  margin-right: auto;
-}
 </style>
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
-suppressMessages(library(magrittr))
-suppressMessages(library(knitr))
-suppressMessages(library(kableExtra))
-suppressMessages(library(stringr))
-suppressMessages(library(ballgown))
-suppressMessages(library(tidyr))
-suppressMessages(library(plyr))
-suppressMessages(library(DT))
-suppressMessages(library(dplyr))
-suppressMessages(library(stringr))
-suppressMessages(library(ggplot2))
-
+options(knitr.table.format = "html")
+bt_opt =  c("hover", "condensed", "responsive")
+library(magrittr)
+library(knitr)
+library(tidyr)
+library(plyr)
+library(kableExtra)
+library(dplyr)
+library(stringr)
+library(ggplot2)
 victors_blast <- try(read.delim(params$victors_blast, header = FALSE), silent = TRUE)
 vfdb_blast <- try(read.delim(params$vfdb_blast, header = FALSE), silent = TRUE)
-gff <- try(gffRead(params$gff), silent = TRUE)
+gff <- try(read.delim(params$gff, header = FALSE), silent = TRUE)
 
 # Check if blast is empty
 if (class(vfdb_blast) != 'try_error' && !is.null(nrow(vfdb_blast)) > 0) {
@@ -66,21 +59,6 @@ if (class(victors_blast) != 'try_error' && !is.null(nrow(victors_blast)) > 0) {
   victors_not_null <- FALSE
   victors_null <- TRUE
 }
-
-# Function to get Attribute Fields
-getAttributeField <- function (x, field, attrsep = ";") { 
-  s = strsplit(x, split = attrsep, fixed = TRUE) 
-  sapply(s, function(atts) { 
-    a = strsplit(atts, split = "=", fixed = TRUE) 
-    m = match(field, sapply(a, "[", 1)) 
-    if (!is.na(m)) { rv = a[[m]][2] 
-    } 
-    else { 
-      rv = as.character(NA) 
-    } 
-    return(rv) 
-  }) 
-}
 ```
 
 # About
@@ -96,7 +74,7 @@ Virulence factors are molecules produced by bacteria that add effectiveness in t
 * Blast % identity: `> `r params$blast_id`%`
 * Blast % query coverage: `> `r params$blast_cov`%`
 
-# Results {.tabset .tabset-fade .tabset-pills}
+# Results
 
 ## VFDB
 

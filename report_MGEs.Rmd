@@ -1,61 +1,55 @@
 ---
-title: "Annotation Report"
-author: "`r params$query` genome assembly"
+title: "Annotation Report of query genome `r params$query`"
+author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-subtitle: "Mobile genetic elements (MGEs) annotated using IslandPath-DIMOB, Phigaro and the databases PHAST and ICEberg"
+subtitle: "Annotated mobile genetic elements (MGEs)"
 params:
-  blast_id: na
-  blast_cov: na
-  phigaro_dir: na
-  phigaro_txt: na
-  ice_blast: na
-  phast_blast: na
-  query: na
-  gff: na
+  blast_id:
+  blast_cov:
+  phigaro_dir:
+  phigaro_txt:
+  virsorter_dir:
+  virsorter_csv:
+  ice_prot_blast:
+  phast_blast:
+  query:
+  gff:
 output:
   bookdown::html_document2:
     df_print: paged
     number_sections: false
     syntax: tango
     self_contained: yes
-    theme: united
+    theme: journal
     toc: true
 ---
 
 <style type="text/css">
 
 body{ /* Normal  */
-      font-size: 14px;
+      font-size: 16px;
   }
-.main-container {
-  max-width: 85% !important;
-  margin-left: auto;
-  margin-right: auto;
-}
 </style>
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
-suppressMessages(library(magrittr))
-suppressMessages(library(knitr))
-suppressMessages(library(kableExtra))
-suppressMessages(library(stringr))
-suppressMessages(library(ballgown))
-suppressMessages(library(tidyr))
-suppressMessages(library(plyr))
-suppressMessages(library(DT))
-suppressMessages(library(dplyr))
-suppressMessages(library(stringr))
-suppressMessages(library(ggplot2))
-
-# Read inputs
+options(knitr.table.format = "html")
+bt_opt =  c("hover", "condensed", "responsive")
+library(magrittr)
+library(knitr)
+library(tidyr)
+library(plyr)
+library(kableExtra)
+library(dplyr)
+library(stringr)
+library(ggplot2)
 phigaro_dir <- params$phigaro_dir
 phigaro_html <- paste0(phigaro_dir, "/assembly.phg.html", collapse = "")
 phigaro_txt <- params$phigaro_txt
 
 ## Read GFF
-gff <- try(gffRead(params$gff), silent = TRUE)
+gff <- read.delim(params$gff, header = FALSE)
 
 ## Read phigaro
 phigaro_txt <- try(read.delim(phigaro_txt), silent = TRUE)
@@ -77,30 +71,18 @@ if (class(phast_blast) != 'try_error' & nrow(phast_blast) > 0) {
   phast_null <- TRUE
 }
 
-ice_blast <- try(read.delim(params$ice_blast, header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+ice_prot_blast <- try(read.delim(params$ice_prot_blast, header = FALSE, col.names = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")), silent = TRUE)
+
+## Read GFF
+gff <- read.delim(params$gff, header = FALSE)
 
 # Check if blast is empty
-if (class(ice_blast) != 'try_error' & nrow(ice_blast) > 0) {
+if (class(ice_prot_blast) != 'try_error' & nrow(ice_prot_blast) > 0) {
   not_null <- TRUE
   null <- FALSE
 } else {
   not_null <- FALSE
   null <- TRUE
-}
-
-# Function to get Attribute Fields
-getAttributeField <- function (x, field, attrsep = ";") { 
-  s = strsplit(x, split = attrsep, fixed = TRUE) 
-  sapply(s, function(atts) { 
-    a = strsplit(atts, split = "=", fixed = TRUE) 
-    m = match(field, sapply(a, "[", 1)) 
-    if (!is.na(m)) { rv = a[[m]][2] 
-    } 
-    else { 
-      rv = as.character(NA) 
-    } 
-    return(rv) 
-  }) 
 }
 ```
 
@@ -112,22 +94,20 @@ In this context, this pipeline automatically annotates prophage sequences and pr
 
 Additionally, integrative and conjugative element (ICE) is an integrative mobile genetic element that encodes a conjugation machinery. It can confer selective advantages and can also encode resistance determinants and virulence factors.
 
-In this report are summarized all the ICEs annotated in the query genome. This features were annotated through BLASTx and BLASTn against [ICEberg](http://202.120.12.136:7913/ICEberg2/) database. ICEs genes were annotated through BLASTx and ICE genomic regions were identified via BLASTn. 
+In this report are summarised all the ICEs annotated in the query genome. This features were annotated through BLASTx and BLASTn against [ICEberg](http://202.120.12.136:7913/ICEberg2/) database. ICEs genes were annotated through BLASTx and ICE genomic regions were identified via BLASTn. 
 
 Blast thresholds were the following:
 
 * Blast % identity: `> `r params$blast_id`%`
 * Blast % query coverage: `> `r params$blast_cov`%`
 
-# Results {.tabset .tabset-fade .tabset-pills}
+# Results
 
 ## Genomic Islands prediction
 
-Genomic Islands are annotated with [islandPath](https://github.com/brinkmanlab/islandpath). Its results are all incorporated into JBrowse output and are drawn in the color cyan. This result shall be seen by using JBrowse output which might be opened with [JBrowse Desktop](https://jbrowse.org/docs/jbrowse_desktop.html). A BED file containing genomic position of all GIs can be found in the **predicted_GIs** folder under output directory.
+Genomic Islands are annotated with [islandPath](https://github.com/brinkmanlab/islandpath). Its results are all incorporated into JBrowse output and are drawn in yellow. This result shall be seen by using JBrowse output which might be opened with [JBrowse Desktop](https://jbrowse.org/docs/jbrowse_desktop.html). A BED file containing genomic position of GIs can be found in the **predicted_GIs** folder under output directory.
 
-## Prophages
-
-### Phigaro prediction
+## Phigaro prediction
 
 ```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=phigaro_not_null, child='yes_phigaro.Rmd'}
 ```
@@ -135,7 +115,7 @@ Genomic Islands are annotated with [islandPath](https://github.com/brinkmanlab/i
 ```{r, phigaro_conditional_block_FALSE, echo=FALSE, results='asis', eval=phigaro_null, child='no_phigaro.Rmd'}
 ```
 
-### PHAST database annotation
+## PHAST database annotation
 
 ```{r, phigaro_conditional_block_TRUE, echo=FALSE, results='asis', eval=phast_not_null, child='yes_phast.Rmd'}
 ```
@@ -143,7 +123,7 @@ Genomic Islands are annotated with [islandPath](https://github.com/brinkmanlab/i
 ```{r, phigaro_conditional_block_FALSE, echo=FALSE, results='asis', eval=phast_null, child='no_phast.Rmd'}
 ```
 
-## Integrative and conjugative elements (ICEs)
+## ICEberg database annotation
 
 ```{r, ICEberg_conditional_block, echo=FALSE, results='asis', eval=not_null, child='yes_ice.Rmd'}
 ```

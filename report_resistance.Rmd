@@ -1,63 +1,57 @@
 ---
-title: "Annotation Report"
-author: "`r params$query` genome assembly"
+title: "Annotation Report of query genome `r params$query`"
+author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-subtitle: "Resistance genes and determinants annotated using NCBI-AMRFinderPlus and CARD-RGI tools"
+subtitle: "Resistance genes and determinants annotated using AMRFinderPlus"
 params:
-  query: na
-  amrfinder: na
-  gff: na
-  rgitool: na
+  query:
+  ncbi_amr:
+  amrfinder:
+  gff_resistance:
+  rgitool:
+  rgiperfect:
+  rgistrict:
 output:
   bookdown::html_document2:
     df_print: paged
     number_sections: false
     syntax: tango
-    toc: false
+    toc: true
     self_contained: yes
-    theme: united
+    theme: journal
 ---
 
 <style type="text/css">
 
 body{ /* Normal  */
-      font-size: 14px;
+      font-size: 16px;
   }
-.main-container {
-  max-width: 85% !important;
-  margin-left: auto;
-  margin-right: auto;
-}
 </style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
-suppressMessages(library(magrittr))
-suppressMessages(library(knitr))
-suppressMessages(library(kableExtra))
-suppressMessages(library(stringr))
-suppressMessages(library(ballgown))
-suppressMessages(library(tidyr))
-suppressMessages(library(plyr))
-suppressMessages(library(DT))
-suppressMessages(library(dplyr))
-suppressMessages(library(stringr))
-suppressMessages(library(ggplot2))
+options(knitr.table.format = "html", knitr.kable.NA = 'NA')
+bt_opt =  c("hover", "condensed", "responsive")
+library(magrittr)
+library(knitr)
+library(stringr)
+library(tidyr)
+library(plyr)
+library(kableExtra)
+library(dplyr)
+library(stringr)
+library(ggplot2)
 
-# Read GFF file
-gff <- gffRead(params$gff)
-
-# Read AMRFinder results
+# Read result
 amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,7,9,15), silent = TRUE)
+ncbi_amr <- try(read.delim(params$ncbi_amr), silent = TRUE)
+# Read file
+rgi_tsv <- try(read.delim(params$rgitool, header = TRUE), silent = TRUE)
+rgi_perfect <- try(read.delim(params$rgiperfect, header = FALSE), silent = TRUE)
+rgi_strict <- try(read.delim(params$rgistrict, header = FALSE), silent = TRUE)
 
-# Read RGI results
-rgi_tsv <- try(read.delim(params$rgitool, header = TRUE), silent = TRUE) %>%
-  separate(ORF_ID, into = c("Protein.Identifier", "Product"), sep = "\\s", extra = "merge") %>%
-  select(Protein.Identifier, Product, Cut_Off, Best_Hit_ARO, ARO, Drug.Class,
-         Resistance.Mechanism, AMR.Gene.Family)
-
-# Check if NCBI AMRFinder file is empty
-if (class(amrtsv) != 'try-error' && !is.null(nrow(amrtsv) > 0)) {
+# Check if NCBI is empty
+if (class(ncbi_amr) != 'try-error' && !is.null(nrow(ncbi_amr) > 0)) {
   amrFinder_not_null <- TRUE
   amrFinder_null <- FALSE
 } else {
@@ -74,31 +68,32 @@ if (class(rgi_tsv) != 'try-error' && !is.null(nrow(rgi_tsv) > 0)) {
   rgi_null <- TRUE
 }
 
-# Function to get Attribute Fields
-getAttributeField <- function (x, field, attrsep = ";") {
-  s = strsplit(x, split = attrsep, fixed = TRUE)
-  sapply(s, function(atts) {
-    a = strsplit(atts, split = "=", fixed = TRUE)
-    m = match(field, sapply(a, "[", 1))
-    if (!is.na(m)) { rv = a[[m]][2]
-    }
-    else {
-      rv = as.character(NA)
-    }
-    return(rv)
-  })
+if (class(rgi_perfect) != 'try-error' && !is.null(nrow(rgi_perfect) > 0)) {
+  rgi_perfect_not_null <- TRUE
+  rgi_perfect_null <- FALSE
+} else {
+  rgi_perfect_not_null <- FALSE
+  rgi_perfect_null <- TRUE
+}
+
+if (class(rgi_strict) != 'try-error' && !is.null(nrow(rgi_strict) > 0)) {
+  rgi_strict_not_null <- TRUE
+  rgi_strict_null <- FALSE
+} else {
+  rgi_strict_not_null <- FALSE
+  rgi_strict_null <- TRUE
 }
 ```
 
 # About
 
-Resistance genes or resistance determinants confer to the bacteria the ability to tolerate or resist antimicrobial molecules. Which means, these characteristics makes the bacteria less susceptible to its effects.
+Resistance genes or resistance determinants confer to the bacteria the ability to tolerate or resist some antibiotics or antimicrobials. Which means, these characteristics makes the bacteria less susceptible to its effects.
 
-Resistance determinants were predicted using [AMRFinderPlus](https://github.com/ncbi/amr/wiki). This is a binary distributed by NCBI that allows users to query the National Database of Antibiotic Resistant Organisms ([NDARO](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/)). This is a NCBI curated database that aggregates resistance genes from other databases such as [Resfams](http://www.dantaslab.org/resfams), [CARD](https://card.mcmaster.ca/), ResFinder, Pasteur Institute Beta Lactamases and others. For more information please read the following [link](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047). NCBI's efforts were done in order to standardize and confer reliability to AMR predictions.
+Resistance determinants were predicted using [AMRFinderPlus](https://github.com/ncbi/amr/wiki). This is a binary distributed by NCBI that allows users to query the National Database of Antibiotic Resistant Organisms ([NDARO](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/)). This is a NCBI curated database that aggregates resistance genes from other databases such as [Resfams](http://www.dantaslab.org/resfams), [CARD](https://card.mcmaster.ca/), ResFinder, Pasteur Institute Beta Lactamases and orthers. For more information please read the following [link](https://www.ncbi.nlm.nih.gov/bioproject/PRJNA313047). NCBI's efforts were done in order to standardise and confer reliability to AMR predictions.
 
 Additionally, resistance determinants were also detected with [CARD RGI](https://github.com/arpcard/rgi) tool which enables the detection of new variants and mutations that confer resistance to antibiotics. The RGI analyzes genome or proteome sequences under three paradigms: **Perfect**, **Strict**, and **Loose** (a.k.a. Discovery). **The Perfect algorithm** is most often applied to clinical surveillance as it detects perfect matches to the curated reference sequences and mutations in the CARD. In contrast, **the Strict algorithm** detects previously unknown variants of known AMR genes, including secondary screen for key mutations, using detection models with CARD's curated similarity cut-offs to ensure the detected variant is likely a functional AMR gene.
 
-# Results {.tabset .tabset-fade .tabset-pills}
+# Results
 
 ## AMRFinder
 
@@ -114,4 +109,18 @@ Additionally, resistance determinants were also detected with [CARD RGI](https:/
 ```
 
 ```{r, rgi_conditional_block_2, echo=FALSE, results='asis', eval=rgi_null, child='no_RGI.Rmd'}
+```
+
+## Prokka
+
+Additionally, Prokka generically anotates a few proteins that are related to any type of resistance. One must take cautin when evaluating this result because this annotation can be very generic and therefore not so meaningful. Because it uses hmms, it can happen to anotate a multidrug resistance efflux pumps but it must be checked wheter it is correctly annotated or functional. These are showed in Table \@ref(tab:prokka-general-resistance).
+
+<br>
+
+```{r prokka-general-resistance, echo=FALSE}
+suppressMessages(library(kableExtra))
+suppressMessages(library(ballgown))
+suppressMessages(library(dplyr))
+df <- gffRead(params$gff_resistance)
+df %>% select("seqname", "start", "end", "attributes") %>% kable(caption = "Prokka Generic Resistance Feature") %>% kable_styling(font_size = 12, bootstrap_options = bt_opt) %>% scroll_box(height = "300px", width = F)
 ```

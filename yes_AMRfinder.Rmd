@@ -1,5 +1,5 @@
 
-Below it is summarized the result obtained with **AMRFinderPlus**. Roughly, it can be divided into two main categories: 
+Below it is summarized the result obtained with AMRFinderPlus. Roughly, it can be divided into two main categories: 
 
 1. Genes related to antibiotics, called AMR;
 2. Genes related to stress resistance which can be:
@@ -7,36 +7,53 @@ Below it is summarized the result obtained with **AMRFinderPlus**. Roughly, it c
     + metal resistance
     + heat resistance
 
-This is well documented in the Table below. Whenever possible, all feature have links to NCBI database marking the closest reference sequence to each annotated gene. A summary of the Antibiotic Classes target by ARGs annotated is shown in Figure \@ref(fig:ncbi-resistome-png).
+This is well documented in Table \@ref(tab:ncbi-amr-resistance-genes). Whenever possible, all feature have links to NCBI database marking the closest reference sequence to each annotated gene. Additionally, gene targets are summarised in image \@ref(fig:ncbi-resistome-png). Right below it is presented a small list containing AMR genes found in the query genome. If empty, none has been found.
 
-```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
+```{r results='asis'}
+# Create Position Column
+ncbi_amr$`Query Protein Coordinates` <- paste(ncbi_amr$seqname, ":", ncbi_amr$start, "-", ncbi_amr$end)
 
-# Create urls of reference genomes
-urls <- lapply(amrtsv$Accession.of.closest.sequence, function(x){
+# Parse again
+genes <- ncbi_amr %>% select(Prokka_ID, `Query Protein Coordinates`)
+
+# To upper
+genes$Prokka_ID <- toupper(ncbi_amr$Prokka_ID)
+
+# Read result
+tab <- amrtsv
+
+# Create List
+string.list <- tab %>% filter(Element.type == "AMR") %>% pull(2) %>% unique()
+cat("- **AMR genes found in the query genome:**\n")
+cat(paste("\t-", string.list), sep = '\n')
+```
+
+### Supporting Data
+
+```{r ncbi-amr-resistance-genes}
+# Merge tables
+tab2 <- merge.data.frame(genes, tab, by.x = "Prokka_ID", by.y = "Protein.identifier", all.y = TRUE)
+
+# Create urls
+urls <- lapply(tab2$Accession.of.closest.sequence, function(x){
   ifelse(!is.na(x), paste0("https://www.ncbi.nlm.nih.gov/gene/?term=", x),
          paste0("No Reference"))
   })
 
-# Parse protein coordinates
-gff$ID <- getAttributeField(as.character(gff$attributes), "ID", ";")
-amrfinder_subset <- gff %>% filter(ID %in% amrtsv$Protein.identifier) %>%
-                               select(ID, start, end)
-
-# Create Position Column
-amrfinder_subset$`Query Protein Coordinates` <- paste(amrfinder_subset$ID, ":",
-                                                      amrfinder_subset$start,
-                                                      "-", amrfinder_subset$end)
-
-# Merge information and produce table
-df <- 
-  merge.data.frame(amrfinder_subset, amrtsv, by.x = "ID", by.y = "Protein.identifier", all.y = TRUE) %>%
-  select(Element.type, ID, Gene.symbol, Sequence.name, Class, Method, Accession.of.closest.sequence, `Query Protein Coordinates`) %>%
+# Produce Table
+tab2 %>%
+  select(Element.type, Prokka_ID, Gene.symbol, Sequence.name, Class, Method, Accession.of.closest.sequence, `Query Protein Coordinates`) %>%
   mutate("Accession.of.closest.sequence" = ifelse(!is.na(Accession.of.closest.sequence), cell_spec(Accession.of.closest.sequence, "html", link = urls), NA)) %>%
-  arrange(Element.type, ID)
+  arrange(Element.type, Prokka_ID) %>%
+kable(caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus", escape = FALSE, col.names = c("Resistance Type", "Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence", "Genome Coordinates")) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1, valign = "middle") %>%
+  footnote("All NA genome coordinates entries are due to a merge step with bedtools. Which means, these entries have been merged in the gff and we can not precisely get its coordinates. One might look at the gff file to analyse it.")
+```
 
-# Render image
-ncbi_count <- df %>%
-  select(3,5)
+```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
+ncbi_count <- tab2 %>%
+  select(3,7)
 drugs <- plyr::count(ncbi_count, "Class")
 ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   geom_bar(stat = "identity") +
@@ -45,22 +62,4 @@ ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   xlab("Gene Target") +
   ylab("Number of genes") +
   guides(fill=guide_legend(title = "Gene Target"))
-```
-
-```{r results='asis'}
-# Create List
-#string.list <- amrtsv %>% filter(Element.type == "AMR") %>% pull(2) %>% unique()
-#cat("- **AMR genes found in the query genome:**\n")
-#cat(paste("\t-", string.list), sep = '\n')
-```
-
-### Supporting Data
-
-```{r ncbi-amr-resistance-genes}
-datatable(df, caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus",
-            colnames = c("Resistance Type", "Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence", "Genome Coordinates"),
-          escape = FALSE,
-          rownames = FALSE,
-          options = list(pageLength = 5,
-                         width = '80%'))
 ```

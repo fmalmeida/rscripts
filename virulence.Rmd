@@ -1,0 +1,50 @@
+---
+title: "Virulence databases"
+params:
+  virulence_summary: na
+  virulence_gff: na
+  is_VFDB: FALSE
+  vfdb_summary: na
+  vfdb_gff: na
+  is_Victors: FALSE
+  victors_summary: na
+  victors_gff: na
+---
+```{r echo=FALSE}
+library(magrittr)
+
+virulence_summary <- params$virulence_summary
+virulence_gff <- params$virulence_gff
+is_VFDB <- params$is_VFDB
+is_Victors <- params$is_Victors
+```
+
+#### Virulence databases
+
+In this pipeline, the virulence genes could be annotated from two different databases:
+
+* [VFDB database](http://www.phidias.us/victors/) and;
+    * Was this database used? - ``r is_VFDB``
+* [Victors database](http://www.mgc.ac.cn/VFs/).
+    * Was this database used? - ``r is_Victors``
+* Files containg genes pottentially related to virulence:
+    * GFF: ``r virulence_gff``
+    * Summary table: ``r virulence_summary``
+
+##### Summary table overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+if (!is.na(file.info(virulence_summary)$size) && virulence_summary != 'na') {
+df <- tryCatch(read.delim(virulence_summary, header = TRUE, sep = "\t"), warning = function(w) {df <- data.frame()}, error = function(w) {df <- data.frame()})
+if (!nrow(df)) {cat("The summary table for these databases is empty. Or the databases were not used, or no element was found!")} else {df} 
+} else {cat("The summary table for these databases is empty. Or the databases were not used, or no element was found!")}
+```
+
+##### GFF overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+if (!is.na(file.info(virulence_gff)$size) && virulence_gff != 'na') {
+df <- tryCatch(ballgown::gffRead(virulence_gff), warning = function(w) {df <- data.frame()}, error = function(w) {df <- data.frame()})
+if (!nrow(df)) {cat("The gff file for these databases is empty. Or the databases were not used, or no element was found!")} else {df} 
+} else {cat("The gff file for these databases is empty. Or the databases were not used, or no element was found!")}
+```

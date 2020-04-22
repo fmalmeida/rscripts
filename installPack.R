@@ -3,7 +3,7 @@
 install.packages("sf", repos = "https://cloud.r-project.org/", dependencies = TRUE) ;
 install.packages(c("DataCombine", "glue", "docopt", "dplyr", 
                    "stringr", "kableExtra", "ggplot2",
-                   "bookdown", "plyr", "tidyr", "DT"), repos = "https://cloud.r-project.org/", dependencies = TRUE) ;
+                   "bookdown", "plyr", "tidyr"), repos = "https://cloud.r-project.org/", dependencies = TRUE) ;
 
 
 # Install bioc packages

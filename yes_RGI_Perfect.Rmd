@@ -1,11 +1,68 @@
-### Perfect Hits
 
-Perfect hits are genes that CARD guarantee its functionality. Which means that these genes are likely functional and might be conferring resistance to the bacteria. A summary of the Antibiotic Classes target by ARGs annotated as Perfect hits is shown in Figure \@ref(fig:rgi-perfect-resistome-png).
+Perfect hits are genes that CARD guarantee its functionality. Which means that these genes are likely functional and might be confering resistance to the bacteria.
 
-```{r rgi-perfect-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="60%"}
+```{r results='asis'}
+## Name columns
+colnames(rgi_perfect) <- c("Contig", "Start", "Stop", "Orientation", "Cut_Off", "Best_Hit_ARO", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
+## Fix Contig Names
+rgi_perfect$Contig <- gsub(pattern = " ", replacement = "", rgi_perfect$Contig)
+rgi_perfect$Contig <- gsub(pattern = "_[0-9]*$", replacement = "", rgi_perfect$Contig)
+## Create Coordinate
+rgi_perfect$Coordinates <- paste(rgi_perfect$Contig, ":", rgi_perfect$Start, "-", rgi_perfect$Stop, sep = '')
+## Separate rows
+rgi_perfect <- rgi_perfect %>%
+  separate_rows(`Drug Class`, sep = "; ")
+
+# Create List
+#string.list <- rgi_perfect %>% pull(6) %>% sort() %>% unique()
+#cat("- **AMR genes found in the query genome:**\n")
+#cat(paste("\t-", string.list), sep = '\n')
+
+# Create List
+string.list <- rgi_perfect %>% pull(8) %>% sort() %>% unique()
+cat("- **Drug Classes targeted by the query genome:**\n")
+cat(paste("\t-", string.list), sep = '\n')
+```
+
+#### Supporting Data
+
+```{r rgi-perfect-resistance-genes}
+# Get metadata
+card_meta <- read.csv("https://github.com/fmalmeida/CARDDB/raw/master/aro.tsv", sep = "\t")
+card_meta$Accession <- str_remove(card_meta$Accession, "ARO:")
+# Change Col name
+names(card_meta)[names(card_meta) == "Accession"] <- 'ARO'
+card_meta$ARO <- as.integer(card_meta$ARO)
+
+# Join
+rgi_perfect <- dplyr::left_join(rgi_perfect, card_meta, by = c("ARO"))
+
+# Create urls
+urls <- lapply(rgi_perfect$ID, function(x){paste0("https://card.mcmaster.ca/ontology/", x)})
+
+# Change Col name
+names(rgi_perfect)[names(rgi_perfect) == "ID"] <- 'CARD link'
+names(rgi_perfect)[names(rgi_perfect) == "Best_Hit_ARO"] <- 'Gene'
+
+# Produce Table
+rgi_perfect %>%
+  select("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD link", "Coordinates", "Description") %>%
+  mutate("CARD link" = cell_spec(`CARD link`, "html", link = urls)) %>%
+  group_by(`Resistance Mechanism`) %>%
+  arrange(`Gene`, `CARD link`,`Resistance Mechanism`, `Drug Class`) %>%
+  kable(caption = "CARD resistance genes annotated and its target drug classes", escape = FALSE) %>%
+  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
+  collapse_rows(columns = 1:7, valign = "middle") %>%
+  scroll_box(height = "500px")
+```
+
+<br>
+
+In the image below it is shown the amount of genes found to target these specific drug classes.
+
+```{r rgi-perfect-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="80%"}
 rgi_count <- rgi_perfect %>%
-  separate_rows(`Drug Class`, sep = "; ") %>%
-  select(`Protein ID`,`Drug Class`)
+  select(1,8)
 colnames(rgi_count) <- c("Contig", "Class")
 drugs <- plyr::count(rgi_count, "Class")
 ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
@@ -15,26 +72,4 @@ ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   xlab("Targeted Drug Class") +
   ylab("Number of genes") +
   guides(fill=guide_legend(title = "Drug Classes"))
-```
-
-```{r results='asis'}
-# Create List
-#string.list <- rgi_perfect %>% separate_rows(`Drug Class`, sep = "; ") %>% pull(`Drug Class`) %>% sort() %>% unique()
-#cat("- **Drug Classes targeted by the query genome:**\n")
-#cat(paste("\t-", string.list), sep = '\n')
-```
-
-#### Supporting data
-
-```{r rgi-perfect-resistance-genes}
-# Produce Table
-rgi_perfect %>%
-  select("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD Link", "Query Protein Coordinates", "Description") %>%
-  group_by(`Resistance Mechanism`) %>%
-  arrange(`Gene`, `CARD Link`,`Resistance Mechanism`, `Drug Class`) %>%
-  datatable(caption = "CARD resistance genes annotated and its target drug classes",
-            colnames = c("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD Link", "Genome Coordinates", "Description"),
-          escape = FALSE,
-          rownames = FALSE,
-          options = list(pageLength = 5))
 ```

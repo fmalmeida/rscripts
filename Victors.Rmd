@@ -1,0 +1,23 @@
+---
+title: "Victors"
+params:
+  victors_gff: na
+---
+```{r echo=FALSE}
+library(magrittr)
+
+victors_gff <- params$victors_gff
+```
+
+##### Victors database
+
+* GFF: ``r victors_gff``
+
+Overview:
+
+```{r echo=FALSE, comment="", eval=TRUE}
+if (!is.na(file.info(victors_gff)$size) && victors_gff != 'na') {
+df <- tryCatch(read.delim(victors_gff, header = TRUE, sep = "\t"), warning = function(w) {df <- data.frame()}, error = function(w) {df <- data.frame()})
+if (!nrow(df)) {cat("The gff file for this database is empty. Or the database was not used, or no element were found!")} else {df} 
+} else {cat("The gff file for this database is empty. Or the database was not used, or no element were found!")}
+```

@@ -31,22 +31,22 @@ suppressMessages(library(tidyr))
 # Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
-  paste(unique(d), collapse = ',')
+  paste(unique(d), collapse = ',') 
 }
 
 # Function to get Attribute Fields
-getAttributeField <- function (x, field, attrsep = ";") {
-  s = strsplit(x, split = attrsep, fixed = TRUE)
-  sapply(s, function(atts) {
-    a = strsplit(atts, split = "=", fixed = TRUE)
-    m = match(field, sapply(a, "[", 1))
-    if (!is.na(m)) { rv = a[[m]][2]
-    }
-    else {
-      rv = as.character(NA)
-    }
-    return(rv)
-  })
+getAttributeField <- function (x, field, attrsep = ";") { 
+  s = strsplit(x, split = attrsep, fixed = TRUE) 
+  sapply(s, function(atts) { 
+    a = strsplit(atts, split = "=", fixed = TRUE) 
+    m = match(field, sapply(a, "[", 1)) 
+    if (!is.na(m)) { rv = a[[m]][2] 
+    } 
+    else { 
+      rv = as.character(NA) 
+    } 
+    return(rv) 
+  }) 
 }
 # Operator to discard patterns found
 '%ni%' <- Negate('%in%')
@@ -59,21 +59,21 @@ gff$ID <- getAttributeField(as.character(gff$attributes), "ID", ";")
 NCBIamr <- read.delim(opt$input)
 
 if (is.null(NCBIamr) == FALSE & dim(NCBIamr)[1] != 0) {
-
+  
 # Get its ids
 ids <- NCBIamr$Protein.identifier
-
+    
 # Subset based on gene IDs
 sub <- gff %>% filter(ID %in% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
 not <- gff %>% filter(ID %ni% ids)  %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
-# Create Description'=
-NCBIamr$description <- paste("Additional_database=", opt$database, ";Gene_Name=", NCBIamr$Gene.symbol, ";",
+# Create Description
+NCBIamr$description <- paste("Additional_database=NDARO;Gene_Name=", NCBIamr$Gene.symbol, ";",
                      "Gene_Product=", NCBIamr$Sequence.name, ";", "Resistance_Category=",
                      NCBIamr$Element.type, ";", "Resistance_Target=", NCBIamr$Class, ";",
                      "Method=", NCBIamr$Method, ";", "Closest_Sequence=", NCBIamr$Name.of.closest.sequence, sep = "")
 NCBIamr$description <- gsub(" ", "_", NCBIamr$description)
-
+    
 ## Add New Source
 s <- sub$source
 sn <- opt$database
@@ -88,7 +88,7 @@ sub$feature <- fnew
 
 ## attributes
 sub$ID <- getAttributeField(as.character(sub$attributes), "ID", ";")
-sub <- merge.data.frame(sub, NCBIamr, by.x = "ID",
+sub <- merge.data.frame(sub, NCBIamr, by.x = "ID", 
                         by.y = "Protein.identifier", all = TRUE)
 sub <- unite(sub, "attributes", c("attributes", "description"), sep = ";") %>%
   select(seqname, source, feature, start, end, score, strand, frame, attributes)
@@ -101,15 +101,15 @@ merged_df$feature <- sapply(feat, reduce_row)
 source <- merged_df$source
 merged_df$source <- sapply(source, reduce_row)
 merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
-
+    
 # Write output
-write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t",
+write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", 
                 col.names = FALSE, row.names = FALSE)
 
 } else {
   # Load GFF file
   gff <- gffRead(opt$gff)
   # Write output
-  write.table(gff, file = opt$out, quote = FALSE, sep = "\t",
+  write.table(gff, file = opt$out, quote = FALSE, sep = "\t", 
               col.names = FALSE, row.names = FALSE)
 }
