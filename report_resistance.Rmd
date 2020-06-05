@@ -1,8 +1,8 @@
 ---
 title: "Annotation Report of query genome `r params$query`"
-author: "Felipe M. Almeida <almeidafmarques@gmail.com>"
+author: "Produced with bacannot pipeline"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-subtitle: "Resistance genes and determinants annotated using AMRFinderPlus"
+subtitle: "Resistance genes/determinants"
 params:
   query:
   amrfinder:
@@ -47,18 +47,18 @@ suppressMessages(library(ggplot2))
 ### Useful functions ###
 ########################
 
-getAttributeField <- function (x, field, attrsep = ";") { 
-  s = strsplit(x, split = attrsep, fixed = TRUE) 
-  sapply(s, function(atts) { 
-    a = strsplit(atts, split = "=", fixed = TRUE) 
-    m = match(field, sapply(a, "[", 1)) 
-    if (!is.na(m)) { rv = a[[m]][2] 
-    } 
-    else { 
-      rv = as.character(NA) 
-    } 
-    return(rv) 
-  }) 
+getAttributeField <- function (x, field, attrsep = ";") {
+  s = strsplit(x, split = attrsep, fixed = TRUE)
+  sapply(s, function(atts) {
+    a = strsplit(atts, split = "=", fixed = TRUE)
+    m = match(field, sapply(a, "[", 1))
+    if (!is.na(m)) { rv = a[[m]][2]
+    }
+    else {
+      rv = as.character(NA)
+    }
+    return(rv)
+  })
 }
 
 
@@ -154,7 +154,7 @@ Additionally, Prokka generically annotates a few proteins that are related to an
 ```{r prokka-general-resistance, echo=FALSE}
 gff %>%
   filter(str_detect(attributes, "resistance")) %>%
-  select("seqname", "start", "end", "attributes") %>% 
+  select("seqname", "start", "end", "attributes") %>%
   kable(caption = "Prokka generic resistance annotation") %>% kable_styling(font_size = 12, bootstrap_options = bt_opt) %>%
   scroll_box(height = "300px", width = F)
 ```

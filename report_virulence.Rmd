@@ -1,8 +1,8 @@
 ---
 title: "Annotation Report of query genome `r params$query`"
-author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
+author: "Produced with bacannot pipeline"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-subtitle: "Virulence genes annotated from VFDB"
+subtitle: "Virulence genes/determinants"
 params:
   blast_id:
   blast_cov:

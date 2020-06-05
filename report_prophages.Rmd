@@ -1,6 +1,6 @@
 ---
 title: "Annotation Report of query genome `r params$query`"
-author: "Felipe M. Almeida <falmeida@aluno.unb.br>"
+author: "Produced with bacannot pipeline"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 subtitle: "Prophages summary."
 params:
