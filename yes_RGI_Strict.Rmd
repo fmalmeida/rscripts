@@ -3,22 +3,14 @@ Strict hits genes are genes annotated with looser parameters and are not surely 
 
 ```{r results='asis'}
 ## Name columns
-colnames(rgi_strict) <- c("Contig", "Start", "Stop", "Orientation", "Cut_Off", "Best_Hit_ARO", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
-## Fix Contig Names
-rgi_strict$Contig <- gsub(pattern = "_[0-9]*$", replacement = "", rgi_strict$Contig)
-## Create Coordinate
-rgi_strict$Coordinates <- paste(rgi_strict$Contig, ":", rgi_strict$Start, "-", rgi_strict$Stop, sep = '')
+colnames(rgi_strict) <- c("Protein ID", "Product", "Cut_Off", "Best_Hit_ARO", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
+
 ## Separate rows
 rgi_strict <- rgi_strict %>%
   separate_rows(`Drug Class`, sep = "; ")
 
 # Create List
-#string.list <- rgi_strict %>% pull(6) %>% sort() %>% unique()
-#cat("- **AMR genes found in the query genome:**\n")
-#cat(paste("\t-", string.list), sep = '\n')
-
-# Create List
-string.list <- rgi_strict %>% pull(8) %>% sort() %>% unique()
+string.list <- rgi_strict %>% pull(6) %>% sort() %>% unique()
 cat("- **Drug Classes targeted by the query genome:**\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
@@ -26,9 +18,13 @@ cat(paste("\t-", string.list), sep = '\n')
 #### Supporting Data
 
 ```{r rgi-strict-resistance-genes}
+# Merge data.frame with GFF
+rgi_strict <- merge.data.frame(gff, rgi_strict, by.x = "Prokka_ID", by.y = "Protein ID", all.y = TRUE, all.x = FALSE)
+
 # Get metadata
 card_meta <- read.csv("https://github.com/fmalmeida/CARDDB/raw/master/aro.tsv", sep = "\t")
 card_meta$Accession <- str_remove(card_meta$Accession, "ARO:")
+
 # Change Col name
 names(card_meta)[names(card_meta) == "Accession"] <- 'ARO'
 card_meta$ARO <- as.integer(card_meta$ARO)
@@ -45,7 +41,7 @@ names(rgi_strict)[names(rgi_strict) == "Best_Hit_ARO"] <- 'Gene'
 
 # Produce Table
 rgi_strict %>%
-  select("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD link", "Coordinates", "Description") %>%
+  select("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD link", "Query Protein Coordinates", "Description") %>%
   mutate("CARD link" = cell_spec(`CARD link`, "html", link = urls)) %>%
   group_by(`Resistance Mechanism`) %>%
   arrange(`Gene`, `CARD link`,`Resistance Mechanism`, `Drug Class`) %>%
@@ -61,7 +57,7 @@ In the image below it is shown the amount of genes found to target these specifi
 
 ```{r rgi-strict-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="80%"}
 rgi_count <- rgi_strict %>%
-  select(1,8)
+  select(Prokka_ID, `Drug Class`)
 colnames(rgi_count) <- c("Contig", "Class")
 drugs <- plyr::count(rgi_count, "Class")
 ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +

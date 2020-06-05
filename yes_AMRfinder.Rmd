@@ -7,18 +7,9 @@ Below it is summarized the result obtained with AMRFinderPlus. Roughly, it can b
     + metal resistance
     + heat resistance
 
-This is well documented in Table \@ref(tab:ncbi-amr-resistance-genes). Whenever possible, all feature have links to NCBI database marking the closest reference sequence to each annotated gene. Additionally, gene targets are summarised in image \@ref(fig:ncbi-resistome-png). Right below it is presented a small list containing AMR genes found in the query genome. If empty, none has been found.
+This is well documented in Table \@ref(tab:ncbi-amr-resistance-genes). Whenever possible, all feature have links to NCBI database marking the closest reference sequence to each annotated gene. Additionally, gene targets are summarized in image \@ref(fig:ncbi-resistome-png). Right below it is presented a small list containing AMR genes found in the query genome. If empty, none has been found.
 
 ```{r results='asis'}
-# Create Position Column
-ncbi_amr$`Query Protein Coordinates` <- paste(ncbi_amr$seqname, ":", ncbi_amr$start, "-", ncbi_amr$end)
-
-# Parse again
-genes <- ncbi_amr %>% select(Prokka_ID, `Query Protein Coordinates`)
-
-# To upper
-genes$Prokka_ID <- toupper(ncbi_amr$Prokka_ID)
-
 # Read result
 tab <- amrtsv
 
@@ -32,7 +23,7 @@ cat(paste("\t-", string.list), sep = '\n')
 
 ```{r ncbi-amr-resistance-genes}
 # Merge tables
-tab2 <- merge.data.frame(genes, tab, by.x = "Prokka_ID", by.y = "Protein.identifier", all.y = TRUE)
+tab2 <- merge.data.frame(gff, tab, by.x = "Prokka_ID", by.y = "Protein.identifier", all.y = TRUE, all.x = FALSE)
 
 # Create urls
 urls <- lapply(tab2$Accession.of.closest.sequence, function(x){
@@ -53,7 +44,7 @@ kable(caption = "Resistance genes annotated from NCBI AMR curated database using
 
 ```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
 ncbi_count <- tab2 %>%
-  select(3,7)
+  select(Prokka_ID, Class)
 drugs <- plyr::count(ncbi_count, "Class")
 ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   geom_bar(stat = "identity") +
