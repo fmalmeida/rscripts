@@ -35,10 +35,20 @@ reduce_row = function(i) {
 }
 
 # Parse Blast Titles
-subj_title = function(x) {
+subj_title = function(x, db) {
   desc = strsplit(x, "~~~", fixed=TRUE)
-  text <- paste("Additional_database=", desc[[1]][1], ";", desc[[1]][1], "_Target=",
-                desc[[1]][2], ";", desc[[1]][1], "_Product=", desc[[1]][4], sep = "")
+  
+  if (db == "PHAST" | db == "Victors") {
+    text <- paste("Additional_database=", desc[[1]][1], ";", desc[[1]][1], "_Target=",
+                  desc[[1]][4], ";", desc[[1]][1], "_Product=", desc[[1]][2], sep = "")
+  } else if (db == "VFDB") {
+    text <- paste("Additional_database=", desc[[1]][1], ";", desc[[1]][1], "_Target=",
+                  desc[[1]][3], ";", desc[[1]][1], "_Product=", desc[[1]][4], sep = "")
+  } else {
+    text <- paste("Additional_database=", desc[[1]][1], ";", desc[[1]][1], "_Target=",
+                  desc[[1]][2], ";", desc[[1]][1], "_Product=", desc[[1]][4], sep = "")
+  }
+  
   return(text)
 }
 
@@ -80,7 +90,7 @@ if (file.info(opt$input)$size > 0 ) {
     blastFile$sseqid <- gsub(" ", "_", x = blastFile$sseqid)
 
     # Create GFF Attribute Entry
-    blastFile$NEW_attributes <- sapply(blastFile$sseqid, subj_title)
+    blastFile$NEW_attributes <- sapply(blastFile$sseqid, subj_title, db=opt$database)
 
     # Get gene names
     ids <- blastFile$qseqid

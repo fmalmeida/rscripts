@@ -26,6 +26,7 @@ reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',') 
 }
+
 # Function to get Attribute Fields
 getAttributeField <- function (x, field, attrsep = ";") { 
   s = strsplit(x, split = attrsep, fixed = TRUE) 
@@ -40,6 +41,7 @@ getAttributeField <- function (x, field, attrsep = ";") {
     return(rv) 
   }) 
 }
+
 # Operator to discard patterns found
 '%ni%' <- Negate('%in%')
 
