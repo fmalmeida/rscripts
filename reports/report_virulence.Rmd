@@ -11,34 +11,34 @@ params:
   query:
   gff:
 output:
-  bookdown::html_document2:
+  bookdown::html_document2: 
+    #includes:
+    #  after_body: footer.html
+    css: styles.css
     df_print: paged
-    number_sections: false
-    syntax: tango
+    number_sections: true
+    syntax: espresso
     self_contained: yes
-    theme: journal
+    theme: yeti
+    toc: yes
+    toc_collapsed: yes
+    toc_depth: 4
+    toc_float: yes
+    code_folding: "show"
 ---
-
-<style type="text/css">
-
-body{ /* Normal  */
-      font-size: 16px;
-  }
-</style>
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
-options(knitr.table.format = "html")
-bt_opt =  c("hover", "condensed", "responsive")
 library(magrittr)
 library(knitr)
 library(tidyr)
 library(plyr)
-library(kableExtra)
+suppressMessages(library(DT))
 library(dplyr)
 library(stringr)
 library(ggplot2)
+
+# Load data
 victors_blast <- try(read.delim(params$victors_blast, header = FALSE), silent = TRUE)
 vfdb_blast <- try(read.delim(params$vfdb_blast, header = FALSE), silent = TRUE)
 gff <- try(read.delim(params$gff, header = FALSE), silent = TRUE)
@@ -59,6 +59,16 @@ if (class(victors_blast) != 'try_error' && !is.null(nrow(victors_blast)) > 0) {
   victors_not_null <- FALSE
   victors_null <- TRUE
 }
+
+# DT options
+# Lists
+dt_opt_lst <- list(pageLength = 5,
+                         lengthMenu = c(5, 10, 15, 20, 50),
+                         dom='flrtBip',
+                         buttons = c('copy', 'csv', 'excel', 'colvis'),
+                         scrollX = TRUE,
+                         fixedColumns = FALSE,
+                         autoWidth = TRUE)
 ```
 
 # About

@@ -22,12 +22,26 @@ suppressMessages(library(ballgown))
 suppressMessages(library(DataCombine))
 suppressMessages(library(dplyr))
 suppressMessages(library(tidyr))
+suppressMessages(library(stringr))
+
+#################
+### Functions ###
+#################
 
 # Function used to remove redundancy
 reduce_row = function(i) {
   d <- unlist(strsplit(i, split=","))
   paste(unique(d), collapse = ',')
 }
+
+# Parse Blast Titles
+subj_title = function(x) {
+  desc = strsplit(x, "~~~", fixed=TRUE)
+  text <- paste("Additional_database=", desc[[1]][1], ";", desc[[1]][1], "_Target=",
+                desc[[1]][2], ";", desc[[1]][1], "_Product=", desc[[1]][4], sep = "")
+  return(text)
+}
+
 # Function to get Attribute Fields
 getAttributeField <- function (x, field, attrsep = ";") {
   s = strsplit(x, split = attrsep, fixed = TRUE)
@@ -42,80 +56,91 @@ getAttributeField <- function (x, field, attrsep = ";") {
     return(rv)
   })
 }
+
 # Operator to discard patterns found
 '%ni%' <- Negate('%in%')
+
+#############
+### BEGIN ###
+#############
 
 # Check if file is empty
 
 if (file.info(opt$input)$size > 0 ) {
-# Load blast tabular file
-blastHeader <- c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart",
-                 "qend", "sstart", "send", "slen", "evalue", "bitscore", "stitle")
+  
+  blastFile <- read.delim(opt$input, header = TRUE)
+  # blastFile <- read.delim("/Volumes/falmeida1TB/bacannot_teste/teste/VariantCaller_final_polish/ICEs/VariantCaller_final_polish_iceberg_blastp_onGenes.txt", header = TRUE)
 
-blastFile <- read.delim(opt$input, header = FALSE)
-colnames(blastFile) <- blastHeader
+  if (nrow(blastFile) > 0) {
+    
+    # Sort entries
+    blastFile <- blastFile[order(blastFile$qseqid),]
+    
+    # Remove whitespaces for GFF
+    blastFile$sseqid <- gsub(" ", "_", x = blastFile$sseqid)
 
-if (nrow(blastFile) > 0) {
-# Remove duplicates based on bitscore
-blastFile <- blastFile[order(blastFile$qseqid, -abs(blastFile$pident), -abs(blastFile$bitscore) ), ]
-blastFile <-blastFile[ !duplicated(blastFile$qseqid), ]
-blastFile <- blastFile[order(blastFile$qseqid),]
-blastFile$stitle <- gsub("; ", ", ", x = blastFile$stitle)
+    # Create GFF Attribute Entry
+    blastFile$NEW_attributes <- sapply(blastFile$sseqid, subj_title)
 
-# Create GFF Attribute Entry
-blastFile$NEW_attributes <- paste("Additional_database=", opt$database, ";", opt$database, "_ID=",
-             blastFile$sseqid, ";", opt$database, "_Target=", blastFile$stitle, sep = "")
+    # Get gene names
+    ids <- blastFile$qseqid
 
-# Get gene names
-ids <- blastFile$qseqid
+    # Load GFF file for merge
+    gff <- gffRead(opt$gff)
+    # gff <- gffRead("/Volumes/falmeida1TB/bacannot_teste/tmp.gff")
 
-# Load GFF file
-gff <- gffRead(opt$gff)
+    # Create a column in gff with ids
+    gff$ID <- getAttributeField(gff$attributes, "ID", ";")
 
-# Create a column in gff with ids
-gff$ID <- getAttributeField(gff$attributes, "ID", ";")
+    # Subset based on gene IDs
+    ## Lines with our IDs
+    sub <- gff %>% 
+      filter(ID %in% ids) %>% 
+      select(seqname, source, feature, start, end, score, strand, frame, attributes, ID)
+    ## Lines without our IDs
+    not <- gff %>% 
+      filter(ID %ni% ids) %>% 
+      select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
-# Subset based on gene IDs
-sub <- gff %>% filter(ID %in% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes, ID)
-not <- gff %>% filter(ID %ni% ids) %>% select(seqname, source, feature, start, end, score, strand, frame, attributes)
+    # Change fields values
+    ## source
+    s <- sub$source
+    sn <- opt$database
+    snew <- paste(s, sn, sep = ",")
+    sub$source <- snew
 
-# Change fields values
-## source
-s <- sub$source
-sn <- opt$database
-snew <- paste(s, sn, sep = ",")
-sub$source <- snew
+    ## feature
+    f <- sub$feature
+    fn <- opt$type
+    fnew <- paste(f, fn, sep = ",")
+    sub$feature <- fnew
 
-## feature
-f <- sub$feature
-fn <- opt$type
-fnew <- paste(f, fn, sep = ",")
-sub$feature <- fnew
+    ## attributes
+    sub <- merge.data.frame(sub, blastFile, by.x = "ID",
+                            by.y = "qseqid", all = TRUE)
+    sub <- unite(sub, "attributes", c("attributes", "NEW_attributes"), sep = ";") %>%
+      select(seqname, source, feature, start, end, score, strand, frame, attributes)
 
-## attributes
-sub <- merge.data.frame(sub, blastFile, by.x = "ID",
-                        by.y = "qseqid", all = TRUE)
-sub <- unite(sub, "attributes", c("attributes", "NEW_attributes"), sep = ";") %>%
-  select(seqname, source, feature, start, end, score, strand, frame, attributes)
+    # Merge files
+    merged_df <- merge.data.frame(sub, not, all = TRUE)
+    feat <- merged_df$feature
+    merged_df$feature <- sapply(feat, reduce_row)
+    source <- merged_df$source
+    merged_df$source <- sapply(source, reduce_row)
+    merged_df <- merged_df[str_order(merged_df$attributes, numeric = TRUE), ]
 
-# Merge files
-merged_df <- merge.data.frame(sub, not, all = TRUE)
-feat <- merged_df$feature
-merged_df$feature <- sapply(feat, reduce_row)
-source <- merged_df$source
-merged_df$source <- sapply(source, reduce_row)
-merged_df <- merged_df[order(merged_df$seqname, merged_df$start),]
-
-# Write output
-write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t",
-            col.names = FALSE, row.names = FALSE)
+    # Write output
+    write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", col.names = FALSE, row.names = FALSE)
+    
 } else {
+  
   # Load GFF file
   gff <- gffRead(opt$gff)
   # Write output
   write.table(gff, file = opt$out, quote = FALSE, sep = "\t",
               col.names = FALSE, row.names = FALSE)
 }} else {
+  
   # Load GFF file
   gff <- gffRead(opt$gff)
   # Write output
