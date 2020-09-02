@@ -79,7 +79,6 @@ getAttributeField <- function (x, field, attrsep = ";") {
 if (file.info(opt$input)$size > 0 ) {
   
   blastFile <- read.delim(opt$input, header = TRUE)
-  # blastFile <- read.delim("/Volumes/falmeida1TB/bacannot_teste/teste/VariantCaller_final_polish/ICEs/VariantCaller_final_polish_iceberg_blastp_onGenes.txt", header = TRUE)
 
   if (nrow(blastFile) > 0) {
     
@@ -97,7 +96,6 @@ if (file.info(opt$input)$size > 0 ) {
 
     # Load GFF file for merge
     gff <- gffRead(opt$gff)
-    # gff <- gffRead("/Volumes/falmeida1TB/bacannot_teste/tmp.gff")
 
     # Create a column in gff with ids
     gff$ID <- getAttributeField(gff$attributes, "ID", ";")
