@@ -1,9 +1,7 @@
-All prophage genes that were found in the query genome using PHAST database are showed in Table \@ref(tab:phast-table). In this table it is presented the query protein tag, its source prophage and gene function.
+```{r setup-phast, eval=TRUE, include=FALSE, echo=FALSE}
+# Fucntions
 
-> Unfortunately, PHASTER database have no searchable interface to visualize its prophages. Therefore, this table has no links to external sources.
-
-```{r phast-table}
-# Function to get Attribute Fields
+## Function to get Attribute Fields
 getAttributeField <- function (x, field, attrsep = ";") { 
   s = strsplit(x, split = attrsep, fixed = TRUE) 
   sapply(s, function(atts) { 
@@ -17,34 +15,63 @@ getAttributeField <- function (x, field, attrsep = ";") {
     return(rv) 
   }) 
 }
+```
 
+
+## Against the whole genome
+
+All prophage genes from PHAST database that had good alignments to the query genome (whole genome) are summarised in Table \@ref(tab:write-table-phast-genome). We report both annotations using the predicted genes and the whole genome because Prokka uses prodigal to predicted genes which may miss some genomes.
+
+<caption>(#tab:write-table-phast-genome) Prophage genes using the PHAST database via BLASTx against the whole genome</caption>
+```{r}
+blast <- phast_genome_blast %>% select(-PHAST_ID)
+blast$GENE <- gsub(blast$GENE, pattern = "_", replacement = " ")
+# Render dt
+blast[sapply(blast, is.character)] <- lapply(blast[sapply(blast, is.character)], as.factor)
+colnames(blast) <- c("Contig", "Start", "End", "Strand", "Product", "Coverage_aln", "Gaps", "Coverage %", "Identity %", "Database", "Ref. Accession", "Description")
+datatable(blast,
+          escape = FALSE,
+          filter = 'top',
+          options = dt_opt_lst,
+          extensions = 'Buttons',
+          rownames = T)
+```
+
+## Against the predicted genes
+
+All prophage genes from PHAST database that had good alignments to the genes of the query genome are summarised in Table \@ref(tab:phast-table). The protein sequences of these genes were aligned against the gene sequences predicted by Prokka via BLASTp.
+
+> Unfortunately, PHASTER database have no searchable interface to visualize its prophages. Therefore, this table has no links to external sources.
+
+<caption>(#tab:phast-table) Prophage genes annotated using PHAST database via BLASTp</caption>
+```{r phast-table}
 # Create ID Column
-gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
+gff$ID <- getAttributeField(as.character(gff$V9), "ID", ";")
 
 # To upper
 gff$ID <- toupper(gff$ID)
 
-# Remove duplicates based on bitscore
-phast_blast <- phast_blast[order(phast_blast$qseqid, -abs(phast_blast$pident), -abs(phast_blast$bitscore) ), ]
-phast_blast <-phast_blast[ !duplicated(phast_blast$qseqid), ]
-phast_blast <- phast_blast[order(phast_blast$qseqid),]
-
-# Produce Table
-phast_blast$stitle <- gsub(phast_blast$stitle, pattern = " \\[", replacement = "\\|[")
+# Parse BLAST
+blast <- phast_prot_blast %>% select(-sseqid)
+blast <- separate(blast, stitle, c("header", "Description"), sep = " ", extra = "merge")
+blast <- separate(blast, header, c("db", "product", "ref", "phast_id"), sep = "~~~", extra = "merge")
+blast$prophage <- sapply(str_split(blast$Description, "\\|"), head, 1)
+blast$prophage <- gsub(blast$prophage, pattern = "-..$", replacement = "")
+blast$product <- gsub(blast$product, pattern = "_", replacement = " ")
 
 # Data Complete
-full_info <- merge.data.frame(phast_blast, gff, by.x = "qseqid", by.y = "ID")
+full_info <- merge.data.frame(blast, gff, by.x = "qseqid", by.y = "ID", all = TRUE)
 
 # Create Position Column
 full_info$position <- paste(full_info$V1, ":", full_info$V4, "-", full_info$V5, sep = "")
+full_info <- full_info %>% select(prophage, Description, qseqid, product, position) %>%
+  arrange(prophage)
+colnames(full_info) <- c("Prophage of origin", "Description", "Query protein", "Product", "Genomic Position")
 
-full_info %>%
-  select(qseqid, stitle, position) %>%
-  separate(stitle, c("prophage", "id", "tag", "contig", "product", "species"), sep = "\\|") %>%
-  select(prophage, species, qseqid, product, position) %>%
-  arrange(prophage) %>%
-  kable(caption = "Prophage genes annotated using [PHASTER database](https://phaster.ca).", escape = FALSE, col.names = c("Prophage Name", "Species source", "Query Protein ID", "Gene Product", "Query Protein Coordinates")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:5, valign = "middle") %>%
-  scroll_box(height = "500px")
+datatable(full_info,
+          escape = FALSE,
+          filter = 'top',
+          options = dt_opt_lst,
+          extensions = 'Buttons',
+          rownames = T)
 ```

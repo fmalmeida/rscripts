@@ -1,21 +1,4 @@
-```{r parsing-db-victors, eval=TRUE, include=FALSE, echo=FALSE}
-# Download Victors Metadata
-victors_meta <- read.delim("/work/victors/victors_metadata.tsv")
-
-# Remove duplicates based on bitscore
-victors_blast <- victors_blast[order(victors_blast$V1, -abs(victors_blast$V3), -abs(victors_blast$V13) ), ]
-victors_blast <-victors_blast[ !duplicated(victors_blast$V1), ]
-victors_blast <- victors_blast[order(victors_blast$V1),]
-
-# Find Victors ID in each blast result
-s <- strsplit(as.character(victors_blast$V2), "\\|")
-y <- sapply(s, function(x) { x[2] })
-victors_blast$DB_ID <- y
-
-# Merge annotation with metadata
-victors_full <- merge.data.frame(victors_blast, victors_meta, by.x = "DB_ID", by.y = "NCBI.Protein.GI")
-victors_full <- victors_full[ !duplicated(victors_full$V1), ]
-
+```{r setup-victors, eval=TRUE, include=FALSE, echo=FALSE}
 # Function to get Attribute Fields
 getAttributeField <- function (x, field, attrsep = ";") { 
   s = strsplit(x, split = attrsep, fixed = TRUE) 
@@ -31,37 +14,90 @@ getAttributeField <- function (x, field, attrsep = ";") {
   }) 
 }
 
+# Function do get URLs for DATATABLE
+vf_id_url_DT <- function (x) {
+  
+  id <-  x[5]
+  url <- paste0("http://www.phidias.us/victors/gene_detail.php?c_mc_victor_id=", id)
+  url <- paste0("<a  target=_blank href=", url, ">", id,"</a>" )
+  
+  return(url)
+}
+
+# Get Victors Metadata
+#victors_meta <- read.delim("/work/victors/victors_metadata.tsv")
+victors_meta <- read.delim("/Users/falmeida/Downloads/victors_metadata.tsv")
+```
+
+## Against the whole genome
+
+All the virulence factors in Victors database that have an alignment against the genome full-filling the thresholds set are shown in Table \@ref(tab:write-table-victors-genome). We report both annotations using the predicted genes and the whole genome because Prokka uses prodigal to predicted genes which may miss some genes.
+
+<caption>(#tab:write-table-victors-genome) Virulence factors annotated using the Victors database via BLASTx against the whole genome</caption>
+```{r}
+## Convert to factors
+blast <- victors_blast_genome
+colnames(blast) <- c("Contig", "Start", "End", "Strand", "Product", "Coverage_aln", "Gaps", "Coverage %", "Identity %", "Database", "Ref. Accession", "Victors ID", "Description")
+blast$`Victors ID` <- lapply(str_split(blast$`Victors ID`, "_"), tail, 1)
+blast$`Victors ID` <- apply(blast, 1, vf_id_url_DT)
+blast[sapply(blast, is.character)] <- lapply(blast[sapply(blast, is.character)], as.factor)
+datatable(blast,
+          escape = FALSE,
+          filter = 'top',
+          options = dt_opt_lst,
+          extensions = 'Buttons',
+          rownames = T)
+```
+
+## Against the predicted genes
+
+```{r parsing-db-victors, eval=TRUE, include=FALSE, echo=FALSE}
+# Parse BLAST
+blast <- victors_blast %>% select(qseqid, stitle)
+blast <- separate(blast, stitle, c("vf_header", "Description"), sep = " ", extra = "merge")
+blast <- separate(blast, vf_header, c("db", "Gene Name", "ref", "VF ID"), sep = "~~~", extra = "merge")
+blast <- separate(blast, `VF ID`, c("db", "VF ID"), sep = "_", extra = "merge")
+blast$`Gene Name` <- gsub(blast$`Gene Name`, pattern = "_", replacement = " ")
+
+# Merge annotation with metadata
+victors_full <- merge.data.frame(blast, victors_meta, by.x = "VF ID", by.y = "NCBI.Protein.GI")
+victors_full <- victors_full[ !duplicated(victors_full$qseqid), ]
+
 # Create ID Column
-gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
+gff$ID <- getAttributeField(as.character(gff$V9), "ID", ";")
 
 # To upper
 gff$ID <- toupper(gff$ID)
 
 # Merge with GFF
-victors_full <- merge.data.frame(victors_full, gff, by.x = "V1", by.y = "ID")
+victors_full <- merge.data.frame(victors_full, gff, by.x = "qseqid", by.y = "ID")
 
 # Create Position Column
-victors_full$position <- paste(victors_full$V1.y, ":", victors_full$V4.y, "-", victors_full$V5.y, sep = "")
+victors_full$position <- paste(victors_full$V1, ":", victors_full$V4, "-", victors_full$V5, sep = "")
 
 # Create DF for kable
-blast <- victors_full %>% select(V1, Gene.Name, Protein.Name, Protegen.ID, position)
+blast <- victors_full %>% select(qseqid, Gene.Name, Protein.Name, Description, Protegen.ID, position)
 
 # Get urls
 ids <- blast$Protegen.ID
 urls <- lapply(ids, function(x){paste0("http://www.phidias.us/victors/gene_detail.php?c_mc_victor_id=", x)})
 ```
 
-All query genes that have a match in Victors database are described in Table \@ref(tab:write-table-victors). In order to make further investigations easier, all genes are linked to its matches in Victors database.
+All query genes predicted by Prokka that have a match in Victors database are described in Table \@ref(tab:write-table-victors). In order to make further investigations easier, all genes are linked to its matches in Victors database.
 
-The results are presented with gene name, gene product, genomics coordinates, query protein name and database ID.
+> Victors database is protein-only thus genes are scanned via blastp. Victors is a new database and focused in proteins that are important in the interaction pathogen-host, thus it may contain proteins that you have never heard about.
 
-```{r write-table-victors}
+<caption>(#tab:write-table-victors) Virulence factors annotated using the Victors database via BLASTp</caption>
+```{r}
 # Produce Table
-colnames(blast) <- c("Query Protein ID", "Gene Name", "Product", "Database ID", "Query Protein Coordinates")
-blast %>%
-  mutate("Database ID" = cell_spec(`Database ID`, "html", link = urls)) %>%
-  arrange(`Query Protein ID`) %>%
-  kable(caption = "Virulence Genes annotated from Victors database", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:5, valign = "middle")
+colnames(blast) <- c("Query Protein ID", "Gene Name", "Product", "Description", "Database ID", "Query Protein Coordinates")
+blast$`Database ID` <- apply(blast, 1, vf_id_url_DT)
+## The conversion
+blast[sapply(blast, is.character)] <- lapply(blast[sapply(blast, is.character)], as.factor)
+datatable(blast,
+          escape = FALSE,
+          filter = 'top',
+          options = dt_opt_lst,
+          extensions = 'Buttons',
+          rownames = T)
 ```

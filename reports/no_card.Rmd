@@ -1,3 +1,0 @@
-Not a single resistance gene from CARD was found in the query genome. This might have happened because your blast thresholds were too stringent or because the genome truly have no virulence gene.
-
-Therefore, it is advisable to take a better look at the parameters used and consider the query genome biology to define which scenario is the one that best suits your data.

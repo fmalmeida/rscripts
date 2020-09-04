@@ -1,10 +1,19 @@
-All prophages annotated using phigaro are showed in its [html report file](`r phigaro_html`) stored at ``r phigaro_dir``. Its genomic regions are summarized in Table \@ref(tab:phigaro-table).
+All prophages annotated using phigaro are better shown in its own [html report file](`r phigaro_html`). The genomic regions predicted as putative prophage sequences are summarized in Table \@ref(tab:phigaro-table).
 
-It is worthy taking notes of prophage's genomic regions for better exploring its data using JBROWSE genome browser. This genome browser was automatically created (stored in a dir called `jbrowse`) and can be be used with [JBROWSE desktop](https://github.com/GMOD/jbrowse).
+* Check it out at:
+    + Dir: ``r phigaro_dir``
+    + HTML: ``r phigaro_html``
 
-```{r phigaro-table}
+> It is worthy taking notes of prophage's genomic regions for a better exploration using the JBROWSE genome browser provided. This genome browser was automatically created (stored in a dir called `jbrowse`) and can be visualized with [JBROWSE desktop](https://github.com/GMOD/jbrowse).
+
+<caption>(#tab:phigaro-table) Putative prophage sequences annotated with phigaro software</caption>
+```{r}
 # Produce Table
-phigaro_txt %>%
-  kable(caption = "Prophages annotated with phigaro software", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12)
+phigaro_txt[sapply(phigaro_txt, is.character)] <- lapply(phigaro_txt[sapply(phigaro_txt, is.character)], as.factor)
+datatable(phigaro_txt,
+          escape = FALSE,
+          filter = 'top',
+          options = dt_opt_lst,
+          extensions = 'Buttons',
+          rownames = T)
 ```

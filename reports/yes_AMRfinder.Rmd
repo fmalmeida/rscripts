@@ -1,5 +1,4 @@
-
-Below it is summarized the result obtained with AMRFinderPlus. Roughly, it can be divided into two main categories: 
+Below it is summarized the results obtained with AMRFinderPlus. Roughly, it can be divided into two main categories: 
 
 1. Genes related to antibiotics, called AMR;
 2. Genes related to stress resistance which can be:
@@ -21,36 +20,45 @@ cat(paste("\t-", string.list), sep = '\n')
 
 ### Supporting Data
 
+<caption>(#tab:ncbi-amr-resistance-genes) Resistance genes annotated from NCBI AMR curated database using AMRfinderplus</caption>
 ```{r ncbi-amr-resistance-genes}
 # Merge tables
 tab2 <- merge.data.frame(gff, tab, by.x = "Prokka_ID", by.y = "Protein.identifier", all.y = TRUE, all.x = FALSE)
-
-# Create urls
-urls <- lapply(tab2$Accession.of.closest.sequence, function(x){
-  ifelse(!is.na(x), paste0("https://www.ncbi.nlm.nih.gov/gene/?term=", x),
-         paste0("No Reference"))
-  })
+tab2$Accession.of.closest.sequence <- teste(tab2$Accession.of.closest.sequence)
 
 # Produce Table
 tab2 %>%
-  select(Element.type, Prokka_ID, Gene.symbol, Sequence.name, Class, Method, Accession.of.closest.sequence, `Query Protein Coordinates`) %>%
-  mutate("Accession.of.closest.sequence" = ifelse(!is.na(Accession.of.closest.sequence), cell_spec(Accession.of.closest.sequence, "html", link = urls), NA)) %>%
+  select(Element.type, Element.subtype, Prokka_ID, Gene.symbol, Sequence.name, Class, Subclass, Method, Accession.of.closest.sequence, `Query Protein Coordinates`) %>%
   arrange(Element.type, Prokka_ID) %>%
-kable(caption = "Resistance genes annotated from NCBI AMR curated database using AMRfinderplus", escape = FALSE, col.names = c("Resistance Type", "Query Protein ID", "Gene Name", "Product", "Target Drug Class", "Annotation Method", "Reference Sequence", "Genome Coordinates")) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1, valign = "middle") %>%
-  footnote("All NA genome coordinates entries are due to a merge step with bedtools. Which means, these entries have been merged in the gff and we can not precisely get its coordinates. One might look at the gff file to analyse it.")
+  datatable(escape = FALSE,
+            filter = 'top',
+            colnames = c("Resistance type", "Resistance subtype", "Query protein", "Gene", "Product", "Resistance Class", "Resistance subclass", "Detection method", "Ref. Accession", "Genomic coordinates"),
+            options = dt_opt_lst,
+            extensions = 'Buttons',
+            rownames = T)
 ```
 
-```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="60%"}
-ncbi_count <- tab2 %>%
+```{r ncbi-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using NCBI's AMRFinderplus", out.width="45%"}
+## Grab AMR
+amr <- tab2 %>%
+  filter(Element.type == "AMR") %>%
   select(Prokka_ID, Class)
-drugs <- plyr::count(ncbi_count, "Class")
+amr <- plyr::count(amr, "Class")
+
+## Grab STRESS
+stress <- tab2 %>%
+  filter(Element.type == "STRESS") %>%
+  select(Prokka_ID, Element.subtype)
+stress <- plyr::count(stress, "Element.subtype")
+colnames(stress) <- c("Class", "freq")
+
+## Plot
+drugs <- rbind(amr, stress)
 ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-  xlab("Gene Target") +
+  xlab("") +
   ylab("Number of genes") +
-  guides(fill=guide_legend(title = "Gene Target"))
+  guides(fill=guide_legend(title = "Resistance Class"))
 ```

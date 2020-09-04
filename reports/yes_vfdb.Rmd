@@ -1,3 +1,85 @@
+## Against the whole genome
+```{r setup-vfdb, eval=TRUE, include=FALSE, echo=FALSE}
+## Convert to factors
+blast <- vfdb_blast_genome
+colnames(blast) <- c("Contig", "Start", "End", "Strand", "Gene", "Coverage_aln", "Gaps", "Coverage %", "Identity %", "Database", "VFDB gene id", "Virulence Factor", "Description")
+blast$`Virulence Factor` <- gsub(blast$`Virulence Factor`, pattern = "\\[", replacement = "")
+blast$`Virulence Factor` <- gsub(blast$`Virulence Factor`, pattern = "\\]", replacement = "")
+blast$`Virulence Factor` <- gsub(blast$`Virulence Factor`, pattern = "_", replacement = " ")
+vfs <- str_split(blast$`Virulence Factor`, " ")
+blast$`Virulence Factor ID` <- sapply(vfs, tail, 1)
+blast$`Virulence Factor ID` <- gsub(blast$`Virulence Factor ID`, pattern = "\\(", replacement = "")
+blast$`Virulence Factor ID` <- gsub(blast$`Virulence Factor ID`, pattern = "\\)", replacement = "")
+```
+
+
+All the virulence factors in VFDB database that have an alignment against the genome full-filling the thresholds set are shown in Table \@ref(tab:write-table-vfdb-genome). We report both annotations using the predicted genes and the whole genome because Prokka uses prodigal to predicted genes which may miss some genomes.
+
+The following virulence factors were detected (having one or more genes in the genome):
+
+> The results are showed as: **VFDB virulence factor name (VFDB virulence factor ID)**.
+
+```{r results='asis'}
+string.list <- apply(blast, 1, function (x) {
+  if (grepl("VF.*[0-9]+", x[14])) {
+    name <- x[12]
+    id <- x[14]
+    url <- paste0("[", name, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", id, "#", id, ")")
+  } else {
+    name <- x[12]
+    id <-  str_split(x[11], "\\(")[[1]][1]
+    url <- paste0("[", name, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/comp_gene.cgi?RID=", id, ")")
+  }
+  
+  return(url)
+}) %>% sort() %>% unique()
+cat("- Virulence factors found in the query genome:\n")
+cat(paste("\t-", string.list), sep = '\n')
+```
+
+<caption>(#tab:write-table-vfdb-genome) Virulence factors annotated using the Victors database via BLASTn against the whole genome</caption>
+```{r}
+# Get urls
+## VFs
+blast$`Virulence Factor` <- apply(blast, 1, function (x) {
+  if (grepl("VF.*[0-9]+", x[14])) {
+    id <- x[14]
+    name <- x[12]
+    url <- paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", id, "#", id)
+    url <- paste0('<a  target=_blank href=', url, '>', name,'</a>' )
+  } else {
+    id <-  str_split(x[11], "\\(")[[1]][1]
+    name <- x[12]
+    url <- paste0("http://www.mgc.ac.cn/cgi-bin/VFs/comp_gene.cgi?RID=", id)
+    url <- paste0("<a  target=_blank href=", url, ">", name,"</a>" )
+  }
+  
+  return(url)
+})
+
+## Genes
+blast$`VFDB gene id` <- apply(blast, 1, function (x) {
+  
+  id <-  str_split(x[11], "\\(")[[1]][1]
+  name <- x[11]
+  url <- paste0("http://www.mgc.ac.cn/cgi-bin/VFs/comp_gene.cgi?RID=", id)
+  url <- paste0("<a  target=_blank href=", url, ">", name,"</a>" )
+    
+  return(url)
+})
+
+# Render dt
+blast[sapply(blast, is.character)] <- lapply(blast[sapply(blast, is.character)], as.factor)
+datatable(blast,
+          escape = FALSE,
+          filter = 'top',
+          options = dt_opt_lst,
+          extensions = 'Buttons',
+          rownames = T)
+```
+
+## Against the predicted genes
+
 ```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
 # Function to get Attribute Fields
 getAttributeField <- function (x, field, attrsep = ";") { 
@@ -14,54 +96,96 @@ getAttributeField <- function (x, field, attrsep = ";") {
   }) 
 }
 
+# Function to get VF IDs
+vf_id_url <- function (x) {
+  if (grepl("VF.*[0-9]+", x[8])) {
+    id <- x[8]
+    url <- paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", id, "#", id)
+  } else {
+    id <-  str_split(x[4], "\\(")[[1]][1]
+    url <- paste0("http://www.mgc.ac.cn/cgi-bin/VFs/comp_gene.cgi?RID=", id)
+  }
+  
+  return(url)
+}
+
+# Function to get URLs for VF List
+vf_id_url_list <- function (x) {
+  if (grepl("VF.*[0-9]+", x[8])) {
+    name <- x[5]
+    id <- x[8]
+    url <- paste0("[", name, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", id, "#", id, ")")
+  } else {
+    name <- x[5]
+    id <-  str_split(x[4], "\\(")[[1]][1]
+    url <- paste0("[", name, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/comp_gene.cgi?RID=", id, ")")
+  }
+  
+  return(url)
+}
+
+# Function do get URLs for DATATABLE
+vf_id_url_DT <- function (x) {
+  if (grepl("VF.*[0-9]+", x[8])) {
+    id <- x[8]
+    url <- paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", id, "#", id)
+    url <- paste0('<a  target=_blank href=', url, '>', id,'</a>' )
+  } else {
+    id <-  str_split(x[4], "\\(")[[1]][1]
+    url <- paste0("http://www.mgc.ac.cn/cgi-bin/VFs/comp_gene.cgi?RID=", id)
+    url <- paste0("<a  target=_blank href=", url, ">", id,"</a>" )
+  }
+  
+  return(url)
+}
+
 # Create ID Column
-gff$ID <- getAttributeField(as.character(gff$V9), "id", ";")
+gff$ID <- getAttributeField(as.character(gff$V9), "ID", ";")
 
 # To upper
 gff$ID <- toupper(gff$ID)
 
-# Remove duplicates based on bitscore
-vfdb_blast <- vfdb_blast[order(vfdb_blast$V1, -abs(vfdb_blast$V3), -abs(vfdb_blast$V13) ), ]
-vfdb_blast <-vfdb_blast[ !duplicated(vfdb_blast$V1), ]
-vfdb_blast <- vfdb_blast[order(vfdb_blast$V1),]
+# Sort entries
+vfdb_blast <- vfdb_blast[order(vfdb_blast$qseqid),]
 
 # Data Complete
-full_info <- merge.data.frame(vfdb_blast, gff, by.x = "V1", by.y = "ID")
+full_info <- merge.data.frame(vfdb_blast, gff, by.x = "qseqid", by.y = "ID")
 
 # Create Position Column
-full_info$position <- paste(full_info$V1.y, ":", full_info$V4.y, "-", full_info$V5.y, sep = "")
+full_info$position <- paste(full_info$V1, ":", full_info$V4, "-", full_info$V5, sep = "")
 
-# Create DF for kable
-blast <- full_info %>% select(V1, V14, position)
-blast <- separate(blast, V14, c("VF ID", "other"), sep = " ", extra = "merge")
-blast <- separate(blast, other, c("Gene Name", "other"), sep = " ", extra = "merge")
-blast$other <- gsub(blast$other, pattern = " \\[", replacement = "#\\[")
-blast <- separate(blast, other, c("Description", "Virulence Factor Name", "Subject Species"), sep = "#", extra = "merge")
+# Parse BLAST
+blast <- full_info %>% select(qseqid, stitle, position)
+blast <- separate(blast, stitle, c("vf_header", "Description"), sep = " ", extra = "merge")
+blast <- separate(blast, vf_header, c("db", "Gene Name", "ref", "Virulence Factor Name"), sep = "~~~", extra = "merge")
+blast$`Virulence Factor Name` <- gsub(blast$`Virulence Factor`, pattern = "\\[", replacement = "")
+blast$`Virulence Factor Name` <- gsub(blast$`Virulence Factor`, pattern = "\\]", replacement = "")
+blast$`Virulence Factor Name` <- gsub(blast$`Virulence Factor`, pattern = "_", replacement = " ")
+vfs <- str_split(blast$`Virulence Factor Name`, " ")
+blast$`Virulence Factor ID` <- sapply(vfs, tail, 1)
+blast$`Virulence Factor ID` <- gsub(blast$`Virulence Factor ID`, pattern = "\\(", replacement = "")
+blast$`Virulence Factor ID` <- gsub(blast$`Virulence Factor ID`, pattern = "\\)", replacement = "")
 
 # Sort
-blast <- arrange(blast, `Virulence Factor Name`, `Gene Name`)
+blast <- arrange(blast, `Virulence Factor ID`, `Gene Name`)
 
 # Get urls
-ids <- blast$`Virulence Factor Name`
-ids <- str_match(ids, "VF.*[0-9]+")
-
-urls <- lapply(ids, function(x){paste0("http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", x, "#", x)})
+urls <- apply(blast, 1, vf_id_url)
 ```
 
-All virulence factors that were found to have at least one gene in the query genome are shown in the list below. All of them are linked to the database for further investigations.
+All virulence factors (from VFDB) that were found to have at least one gene in the query genome are shown in the list below. All of them are linked to the database for further investigations.
 
-> The results are showed as: **[VFDB virulence factor name (VFDB virulence factor ID)]**.
+> The results are showed as: **VFDB virulence factor name (VFDB virulence factor ID)**.
 
 ```{r results='asis'}
-string.list <- blast %>% pull("Virulence Factor Name") %>% unique() %>% sort()
-string.list <- lapply(string.list, function(x){y = str_match(x, "VF.*[0-9]+") ;  paste0("[", x, "]", "(http://www.mgc.ac.cn/cgi-bin/VFs/vfs.cgi?VFID=", y, "#", y, ")")})
+string.list <- apply(blast, 1, vf_id_url_list) %>% sort() %>% unique()
 cat("- Virulence factors found in the query genome:\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
 
-Virulence genes are more detailed in Table \@ref(tab:write-table). It shows the gene product, source and name of each gene related to a Virulence Factor found in the query genome. Additionally, Figure \@ref(fig:vfs-png) summarizes the amount of annotated genes of each virulence factor.
+All query genes predicted by Prokka that have a match in VFDB are more detailed in Table \@ref(tab:vfdb-table). Additionally, Figure \@ref(fig:vfs-png) summarizes the amount of annotated genes of each virulence factor. Information are always linked to the database to make investigations easier.
 
-```{r vfs-png, fig.align='center', fig.show='hold', fig.cap="Virulence Factors annotated from [VFDB](http://www.mgc.ac.cn/VFs/main.htm) database", out.width="60%"}
+```{r vfs-png, fig.align='center', fig.show='hold', fig.cap="Virulence Factors annotated from [VFDB](http://www.mgc.ac.cn/VFs/main.htm) database", out.width="45%"}
 summary <- blast %>%
   select("Virulence Factor Name", "Gene Name")
 colnames(summary) <- c("Virulence_Factor_Name", "Gene_Name")
@@ -74,12 +198,17 @@ ggplot(vfs, aes(x=Virulence_Factor_Name, y=freq, fill=Virulence_Factor_Name)) + 
   guides(fill=guide_legend(title = "Virulence Factors"))
 ```
 
-```{r write-table}
+<caption>(#tab:vfdb-table) Virulence factors annotated using the VFDB database via BLASTn</caption>
+```{r}
 # Produce Table
-colnames(blast) <- c("Query Protein ID", "VF ID", "Gene Name", "Description", "Virulence Factor Name", "Subject Species", "Query Protein Coordinates")
-blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Subject Species", "Query Protein ID", "Query Protein Coordinates") %>%
-  mutate("Virulence Factor Name" = cell_spec(`Virulence Factor Name`, "html", link = urls)) %>%
-  kable(caption = "Virulence Genes annotated from VFDB", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:4, valign = "middle")
+colnames(blast) <- c("Query Protein ID", "Database", "Gene Name", "Ref", "Virulence Factor Name", "Description", "Query Protein Coordinates", "VF ID")
+blast$`VF ID` <- apply(blast, 1, vf_id_url_DT)
+## The conversion
+blast[sapply(blast, is.character)] <- lapply(blast[sapply(blast, is.character)], as.factor)
+datatable(blast %>% select("Virulence Factor Name", "VF ID", "Gene Name", "Description", "Query Protein ID", "Query Protein Coordinates"),
+          escape = FALSE,
+          filter = 'top',
+          options = dt_opt_lst,
+          extensions = 'Buttons',
+          rownames = T)
 ```
