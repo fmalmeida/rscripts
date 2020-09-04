@@ -50,76 +50,85 @@ getAttributeField <- function (x, field, attrsep = ";") {
 # Operator to discard patterns found
 '%ni%' <- Negate('%in%')
 
-# Load GFF File
-gff <- gffRead(opt$gff)
-gff <- gffRead("/Volumes/falmeida1TB/bacannot_teste/tmp.gff")
-# Create a column in gff with ids
-gff$ID <- getAttributeField(gff$attributes, "ID", ";")
-
-# Load CARD RGI results
-rgi_input <- read.delim(opt$input, header = TRUE)
-rgi_input <- read.delim("/Volumes/falmeida1TB/bacannot_teste/teste/GCF_000240185.1_ASM24018v2_genomic/resistance/RGI/RGI_GCF_000240185.1_ASM24018v2_genomic.txt", header = TRUE)
-rgi_input <- rgi_input %>% select(-Contig, -Start, -Stop, -Orientation)
-
-## Rename ORFs
-rgi_input$ORF_ID <- sapply(str_split(rgi_input$ORF_ID, " "), head, 1)
-## Get gene names
-ids <- rgi_input$ORF_ID
-
-if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
-
-  # Subset based on gene IDs
-  ## Lines with our IDs
-  sub <- gff %>% 
-    filter(ID %in% ids) %>% 
-    select(seqname, source, feature, start, end, score, strand, frame, attributes, ID)
-  ## Lines without our IDs
-  not <- gff %>% 
-    filter(ID %ni% ids) %>% 
-    select(seqname, source, feature, start, end, score, strand, frame, attributes)                              
-
-  # Change fields values
-  ## source
-  s <- sub$source
-  sn <- "CARD"
-  snew <- paste(s, sn, sep = ",")
-  sub$source <- snew
+if (file.info(opt$input)$size > 0) {
   
-  ## feature
-  f <- sub$feature
-  fn <- "Resistance"
-  fnew <- paste(f, fn, sep = ",")
-  sub$feature <- fnew
+  # Load GFF File
+  gff <- gffRead(opt$gff)
+  # Create a column in gff with ids
+  gff$ID <- getAttributeField(gff$attributes, "ID", ";")
   
-  ## attributes
-  sub <- merge.data.frame(sub, rgi_input, by.x = "ID",
-                          by.y = "ORF_ID", all = TRUE)
+  # Load CARD RGI results
+  rgi_input <- read.delim(opt$input, header = TRUE)
+  rgi_input <- rgi_input %>% select(-Contig, -Start, -Stop, -Orientation)
   
-  sub$Drug.Class <- gsub(pattern = "; ", replacement = "_&_",
-                         x = sub$Drug.Class)
-  sub$NEW_attributes <-
-    paste( "Additional_database=CARD", ";CARD_name=", sub$Best_Hit_ARO, ";RGI_inference=", sub$Model_type,
-          ";CARD_product=", sub$AMR.Gene.Family, ";Targeted_drug_class=",
-          sub$Drug.Class, sep = "")
+  ## Rename ORFs
+  rgi_input$ORF_ID <- sapply(str_split(rgi_input$ORF_ID, " "), head, 1)
+  ## Get gene names
+  ids <- rgi_input$ORF_ID
   
-  sub$NEW_attributes <- gsub(pattern = " ", replacement = "_",
+  if (is.null(rgi_input) == FALSE & dim(rgi_input)[1] != 0) {
+    
+    # Subset based on gene IDs
+    ## Lines with our IDs
+    sub <- gff %>% 
+      filter(ID %in% ids) %>% 
+      select(seqname, source, feature, start, end, score, strand, frame, attributes, ID)
+    ## Lines without our IDs
+    not <- gff %>% 
+      filter(ID %ni% ids) %>% 
+      select(seqname, source, feature, start, end, score, strand, frame, attributes)                              
+    
+    # Change fields values
+    ## source
+    s <- sub$source
+    sn <- "CARD"
+    snew <- paste(s, sn, sep = ",")
+    sub$source <- snew
+    
+    ## feature
+    f <- sub$feature
+    fn <- "Resistance"
+    fnew <- paste(f, fn, sep = ",")
+    sub$feature <- fnew
+    
+    ## attributes
+    sub <- merge.data.frame(sub, rgi_input, by.x = "ID",
+                            by.y = "ORF_ID", all = TRUE)
+    
+    sub$Drug.Class <- gsub(pattern = "; ", replacement = "_&_",
+                           x = sub$Drug.Class)
+    sub$NEW_attributes <-
+      paste( "Additional_database=CARD", ";CARD_name=", sub$Best_Hit_ARO, ";RGI_inference=", sub$Model_type,
+             ";CARD_product=", sub$AMR.Gene.Family, ";Targeted_drug_class=",
+             sub$Drug.Class, sep = "")
+    
+    sub$NEW_attributes <- gsub(pattern = " ", replacement = "_",
                                x = sub$NEW_attributes)
-  sub$NEW_attributes <- gsub(pattern = "-", replacement = "_",
+    sub$NEW_attributes <- gsub(pattern = "-", replacement = "_",
                                x = sub$NEW_attributes)
+    
+    sub <- unite(sub, "attributes", c("attributes", "NEW_attributes"), sep = ";") %>%
+      select(seqname, source, feature, start, end, score, strand, frame, attributes)
+    
+    # Merge files
+    merged_df <- merge.data.frame(sub, not, all = TRUE)
+    feat <- merged_df$feature
+    merged_df$feature <- sapply(feat, reduce_row)
+    source <- merged_df$source
+    merged_df$source <- sapply(source, reduce_row)
+    merged_df <- merged_df[str_order(merged_df$attributes, numeric = TRUE), ]
+    
+    # Write output
+    write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", col.names = FALSE, row.names = FALSE)
+    
   
-  sub <- unite(sub, "attributes", c("attributes", "NEW_attributes"), sep = ";") %>%
-    select(seqname, source, feature, start, end, score, strand, frame, attributes)
-  
-  # Merge files
-  merged_df <- merge.data.frame(sub, not, all = TRUE)
-  feat <- merged_df$feature
-  merged_df$feature <- sapply(feat, reduce_row)
-  source <- merged_df$source
-  merged_df$source <- sapply(source, reduce_row)
-  merged_df <- merged_df[str_order(merged_df$attributes, numeric = TRUE), ]
-  
-  # Write output
-  write.table(merged_df, file = opt$out, quote = FALSE, sep = "\t", col.names = FALSE, row.names = FALSE)
+  } else {
+    # Load GFF file
+    gff <- gffRead(opt$gff)
+    # Write output
+    write.table(gff, file = opt$out, quote = FALSE, sep = "\t",
+                col.names = FALSE, row.names = FALSE)
+  }
 
 } else {
   # Load GFF file
