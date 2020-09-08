@@ -18,13 +18,13 @@ cat("- **AMR genes found in the query genome:**\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
 
-### Supporting Data
+## Supporting Data
 
 <caption>(#tab:ncbi-amr-resistance-genes) Resistance genes annotated from NCBI AMR curated database using AMRfinderplus</caption>
 ```{r ncbi-amr-resistance-genes}
 # Merge tables
 tab2 <- merge.data.frame(gff, tab, by.x = "Prokka_ID", by.y = "Protein.identifier", all.y = TRUE, all.x = FALSE)
-tab2$Accession.of.closest.sequence <- teste(tab2$Accession.of.closest.sequence)
+tab2$Accession.of.closest.sequence <- amrfinder_url(tab2$Accession.of.closest.sequence)
 
 # Produce Table
 tab2 %>%

@@ -1,70 +1,86 @@
 
-Perfect hits are genes that CARD guarantee its functionality. Which means that these genes are likely functional and might be conferring resistance to the bacteria.
+Perfect hits are genes that CARD guarantee its functionality. Which means that these genes are likely functional and might be conferring resistance to the bacteria. The drug classes found to be targeted by the AMR genes found are shown below:
 
 ```{r results='asis'}
 ## Name columns
-colnames(rgi_perfect) <- c("Protein ID", "Product", "Cut_Off", "Best_Hit_ARO", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
-
-## Separate rows
-rgi_perfect <- rgi_perfect %>%
-  separate_rows(`Drug Class`, sep = "; ")
+colnames(rgi_perfect) <- c("Protein ID", "Cut_Off", "Product", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
 
 # Create List
-string.list <- rgi_perfect %>% pull(6) %>% sort() %>% unique()
+string.list <- rgi_perfect %>% separate_rows(`Drug Class`, sep = "; ")
+string.list$`Drug Class` <- sapply(string.list$`Drug Class`, function(x) { ifelse(as.character(x) == "", "No specific target", x)})
+string.list <- string.list %>% pull(5) %>% sort() %>% unique()
 cat("- **Drug Classes targeted by the query genome:**\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
 
-#### Supporting Data
+### AMR genes
 
 ```{r rgi-perfect-resistance-genes}
 # Merge data.frame with GFF
+colnames(rgi_perfect) <- c("Protein ID", "Cut_Off", "Product", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
 rgi_perfect <- merge.data.frame(gff, rgi_perfect, by.x = "Prokka_ID", by.y = "Protein ID", all.y = TRUE, all.x = FALSE)
 
 # Get CARD metadata
-card_meta <- read.csv("https://github.com/fmalmeida/CARDDB/raw/master/aro.tsv", sep = "\t")
-card_meta$Accession <- str_remove(card_meta$Accession, "ARO:")
+aro_index <- read.csv("https://github.com/fmalmeida/CARDDB/raw/master/aro_index.tsv", sep = "\t")
+#aro_index <- read.csv("/work/card-data/aro_index.tsv", sep = "\t")
+aro_index$ARO.Accession <- str_remove(aro_index$ARO.Accession, "ARO:")
 
 # Change Col name
-names(card_meta)[names(card_meta) == "Accession"] <- 'ARO'
-card_meta$ARO <- as.integer(card_meta$ARO)
+names(aro_index)[names(aro_index) == "ARO.Accession"] <- 'ARO'
+aro_index$ARO <- as.integer(aro_index$ARO)
+rgi_perfect$ARO <- as.integer(rgi_perfect$ARO)
 
 # Join
-rgi_perfect <- dplyr::left_join(rgi_perfect, card_meta, by = c("ARO"))
+rgi_perfect <- merge.data.frame(rgi_perfect, aro_index, by = "ARO", all.x = TRUE)
 
 # Create urls
-urls <- lapply(rgi_perfect$ID, function(x){paste0("https://card.mcmaster.ca/ontology/", x)})
-
-# Change Col name
-names(rgi_perfect)[names(rgi_perfect) == "ID"] <- 'CARD link'
-names(rgi_perfect)[names(rgi_perfect) == "Best_Hit_ARO"] <- 'Gene'
+rgi_perfect$CVTERM.ID <- card_url(rgi_perfect$CVTERM.ID)
 
 # Produce Table
 rgi_perfect %>%
-  select("Gene","Resistance Mechanism", "Drug Class", "ARO", "CARD link", "Query Protein Coordinates", "Description") %>%
-  mutate("CARD link" = cell_spec(`CARD link`, "html", link = urls)) %>%
-  group_by(`Resistance Mechanism`) %>%
-  arrange(`Gene`, `CARD link`,`Resistance Mechanism`, `Drug Class`) %>%
-  kable(caption = "CARD resistance genes annotated and its target drug classes", escape = FALSE) %>%
-  kable_styling(bootstrap_options = bt_opt, full_width = T, fixed_thead = T, font_size = 12) %>%
-  collapse_rows(columns = 1:7, valign = "middle") %>%
-  scroll_box(height = "500px")
+  select(Prokka_ID, Product, `AMR Gene Family`, `Resistance Mechanism`, `Drug Class`, CVTERM.ID, `Query Protein Coordinates`) %>%
+  datatable(escape = FALSE,
+          filter = 'top',
+          options = dt_opt_lst,
+          extensions = 'Buttons',
+          rownames = T)
 ```
 
 <br>
 
-In the image below it is shown the amount of genes found to target these specific drug classes.
+The images \@ref(fig:rgi-perfect-resistome-png) and \@ref(fig:rgi-perfect-resistome-png-2) summarises the drug classes targeted by the AMR genes found and its resistance mechanisms.
 
-```{r rgi-perfect-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="80%"}
+```{r rgi-perfect-resistome-png, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="45%"}
 rgi_count <- rgi_perfect %>%
+  separate_rows(`Drug Class`, sep = "; ", convert = FALSE) %>%
   select(Prokka_ID, `Drug Class`)
+rgi_count$`Drug Class` = sapply(rgi_count$`Drug Class`, function(x) { ifelse(as.character(x) == "", "No specific target", x)})
 colnames(rgi_count) <- c("Contig", "Class")
 drugs <- plyr::count(rgi_count, "Class")
-ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
+
+ggplot(drugs, aes(x=Class, y=freq, fill=Class, na)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
   xlab("Targeted Drug Class") +
   ylab("Number of genes") +
   guides(fill=guide_legend(title = "Drug Classes"))
+```
+
+<br>
+```{r rgi-perfect-resistome-png-2, fig.align='center', fig.show='hold', fig.cap="Resistome Predicted using CARD RGI tool", out.width="45%"}
+rgi_count <- rgi_perfect %>%
+  separate_rows(`Resistance Mechanism`, sep = "; ", convert = FALSE) %>%
+  select(Prokka_ID, `Resistance Mechanism`)
+rgi_count$`Resistance Mechanism` = sapply(rgi_count$`Resistance Mechanism`, function(x) { ifelse(as.character(x) == "", "No specific mechanism", x)})
+colnames(rgi_count) <- c("Contig", "Class")
+drugs <- plyr::count(rgi_count, "Class")
+
+ggplot(drugs, aes(x=Class, y=freq, fill=Class, na)) +
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()) +
+  xlab("Resistance mechanisms") +
+  ylab("Number of genes") +
+  guides(fill=guide_legend(title = "Resistance Mechanisms"))
 ```

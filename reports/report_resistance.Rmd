@@ -4,14 +4,15 @@ author: "Produced with bacannot pipeline"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 subtitle: "Query: `r params$query`"
 params:
-  query: GCF_000240185.1_ASM24018v2_genomic
-  amrfinder: /Volumes/falmeida1TB/bacannot_teste/teste/GCF_000240185.1_ASM24018v2_genomic/resistance/AMRFinderPlus/AMRFinder_resistance-only.tsv
-  gff: /Volumes/falmeida1TB/bacannot_teste/teste/GCF_000240185.1_ASM24018v2_genomic/gffs/GCF_000240185.1_ASM24018v2_genomic.gff 
-  rgitool: /Volumes/falmeida1TB/bacannot_teste/teste/GCF_000240185.1_ASM24018v2_genomic/resistance/RGI/RGI_GCF_000240185.1_ASM24018v2_genomic.txt
-  rgiperfect: /Volumes/falmeida1TB/bacannot_teste/teste/GCF_000240185.1_ASM24018v2_genomic/resistance/RGI/Perfect_RGI_GCF_000240185.1_ASM24018v2_genomic_hits.txt
-  rgistrict: /Volumes/falmeida1TB/bacannot_teste/teste/GCF_000240185.1_ASM24018v2_genomic/resistance/RGI/Strict_RGI_GCF_000240185.1_ASM24018v2_genomic_hits.txt
-  argminer_blastp: /Volumes/falmeida1TB/bacannot_teste/teste/GCF_000240185.1_ASM24018v2_genomic/resistance/ARGMiner/GCF_000240185.1_ASM24018v2_genomic_argminer_blastp_onGenes.txt
-  argminer_blastx: /Volumes/falmeida1TB/bacannot_teste/teste/GCF_000240185.1_ASM24018v2_genomic/resistance/ARGMiner/GCF_000240185.1_ASM24018v2_genomic_argminer_blastx_onGenome.summary.txt
+  blast_id:
+  blast_cov:
+  query:
+  amrfinder:
+  gff: 
+  rgitool:
+  rgiperfect:
+  rgistrict:
+  argminer_blastp:
 output:
   bookdown::html_document2: 
     css: styles.css
@@ -28,7 +29,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H')
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, fig.pos = 'H', message = FALSE)
 suppressMessages(library(magrittr))
 suppressMessages(library(ballgown))
 suppressMessages(library(knitr))
@@ -63,7 +64,25 @@ amrfinder_url <- function (x) {
   
   id  <- x
   url <- ifelse(!is.na(x), paste0("https://www.ncbi.nlm.nih.gov/gene/?term=", x), paste0("No Reference"))
-  url <- paste0("<a  target=_blank href=", url, ">", id, "</a>" )
+  url <- ifelse(!is.na(x), paste0("<a  target=_blank href=", url, ">", id, "</a>" ), paste0("No Reference"))
+    
+  return(url)
+}
+
+card_url <- function (x) {
+  
+  id  <- x
+  url <- ifelse(!is.na(x), paste0("https://card.mcmaster.ca/ontology/", x), paste0("No Reference"))
+  url <- ifelse(!is.na(x), paste0("<a  target=_blank href=", url, ">", id, "</a>" ), paste0("No Reference"))
+    
+  return(url)
+}
+
+argminer_url <- function (x) {
+  
+  id  <- x
+  url <- ifelse(!is.na(x), paste0("https://card.mcmaster.ca/ontology/", x), paste0("No Reference"))
+  url <- ifelse(!is.na(x), paste0("<a  target=_blank href=", url, ">", id, "</a>" ), paste0("No Reference"))
     
   return(url)
 }
@@ -84,6 +103,8 @@ amrtsv <- try(read.delim(params$amrfinder) %>% select(1,2,3,4,5,6,7,8,9,15), sil
 rgi_tsv <- try(read.delim(params$rgitool, header = TRUE), silent = TRUE)
 rgi_perfect <- try(read.delim(params$rgiperfect, header = FALSE), silent = TRUE)
 rgi_strict <- try(read.delim(params$rgistrict, header = FALSE), silent = TRUE)
+# ARGminer
+argminer_blastp <- try(read.delim(params$argminer_blastp, header = TRUE), silent = TRUE)
 
 
 #########################################
@@ -97,6 +118,15 @@ if (class(amrtsv) != 'try-error' && nrow(amrtsv) > 1) {
 } else {
   amrFinder_not_null <- FALSE
   amrFinder_null <- TRUE
+}
+
+# Check if ARGminer is empty
+if (class(argminer_blastp) != 'try-error' && nrow(argminer_blastp) > 1) {
+  argminer_not_null <- TRUE
+  argminer_null <- FALSE
+} else {
+  argminer_not_null <- FALSE
+  argminer_null <- TRUE
 }
 
 # Check if RGI is empty
@@ -150,8 +180,7 @@ About the BLASTs:
 * [AMRFinderPlus](https://github.com/ncbi/amr/wiki) and [ARGminer](https://bench.cs.vt.edu/argminer/#/home) are searched in a manner that it is possible to filter alignments based on coverage and identity, for those we have used the following:
     * Blast % identity: `> `r params$blast_id`%`
     * Blast % query coverage: `> `r params$blast_cov`%`
-        + For blasts against gene sequences predicted by Prokka, alignments are filtered in a two way manner so they cover at least `r params$blast_cov`% of the reference gene sequence and the of query sequence at the same time -- valid for ARGminer
-        + For blasts against the whole genome, alignments are filtered in a one way manner so they cover at least `r params$blast_cov`% of only the reference gene sequence -- valid for ARGminer
+        + For blasts against gene sequences predicted by Prokka, alignments are filtered in a two way manner so they cover at least `r params$blast_cov`% of the reference gene sequence and the of query sequence at the same time -- _valid for ARGminer_
 * [CARD RGI](https://github.com/arpcard/rgi) results are not filtered in these manners because they have their own detection models thresholds obtained by curation
 
 # AMRFinder
@@ -171,6 +200,12 @@ About the BLASTs:
 ```
 
 # ARGminer
+
+```{r, argminer_conditional_block, echo=FALSE, results='asis', eval=argminer_not_null, child='yes_argminer.Rmd'}
+```
+
+```{r, argminer_conditional_block_2, echo=FALSE, results='asis', eval=argminer_null, child='no_argminer.Rmd'}
+```
 
 # Prokka
 
