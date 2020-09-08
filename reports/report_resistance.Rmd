@@ -78,15 +78,6 @@ card_url <- function (x) {
   return(url)
 }
 
-argminer_url <- function (x) {
-  
-  id  <- x
-  url <- ifelse(!is.na(x), paste0("https://card.mcmaster.ca/ontology/", x), paste0("No Reference"))
-  url <- ifelse(!is.na(x), paste0("<a  target=_blank href=", url, ">", id, "</a>" ), paste0("No Reference"))
-    
-  return(url)
-}
-
 #####################
 ### Loading files ###
 #####################

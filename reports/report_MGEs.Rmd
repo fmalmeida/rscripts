@@ -10,7 +10,7 @@ params:
   phigaro_txt: 
   ice_genome_blast: 
   ice_prot_blast: 
-  ice_genome_blastx: 
+  ice_genome_tblastn: 
   phast_prot_blast: 
   phast_genome_blast: 
   query: 
@@ -70,7 +70,7 @@ if (class(phast_prot_blast) != 'try_error' & nrow(phast_prot_blast) > 0) {
 ## Read ICEberg documents
 ice_prot_blast <- try(read.delim(params$ice_prot_blast, header = TRUE), silent = TRUE)
 ice_genome_blast <- try(read.delim(params$ice_genome_blast, header = TRUE), silent = TRUE)
-ice_genome_blastx <- try(read.delim(params$ice_genome_blastx, header = TRUE), silent = TRUE)
+ice_genome_tblastn <- try(read.delim(params$ice_genome_tblastn, header = TRUE), silent = TRUE)
 if (class(ice_prot_blast) != 'try_error' & nrow(ice_prot_blast) > 0) {
   not_null <- TRUE
   null <- FALSE
@@ -101,8 +101,8 @@ In this context, this pipeline automatically annotates prophage sequences and pr
 
 About the BLASTs:
 
-* [PHAST](https://phaster.ca) is a protein database that contains a vast number of proteins that are commonly found in phages. This database is blasted to the genome via BLASTx and to the predicted genes via BLASTn;
-* [ICEberg](http://202.120.12.136:7913/ICEberg2/) is a protein and nucleotide database that contains the full-length sequences of known ICEs and also contains the sequences of a multitude of proteins commonly found inside these ICEs. Full-length ICEs are blasted to the genome via BLASTn while the protein sequences are blasted to the genome itself via BLASTx and to the predicted genes via BLASTp.
+* [PHAST](https://phaster.ca) is a protein database that contains a vast number of proteins that are commonly found in phages. This database is blasted to the genome via TBLASTn and to the predicted genes via BLASTn;
+* [ICEberg](http://202.120.12.136:7913/ICEberg2/) is a protein and nucleotide database that contains the full-length sequences of known ICEs and also contains the sequences of a multitude of proteins commonly found inside these ICEs. Full-length ICEs are blasted to the genome via BLASTn while the protein sequences are blasted to the genome itself via TBLASTn and to the predicted genes via BLASTp.
 * Blast % identity: `> `r params$blast_id`%`
 * Blast % query coverage: `> `r params$blast_cov`%`
     + For blasts against gene sequences predicted by Prokka, alignments are filtered in a two way manner so they cover at least `r params$blast_cov`% of the reference gene sequence and the of query sequence at the same time

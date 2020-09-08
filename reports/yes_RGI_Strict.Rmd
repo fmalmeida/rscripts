@@ -21,8 +21,8 @@ colnames(rgi_strict) <- c("Protein ID", "Cut_Off", "Product", "ARO", "Drug Class
 rgi_strict <- merge.data.frame(gff, rgi_strict, by.x = "Prokka_ID", by.y = "Protein ID", all.y = TRUE, all.x = FALSE)
 
 # Get CARD metadata
-aro_index <- read.csv("https://github.com/fmalmeida/CARDDB/raw/master/aro_index.tsv", sep = "\t")
-#aro_index <- read.csv("/work/card-data/aro_index.tsv", sep = "\t")
+#aro_index <- read.csv("https://github.com/fmalmeida/CARDDB/raw/master/aro_index.tsv", sep = "\t")
+aro_index <- read.csv("/work/card-data/aro_index.tsv", sep = "\t")
 aro_index$ARO.Accession <- str_remove(aro_index$ARO.Accession, "ARO:")
 
 # Change Col name
@@ -58,7 +58,7 @@ rgi_count$`Drug Class` = sapply(rgi_count$`Drug Class`, function(x) { ifelse(as.
 colnames(rgi_count) <- c("Contig", "Class")
 drugs <- plyr::count(rgi_count, "Class")
 
-ggplot(drugs, aes(x=Class, y=freq, fill=Class, na)) +
+ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
@@ -76,7 +76,7 @@ rgi_count$`Resistance Mechanism` = sapply(rgi_count$`Resistance Mechanism`, func
 colnames(rgi_count) <- c("Contig", "Class")
 drugs <- plyr::count(rgi_count, "Class")
 
-ggplot(drugs, aes(x=Class, y=freq, fill=Class, na)) +
+ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
   geom_bar(stat = "identity") +
   theme(axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +

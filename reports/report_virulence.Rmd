@@ -80,7 +80,7 @@ Virulence factors are molecules produced by bacteria that add effectiveness in t
 About the BLASTs:
 
 * [VFDB](http://www.mgc.ac.cn/VFs/main.htm) is a nucleotide database blasted to the genome itself and to the predicted genes via BLASTn;
-* [Victors](http://www.phidias.us/victors/) is a protein database blasted to the genome itself via BLASTx and to the predicted genes via BLASTp.
+* [Victors](http://www.phidias.us/victors/) is a protein database blasted to the genome itself via TBLASTn and to the predicted genes via BLASTp.
 * Blast % identity: `> `r params$blast_id`%`
 * Blast % query coverage: `> `r params$blast_cov`%`
     + For blasts against gene sequences predicted by Prokka, alignments are filtered in a two way manner so they cover at least `r params$blast_cov`%` of the reference gene sequence and the of query sequence at the same time

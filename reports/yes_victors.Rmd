@@ -33,7 +33,7 @@ victors_meta <- read.delim("/work/victors/victors_metadata.tsv")
 
 All the virulence factors in Victors database that have an alignment against the genome full-filling the thresholds set are shown in Table \@ref(tab:write-table-victors-genome). We report both annotations using the predicted genes and the whole genome because Prokka uses prodigal to predicted genes which may miss some genes.
 
-<caption>(#tab:write-table-victors-genome) Virulence factors annotated using the Victors database via BLASTx against the whole genome</caption>
+<caption>(#tab:write-table-victors-genome) Virulence factors annotated using the Victors database via TBLASTn against the whole genome</caption>
 ```{r}
 ## Convert to factors
 blast <- victors_blast_genome
