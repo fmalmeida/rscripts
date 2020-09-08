@@ -29,28 +29,6 @@ victors_meta <- read.delim("/work/victors/victors_metadata.tsv")
 #victors_meta <- read.delim("/Users/falmeida/Downloads/victors_metadata.tsv")
 ```
 
-## Against the whole genome
-
-All the virulence factors in Victors database that have an alignment against the genome full-filling the thresholds set are shown in Table \@ref(tab:write-table-victors-genome). We report both annotations using the predicted genes and the whole genome because Prokka uses prodigal to predicted genes which may miss some genes.
-
-<caption>(#tab:write-table-victors-genome) Virulence factors annotated using the Victors database via TBLASTn against the whole genome</caption>
-```{r}
-## Convert to factors
-blast <- victors_blast_genome
-colnames(blast) <- c("Contig", "Start", "End", "Strand", "Product", "Coverage_aln", "Gaps", "Coverage %", "Identity %", "Database", "Ref. Accession", "Victors ID", "Description")
-blast$`Victors ID` <- lapply(str_split(blast$`Victors ID`, "_"), tail, 1)
-blast$`Victors ID` <- apply(blast, 1, vf_id_url_DT)
-blast[sapply(blast, is.character)] <- lapply(blast[sapply(blast, is.character)], as.factor)
-datatable(blast,
-          escape = FALSE,
-          filter = 'top',
-          options = dt_opt_lst,
-          extensions = 'Buttons',
-          rownames = T)
-```
-
-## Against the predicted genes
-
 ```{r parsing-db-victors, eval=TRUE, include=FALSE, echo=FALSE}
 # Parse BLAST
 blast <- victors_blast %>% select(qseqid, stitle)

@@ -41,69 +41,6 @@ datatable(blast,
 
 ## Analysis of ICE's proteins
 
-### Against the whole genome
-
-All ICE's proteins from ICEberg database that had good alignments to the query genome (whole genome) are summarised in Table \@ref(tab:write-table-ice-genome). We report both annotations using the predicted genes and the whole genome because Prokka uses prodigal to predicted genes which may miss some genomes.
-
-> Take note: The fact that the genome possess some proteins from ICEs does not necessarily means that the ICE is present in the genome. Please, check the number of proteins that the ICE of origin posses in the [ICEberg database list of ICEs](https://bioinfo-mml.sjtu.edu.cn/ICEberg2/browse_result.php?type=alpha&alpha=100), and them infer based one the alignments you see if your genome have or not one ICE in it.
-
-<caption>(#tab:write-table-ice-genome) ICE genes annotated from ICEberg database via TBLASTn</caption>
-```{r}
-blast <- ice_genome_tblastn
-blast$ICEBERG_ID <- sapply(str_split(blast$ICEBERG_ID, "_"), tail, 1)
-blast$PRODUCT <- gsub(blast$PRODUCT, pattern = "_", replacement = " ")
-blast$ICEBERG_ID <- apply(blast, 1, function (x) {
-  
-  id <-  x[5]
-  url <- paste0("https://bioinfo-mml.sjtu.edu.cn/ICEberg2/feature_page.php?ice_id=", id, "#ICE")
-  url <- paste0("<a  target=_blank href=", url, ">", id,"</a>" )
-    
-  return(url)
-})
-# Render dt
-blast[sapply(blast, is.character)] <- lapply(blast[sapply(blast, is.character)], as.factor)
-colnames(blast) <- c("Contig", "Start", "End", "Strand", "ICEberg of origin", "Coverage_aln", "Gaps", "Coverage %", "Identity %", "Database", "Ref. Accession", "Product / Gene", "Description")
-datatable(blast %>% arrange(`ICEberg of origin`, Contig, Start),
-          escape = FALSE,
-          filter = 'top',
-          options = dt_opt_lst,
-          extensions = 'Buttons',
-          rownames = T)
-```
-
-
-### Against the predicted genes
-
-```{r parsing-db, eval=TRUE, include=FALSE, echo=FALSE}
-# Create ID Column
-gff$ID <- getAttributeField(as.character(gff$V9), "ID", ";")
-
-# To upper
-gff$ID <- toupper(gff$ID)
-
-# Data Complete
-full_info <- merge.data.frame(ice_prot_blast, gff, by.x = "qseqid", by.y = "ID")
-
-# Create Position Column
-full_info$position <- paste(full_info$V1, ":", full_info$V4, "-", full_info$V5, sep = "")
-
-# Parse BLAST
-blast <- full_info %>% select(qseqid, stitle, position)
-blast <- separate(blast, stitle, c("header", "Description"), sep = " ", extra = "merge")
-blast <- separate(blast, header, c("db", "ICE_ID", "ref", "product"), sep = "~~~", extra = "merge")
-blast <- blast %>% select(-db)
-blast$ICE_ID <- sapply(str_split(blast$ICE_ID, "_"), tail, 1)
-blast$product <- gsub(blast$product, pattern = "_", replacement = " ")
-blast$ICE_ID <- apply(blast, 1, function (x) {
-  
-  id <-  x[2]
-  url <- paste0("https://bioinfo-mml.sjtu.edu.cn/ICEberg2/feature_page.php?ice_id=", id, "#ICE")
-  url <- paste0("<a  target=_blank href=", url, ">", id,"</a>" )
-    
-  return(url)
-})
-```
-
 All query genes predicted by Prokka that have a match in ICEberg database are shown in Table \@ref(tab:write-table-ice-blastp). It is summarised the ICE id and all its genes that were found in the query genome. All of them are linked to the database for further investigations.
 
 > Take note: The fact that the genome possess some proteins from ICEs does not necessarily means that the ICE is present in the genome. Please, check the number of proteins that the ICE of origin posses in the [ICEberg database list of ICEs](https://bioinfo-mml.sjtu.edu.cn/ICEberg2/browse_result.php?type=alpha&alpha=100), and them infer based one the alignments you see if your genome have or not one ICE in it.

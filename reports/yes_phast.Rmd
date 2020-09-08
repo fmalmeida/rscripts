@@ -17,28 +17,6 @@ getAttributeField <- function (x, field, attrsep = ";") {
 }
 ```
 
-
-## Against the whole genome
-
-All prophage genes from PHAST database that had good alignments to the query genome (whole genome) are summarised in Table \@ref(tab:write-table-phast-genome). We report both annotations using the predicted genes and the whole genome because Prokka uses prodigal to predicted genes which may miss some genomes.
-
-<caption>(#tab:write-table-phast-genome) Prophage genes using the PHAST database via TBLASTn against the whole genome</caption>
-```{r}
-blast <- phast_genome_blast %>% select(-PHAST_ID)
-blast$GENE <- gsub(blast$GENE, pattern = "_", replacement = " ")
-# Render dt
-blast[sapply(blast, is.character)] <- lapply(blast[sapply(blast, is.character)], as.factor)
-colnames(blast) <- c("Contig", "Start", "End", "Strand", "Product", "Coverage_aln", "Gaps", "Coverage %", "Identity %", "Database", "Ref. Accession", "Description")
-datatable(blast,
-          escape = FALSE,
-          filter = 'top',
-          options = dt_opt_lst,
-          extensions = 'Buttons',
-          rownames = T)
-```
-
-## Against the predicted genes
-
 All prophage genes from PHAST database that had good alignments to the genes of the query genome are summarised in Table \@ref(tab:phast-table). The protein sequences of these genes were aligned against the gene sequences predicted by Prokka via BLASTp.
 
 > Unfortunately, PHASTER database have no searchable interface to visualize its prophages. Therefore, this table has no links to external sources.

@@ -7,9 +7,7 @@ params:
   blast_id:
   blast_cov:
   vfdb_blast: 
-  vfdb_blast_genome: 
-  victors_blast: 
-  victors_blast_genome: 
+  victors_blast:
   query: 
   gff: 
 output:
@@ -40,9 +38,7 @@ suppressMessages(library(ggplot2))
 
 # Load data
 victors_blast <- try(read.delim(params$victors_blast, header = TRUE), silent = TRUE)
-victors_blast_genome <- try(read.delim(params$victors_blast_genome, header = TRUE), silent = TRUE)
 vfdb_blast <- try(read.delim(params$vfdb_blast, header = TRUE), silent = TRUE)
-vfdb_blast_genome <- try(read.delim(params$vfdb_blast_genome, header = TRUE), silent = TRUE)
 gff <- try(read.delim(params$gff, header = FALSE), silent = TRUE)
 
 # Check if blast is empty
@@ -79,12 +75,11 @@ Virulence factors are molecules produced by bacteria that add effectiveness in t
 
 About the BLASTs:
 
-* [VFDB](http://www.mgc.ac.cn/VFs/main.htm) is a nucleotide database blasted to the genome itself and to the predicted genes via BLASTn;
-* [Victors](http://www.phidias.us/victors/) is a protein database blasted to the genome itself via TBLASTn and to the predicted genes via BLASTp.
+* [VFDB](http://www.mgc.ac.cn/VFs/main.htm) is a nucleotide database blasted to the predicted genes via BLASTn;
+* [Victors](http://www.phidias.us/victors/) is a protein database blasted to the predicted genes via BLASTp.
 * Blast % identity: `> `r params$blast_id`%`
 * Blast % query coverage: `> `r params$blast_cov`%`
     + For blasts against gene sequences predicted by Prokka, alignments are filtered in a two way manner so they cover at least `r params$blast_cov`%` of the reference gene sequence and the of query sequence at the same time
-    + For blasts against the whole genome, alignments are filtered in a one way manner so they cover at least `r params$blast_cov`%` of only the reference gene sequence
 
 > The results used to create this report are under the directory called `virulence` in the output folder of the query `r params$query`.
 
