@@ -6,7 +6,7 @@
 #################################################
 ### Setting Help message and input parameters ###
 #################################################
-'usage: draw_MDS.R [--input=<file>]
+'usage: draw_MDS.R [--input=<file> --meta=<file> --qmeta=<file>]
 options:
 -i, --input=<file>    Quadratic distance matrix produced with Dashing software
 -m, --meta=<file>     Path to file containing metadata information of genomes
@@ -91,7 +91,7 @@ fix_groups <- function(x) {
 #################################
 
 ## Loading of distance matrices
-dist.mat <- load_dist_matrix("/Volumes/falmeida1TB/Git_Repos/BacterialMDS/output/dashing_distance/dashing_distance_matrix.txt")
+dist.mat <- load_dist_matrix(opt$input)
 
 ###################################
 ######### Do MDS analysis #########
@@ -141,13 +141,13 @@ dist.points$Identification <- apply(dist.points, 1, fix_groups)
 #################################
 
 ## Loading metadata (only of the closest genomes)
-metadata <- read.csv("/Volumes/falmeida1TB/Git_Repos/BacterialMDS/output/refseq/Klebsiella_quasipneumoniae_genomes_metadata.txt",
+metadata <- read.csv(opt$meta,
                         sep = "\t",
                         header = FALSE,
                         col.names = c("Assembly.acc", "Biosample.acc", "Owned.by", "Date", "Geo.loc", "Isolation.source", "Host"),
                         stringsAsFactors = FALSE)
 
-query_metadata <- read.csv("/Volumes/falmeida1TB/Git_Repos/BacterialMDS/query_metadata.csv",
+query_metadata <- read.csv(opt$qmeta,
                      header = FALSE,
                      col.names = c("Assembly.acc", "Biosample.acc", "Owned.by", "Date", "Geo.loc", "Isolation.source", "Host"),
                      stringsAsFactors = FALSE)
