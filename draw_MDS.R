@@ -10,7 +10,7 @@
 options:
 -i, --input=<file>    Quadratic distance matrix produced with Dashing software
 -m, --meta=<file>     Path to file containing metadata information of genomes
--q, -qmeta=<file>     Path to file containing metadata information of query genomes' -> doc
+-q, --qmeta=<file>     Path to file containing metadata information of query genomes' -> doc
 
 # Parse parameters
 suppressMessages(library(docopt))
