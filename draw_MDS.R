@@ -217,7 +217,7 @@ withr::with_dir(".", htmlwidgets::saveWidget(as_widget(interactive_plot), "inter
 
 # Saving plots
 ## SVG
-ggsave(filename = "./plots/mds_of_genetic_distances.svg", plot = full_plot, device = "svg", dpi = 1080, width=7, height=7)
+ggsave(filename = "./mds_of_genetic_distances.svg", plot = full_plot, device = "svg", dpi = 1080, width=7, height=7)
 
 ## PNG
-ggsave(filename = "./plots/mds_of_genetic_distances.png", plot = full_plot, device = "png", dpi = 1080, width=7, height=7)
+ggsave(filename = "./mds_of_genetic_distances.png", plot = full_plot, device = "png", dpi = 1080, width=7, height=7)
