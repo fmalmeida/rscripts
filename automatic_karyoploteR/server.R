@@ -106,31 +106,68 @@ shinyServer(function(input, output) {
         )
     })
     
+    # Delimiter
+    output$delimiter <- renderUI({
+        
+        req(input$mainGFF, input$genomeBED, input$genomeWindow) # This makes the function wait for the input
+        gff.gr <- readGFFAsGRanges(input$mainGFF$datapath)
+        
+        HTML(paste0(
+            "<b><h3><span style='font-weight: bold;'>Result</span></h3></b>",
+            "In the input GFF the following feature types were found (these can be used to plot densities in the kayotype plot): ",
+            sep = ""))
+    })
+    
+    # Generating Plot
     output$karyotype <- renderPlot({
         
-        # req(input$mainGFF) # This makes the function wait for the input
-        # 
-        # text <- str(readGFFAsGRanges(input$mainGFF$datapath))
-        # 
-        # print(text)
+        # Wait for inputs
+        req(input$mainGFF, input$genomeBED, input$genomeWindow)
+        
+        # Load main gff as GRanges
+        gff.gr <- readGFFAsGRanges(input$mainGFF$datapath)
+        
+        # Filter GFF features for density plot
+        filtered.gff.gr <- plyranges::filter(gff.gr, type == str(input$feature))
+        
+        # Load genome bed as GRanges
+        genome.gr <- grFromBed(input$genomeBED$datapath, 
+                               minSize = input$genomeWindow[1], 
+                               maxSize = input$genomeWindow[2])
+        
+        # Plot
+        ## params
+        pp <- getDefaultPlotParams(plot.type = 1)
+        pp$bottommargin <- 500
+        pp$topmargin <- 500
+        pp$ideogramheight <- 50
+        pp$data1outmargin <- 500
+        pp$data1inmargin <- 200
+        
+        ## plot itself
+        kp <- plotKaryotype(plot.type = 1, main = input$`plot-title`, cex = .9, 
+                            genome = genome.gr, plot.params = pp, labels.plotter = NULL)
+        kpAddChromosomeNames(kp, cex = .5, yoffset = -.01) # The options yoffset and xoffset control the position where the names will appear
+        kpDataBackground(kp, color = "#F7F7F7")
+        kpAddBaseNumbers(kp, tick.dist = 2500000, tick.len = 50, cex = .65)
+        
+        # Gene density
+        ## In this area, we use the function kpPlotDensity to create a histogram
+        ## of the density of genes found in a given genome window size
+        ##
+        ## data.panel = "ideogram" Is used to plot inside the ideograms
+        kpPlotDensity(kp, filtered.gff.gr, window.size = 1e6, 
+                      data.panel = 1, col="#313D7C", border="#313D7C",
+                      r0 = 0, r1 = 0.5)
+        kpAddLabels(kp, labels = "Gene Density", r0=0, r1=0.5, cex = .5)
+        
+        
     })
 
 })
 
 # Backup
 if (FALSE){
-    
-    gff.gr <- readGFFAsGRanges("/Volumes/falmeida1TB/BNUT/Felipe/input/Bexcelsav1.1.gene.gff3")
-    unique(gff.gr$type)
-    
-    # Filtering GFF features
-    ## With the function plyranges::filter we can filter a GRanges object based
-    ## on the value of any of its columns
-    genes.gr <- plyranges::filter(gff.gr, type == "gene")
-    
-    # Import BED as GRanges
-    genome_bed <- read.csv("/Volumes/falmeida1TB/BNUT/Felipe/input/bnut_chr.bed", sep = "\t", header = FALSE)
-    genome.gr <- grFromBed("/Volumes/falmeida1TB/BNUT/Felipe/input/bnut_chr.bed", minSize = 500000, maxSize = 20e6)
     
     # Importing custom features from a filtered GFF
     # We can filter it directly via the GRanges of the complete GFF with the

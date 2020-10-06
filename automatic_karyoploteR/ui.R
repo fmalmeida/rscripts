@@ -27,53 +27,61 @@ shinyUI(fluidPage(
     sidebarLayout(
         sidebarPanel(
             
-            ####################
-            ### Loading data ###
-            ####################
-            
-            # Genome in BED format
-            fileInput(
-                inputId = "genomeBED",
-                label   = "BED file of input genome (Chr, Start, End)."
-            ),
-            
-            # Genome window
-            uiOutput("genomeWindow"),
-            
-            # Complete GFF
-            fileInput(
-                inputId = "mainGFF",
-                label   = "Genome GFF that will be used to calculate feature density"
-            ),
-            
-            # Select feature
-            textInput(
-                inputId = "feature", 
-                label   = "Feature type to plot density in the plot",
-                value   = "gene"
-            ),
-            
-            # Regions GFF
-            fileInput(
-                inputId = "regionGFFs",
-                label   = "GFFs (subsets) to be drawn as regions (Multiple inputs allowed)", multiple = TRUE
-            ),
-            
-            # Horizontal line ----
-            tags$hr(),
-            
-            # plot title
-            textInput(
-                inputId = "plot-title",
-                label = "Please enter the desired plot title",
-                value = "karyoploteR template"
-            ),
+            tabsetPanel(
+                tabPanel("Input files",
+                         
+                         br(), # newline
+                         
+                         ####################
+                         ### Loading data ###
+                         ####################
+                         
+                         # Genome in BED format
+                         fileInput(
+                             inputId = "genomeBED",
+                             label   = "BED file of input genome (Chr, Start, End)."
+                         ),
+                         
+                         # Genome window
+                         uiOutput("genomeWindow"),
+                         
+                         # Complete GFF
+                         fileInput(
+                             inputId = "mainGFF",
+                             label   = "Genome GFF that will be used to calculate feature density"
+                         ),
+                         
+                         # Select feature
+                         textInput(
+                             inputId = "feature", 
+                             label   = "Feature type to plot density in the plot",
+                             value   = "gene"
+                         ),
+                         
+                         # Regions GFF
+                         fileInput(
+                             inputId = "regionGFFs",
+                             label   = "GFFs (subsets) to be drawn as regions (Multiple inputs allowed)", multiple = TRUE
+                         )), 
+                
+                tabPanel("Plot parameters", 
+                         
+                         br(), # newline
+                         
+                         # plot title
+                         textInput(
+                             inputId = "plot-title",
+                             label = "Please enter the desired plot title",
+                             value = "karyoploteR template"
+                         ))
+            )
             
         ),
         mainPanel(
             uiOutput("Overview"),
             br(),
             verbatimTextOutput("features"),
+            uiOutput("delimiter"),
             plotOutput("karyotype")
         )
     )
