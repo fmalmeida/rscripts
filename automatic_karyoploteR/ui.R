@@ -9,6 +9,7 @@
 
 library(shiny)
 library(shinythemes)
+library(shinycssloaders)
 
 # Shiny options
 options(
@@ -27,6 +28,8 @@ shinyUI(fluidPage(
     sidebarLayout(
         sidebarPanel(
             
+            width = "2",
+            
             tabsetPanel(
                 tabPanel("Input files",
                          
@@ -39,7 +42,8 @@ shinyUI(fluidPage(
                          # Genome in BED format
                          fileInput(
                              inputId = "genomeBED",
-                             label   = "BED file of input genome (Chr, Start, End)."
+                             label   = "BED file of input genome (Chr, Start, End).",
+                             accept  = ".bed"
                          ),
                          
                          # Genome window
@@ -48,41 +52,166 @@ shinyUI(fluidPage(
                          # Complete GFF
                          fileInput(
                              inputId = "mainGFF",
-                             label   = "Genome GFF that will be used to calculate feature density"
+                             label   = "Genome GFF that will be used to calculate feature density",
+                             accept  = c(".gff", ".gff3")
                          ),
                          
                          # Select feature
-                         textInput(
-                             inputId = "feature", 
-                             label   = "Feature type to plot density in the plot",
-                             value   = "gene"
-                         ),
+                         uiOutput("feature_select"),
                          
                          # Regions GFF
                          fileInput(
                              inputId = "regionGFFs",
-                             label   = "GFFs (subsets) to be drawn as regions (Multiple inputs allowed)", multiple = TRUE
-                         )), 
+                             label   = "GFFs (subsets) to be drawn as regions (Multiple inputs allowed)",
+                             multiple = TRUE
+                         )),
                 
-                tabPanel("Plot parameters", 
+                tabPanel("Plot parameters",
                          
                          br(), # newline
                          
-                         # plot title
-                         textInput(
-                             inputId = "plot-title",
-                             label = "Please enter the desired plot title",
-                             value = "karyoploteR template"
+                         tabsetPanel(
+                          
+                          # Params for title adjustment
+                          tabPanel("Plot title",
+                                    
+                                    br(),
+                                    
+                                    # plot title
+                                    textInput(
+                                        inputId = "plot-title",
+                                        label = "Please enter the desired plot title",
+                                        value = "karyoploteR template"
+                                    ),
+                                    sliderInput(
+                                        inputId = "titlecex",
+                                        label   = "Title font cex (size)",
+                                        min     = 0.1,
+                                        max     = 2,
+                                        value   = 0.9,
+                                    )),
+                           
+                           # Params for chr ideogram adjustment
+                           tabPanel("Chr ideogram",
+                                    
+                                    br(),
+                                    
+                                    sliderInput(
+                                        inputId = "chrcex",
+                                        label   = "Chr label font cex (size)",
+                                        min     = 0.1,
+                                        max     = 1,
+                                        value   = 0.5,
+                                    ),
+                                    sliderInput(
+                                        inputId = "chroffset",
+                                        label   = "Chr label positioning (x axis)",
+                                        min     = -10,
+                                        max     = 10,
+                                        value   = -0.1,
+                                        step    = 0.1
+                                    ), 
+                                    sliderInput(
+                                        inputId = "ideoheight",
+                                        label   = "Ideogram height",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 300
+                                    )),
+                           
+                           # Params for tick controlling
+                           tabPanel("Handling ticks",
+                                    
+                                    br(),
+                                    
+                                    sliderInput(
+                                        inputId = "tickdistance",
+                                        label   = "Distance between ticks",
+                                        min     = 0,
+                                        max     = 1*10^10,
+                                        value   = 2.5*10^6,
+                                        step    = 500
+                                    )),
+                           
+                           # KaryoploteR data.panels
+                           tabPanel("karyoploteR panels",
+                                    
+                                    br(),
+                                    
+                                    sliderInput(
+                                        inputId = "plot-type",
+                                        label   = "Plot type",
+                                        min     = 1,
+                                        max     = 2,
+                                        value   = 1,
+                                        step = 1
+                                    ),
+                                    
+                                    sliderInput(
+                                        inputId = "bottommargin",
+                                        label   = "Bottom margin",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 500
+                                    ),
+                                    sliderInput(
+                                        inputId = "topmargin",
+                                        label   = "Top margin",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 500
+                                    ),
+                                    sliderInput(
+                                        inputId = "data1height",
+                                        label   = "Data panel 1 height",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 300
+                                    ),
+                                    sliderInput(
+                                        inputId = "data1outmargin",
+                                        label   = "Data panel 1 out margin",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 500
+                                    ),
+                                    sliderInput(
+                                        inputId = "data1inmargin",
+                                        label   = "Data panel 1 in margin",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 200
+                                    ),
+                                    sliderInput(
+                                        inputId = "data2height",
+                                        label   = "Data panel 2 height",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 300
+                                    ),
+                                    sliderInput(
+                                        inputId = "data2outmargin",
+                                        label   = "Data panel 2 out margin",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 500
+                                    ),
+                                    sliderInput(
+                                        inputId = "data2inmargin",
+                                        label   = "Data panel 2 in margin",
+                                        min     = 1,
+                                        max     = 2000,
+                                        value   = 200
+                                    ))
+                           
                          ))
             )
             
         ),
         mainPanel(
-            uiOutput("Overview"),
-            br(),
-            verbatimTextOutput("features"),
+            width = 9,
             uiOutput("delimiter"),
-            plotOutput("karyotype")
+            withSpinner(plotOutput("karyotype", width = "100%", height = 1000), color="#0dc5c1")
         )
     )
 ))

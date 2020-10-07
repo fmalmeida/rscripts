@@ -19,6 +19,8 @@ suppressMessages(library(rtracklayer))
 suppressMessages(library(GenomicRanges))
 suppressMessages(library(plyranges))
 suppressMessages(library(dplyr))
+suppressMessages(library(data.table))
+suppressMessages(library(randomcoloR))
 
 ########################
 ### Useful functions ###
@@ -64,32 +66,50 @@ grFromBed <- function(bed, minSize=1, maxSize=NULL) {
         
     }
 }
+readTmpGff <- function(input) {
+    f <- file.path(tempdir(), "tmp.gff")
+    
+    write.table(
+        read.csv(sep = "\t", file = input,
+                 quote = "", header = F, comment.char = "#"),
+        file = f, quote = F, sep = "\t", row.names = F, col.names = F
+    )
+    
+    return(f)
+}
 
 # Define server logic
 shinyServer(function(input, output) {
     
-    # Overview
-    output$Overview <- renderUI({
+    ##################################
+    ### List GFF possible features ###
+    ##################################
+    output$feature_select <- renderUI({
         
-        req(input$mainGFF) # This makes the function wait for the input
-        gff.gr <- readGFFAsGRanges(input$mainGFF$datapath)
+        # Wait for GFF
+        req(input$mainGFF)
+        
+        # Generate
+        gff.gr  <- readGFFAsGRanges(input$mainGFF$datapath)
+        ft_list <- unique(gff.gr$type)
+        selectInput("features", label = h3("Select feature for density plot"), 
+                    choices = ft_list, 
+                    selected = 1)
+    })
+    
+    ######################
+    ### Results header ###
+    ######################
+    output$delimiter <- renderUI({
         
         HTML(paste0(
-            "<b><h3><span style='font-weight: bold;'>Available features in GFF</span></h3></b>",
-            "In the input GFF the following feature types were found (these can be used to plot densities in the kayotype plot): ",
+            "<b><h3><span style='font-weight: bold;'>Resulting karyotypes will appear here</span></h3></b>",
             sep = ""))
     })
     
-    # List
-    output$features <- renderPrint({
-        
-        req(input$mainGFF) # This makes the function wait for the input
-        gff.gr <- readGFFAsGRanges(input$mainGFF$datapath)
-        
-        print(unique(gff.gr$type))
-    })
-    
-    # Checking genome BED file
+    ################################
+    ### Checking genome BED file ###
+    ################################
     output$genomeWindow <- renderUI({
         req(input$genomeBED) # This makes the function wait for the input
         genome_bed <- read.csv(input$genomeBED$datapath, sep = "\t", header = FALSE)
@@ -106,130 +126,77 @@ shinyServer(function(input, output) {
         )
     })
     
-    # Delimiter
-    output$delimiter <- renderUI({
-        
-        req(input$mainGFF, input$genomeBED, input$genomeWindow) # This makes the function wait for the input
-        gff.gr <- readGFFAsGRanges(input$mainGFF$datapath)
-        
-        HTML(paste0(
-            "<b><h3><span style='font-weight: bold;'>Result</span></h3></b>",
-            "In the input GFF the following feature types were found (these can be used to plot densities in the kayotype plot): ",
-            sep = ""))
-    })
-    
-    # Generating Plot
+    #####################################
+    ### Generate the body of the plot ###
+    ### already from the bed file     ###
+    #####################################
     output$karyotype <- renderPlot({
         
-        # Wait for inputs
-        req(input$mainGFF, input$genomeBED, input$genomeWindow)
+        # Wait for regions to plot
+        req(input$genomeBED)
         
-        # Load main gff as GRanges
-        gff.gr <- readGFFAsGRanges(input$mainGFF$datapath)
-        
-        # Filter GFF features for density plot
-        filtered.gff.gr <- plyranges::filter(gff.gr, type == str(input$feature))
+        # Plot parameters
+        pp <- getDefaultPlotParams(plot.type = input$`plot-type`)
+        pp$bottommargin   <- input$bottommargin
+        pp$topmargin      <- input$topmargin
+        pp$ideogramheight <- input$ideoheight
+        pp$data1height    <- input$data1height
+        pp$data1outmargin <- input$data1outmargin
+        pp$data1inmargin  <- input$data1inmargin
+        pp$data2height    <- input$data2height
+        pp$data2outmargin <- input$data2outmargin
+        pp$data2inmargin  <- input$data2inmargin
+        pp$data1max = 1
         
         # Load genome bed as GRanges
         genome.gr <- grFromBed(input$genomeBED$datapath, 
                                minSize = input$genomeWindow[1], 
                                maxSize = input$genomeWindow[2])
         
-        # Plot
-        ## params
-        pp <- getDefaultPlotParams(plot.type = 1)
-        pp$bottommargin <- 500
-        pp$topmargin <- 500
-        pp$ideogramheight <- 50
-        pp$data1outmargin <- 500
-        pp$data1inmargin <- 200
-        
-        ## plot itself
-        kp <- plotKaryotype(plot.type = 1, main = input$`plot-title`, cex = .9, 
+        # Create karyotype body
+        kp <- plotKaryotype(plot.type = input$`plot-type`, main = input$`plot-title`, cex = input$titlecex, 
                             genome = genome.gr, plot.params = pp, labels.plotter = NULL)
-        kpAddChromosomeNames(kp, cex = .5, yoffset = -.01) # The options yoffset and xoffset control the position where the names will appear
+        kpAddChromosomeNames(kp, cex = input$chrcex, xoffset = input$chroffset, yoffset = -0.1) # The options yoffset and xoffset control the position where the names will appear
         kpDataBackground(kp, color = "#F7F7F7")
-        kpAddBaseNumbers(kp, tick.dist = 2500000, tick.len = 50, cex = .65)
+        kpAddBaseNumbers(kp, tick.dist = input$tickdistance, tick.len = 50, cex = .65)
         
-        # Gene density
-        ## In this area, we use the function kpPlotDensity to create a histogram
-        ## of the density of genes found in a given genome window size
-        ##
-        ## data.panel = "ideogram" Is used to plot inside the ideograms
-        kpPlotDensity(kp, filtered.gff.gr, window.size = 1e6, 
-                      data.panel = 1, col="#313D7C", border="#313D7C",
-                      r0 = 0, r1 = 0.5)
-        kpAddLabels(kp, labels = "Gene Density", r0=0, r1=0.5, cex = .5)
+        if (!is.null(input$mainGFF)) {
+            
+            # Load main gff as GRanges
+            gff.gr <- readGFFAsGRanges(readTmpGff(input$mainGFF$datapath))
+            
+            # Filter GFF features for density plot
+            filtered.gff.gr <- plyranges::filter(gff.gr, type == input$feature)
+            
+            # Gene density
+            kpPlotDensity(kp, filtered.gff.gr, window.size = 1e6, 
+                          data.panel = "ideogram", col="#313D7C", border="#313D7C",
+                          r0 = 0.1, r1 = 0.85)
+        }
         
-        
+        if (!is.null(input$regionGFFs)) {
+            
+            # Calculate step for plotting data in data.panel
+            step     = 1 / length(input$regionGFFs[,1])
+            r0_val   = 0
+            r1_val   = step - 0.05
+            
+            # Plot
+            for (i in 1:length(input$regionGFFs[,1])) {
+                
+                color = randomColor()
+                
+                region <- readGFFAsGRanges(readTmpGff(input$regionGFFs[[i, 'datapath']]))
+                label  <- input$regionGFFs[[i, 'name']]
+                kpPlotRegions(kp, data=region, col=color, border=color, r0=r0_val, r1=r1_val)
+                kpAddLabels(kp, labels = label, r0=r0_val, r1=r1_val, cex = .5)
+                
+                # Sum
+                r0_val = r0_val + step
+                r1_val = r1_val + step
+            }
+            
+        }
     })
 
 })
-
-# Backup
-if (FALSE){
-    
-    # Importing custom features from a filtered GFF
-    # We can filter it directly via the GRanges of the complete GFF with the
-    # function plyranges::filter, or, alternatively, we can filter a GFF and
-    # create another object directly from the filtered GFF
-    regions1 <- readGFFAsGRanges("../input/bnut_NLR_annotator_only.gff")
-    
-    ####################
-    ### Drawing Plot ###
-    ####################
-    
-    ## Initiate an instance for the plot
-    png("teste_type1.png", width = 1200, height = 900)
-    
-    # Params
-    ## In this area, we use the function getDefaultPlotParams so we have a 
-    ## small list which contains all the necessary parameters used
-    ## when plotting a karyoploteR ideogram. Whith this list we can
-    ## change some parameters and customize the plot a little bit
-    ##
-    ## Read: https://bernatgel.github.io/karyoploter_tutorial//Tutorial/PlotParams/PlotParams.html
-    pp <- getDefaultPlotParams(plot.type = 1)
-    pp$bottommargin <- 500
-    pp$topmargin <- 500
-    pp$ideogramheight <- 50
-    pp$data1outmargin <- 500
-    pp$data1inmargin <- 200
-    
-    # Karyotype
-    ## In this area, we use the function plotKaryotype do draw the ideogram
-    ## blocks based on a given GRanges object with the chromosome sizes
-    ##
-    ## kpDataBackground changes the color of the data panel background
-    ## kpAddBaseNumbers is used to draw the position ticks which enable
-    ## the visualization of the genome position (base ticks/markers)
-    kp <- plotKaryotype(plot.type = 1, main = 'BNUT - Ideogram plot', cex = .9, 
-                        genome = genome.gr, plot.params = pp, labels.plotter = NULL)
-    kpAddChromosomeNames(kp, cex = .5, yoffset = -.01) # The options yoffset and xoffset control the position where the names will appear
-    kpDataBackground(kp, color = "#F7F7F7")
-    kpAddBaseNumbers(kp, tick.dist = 2500000, tick.len = 50, cex = .65)
-    
-    # Gene density
-    ## In this area, we use the function kpPlotDensity to create a histogram
-    ## of the density of genes found in a given genome window size
-    ##
-    ## data.panel = "ideogram" Is used to plot inside the ideograms
-    kpPlotDensity(kp, genes.gr, window.size = 1e6, 
-                  data.panel = 1, col="#313D7C", border="#313D7C",
-                  r0 = 0, r1 = 0.5)
-    kpAddLabels(kp, labels = "Gene Density", r0=0, r1=0.5, cex = .5)
-    
-    # Custom regions
-    ## In this are, we use the function kpPlotRegions to draw little blocks
-    ## that represents the genomic regions of all the features inside a given
-    ## GRanges object
-    ##
-    ## kpAddLabels give us a little description of the data
-    kpPlotRegions(kp, data=regions1, col="#B22222", layer.margin = 0.05, 
-                  border="#B22222", r0=0.55, r1=1)
-    kpAddLabels(kp, labels = "Resistance Genes", r0=0.55, r1=1, cex = .5)
-    
-    # Finish the plot instance
-    dev.off()
-    
-}
