@@ -184,7 +184,11 @@ shinyServer(function(input, output) {
             # Plot
             for (i in 1:length(input$regionGFFs[,1])) {
                 
-                color = randomColor()
+                if (input$data_panel_colors == "" || length(as.list(strsplit(input$data_panel_colors, ",")[[1]])) != length(input$regionGFFs[,1])) {
+                    color = randomColor()
+                } else {
+                    color = as.list(strsplit(input$data_panel_colors, ",")[[1]])[[i]]
+                }
                 
                 region <- readGFFAsGRanges(readTmpGff(input$regionGFFs[[i, 'datapath']]))
                 label  <- input$regionGFFs[[i, 'name']]

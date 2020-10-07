@@ -119,8 +119,8 @@ shinyUI(fluidPage(
                                         value   = 300
                                     )),
                            
-                           # Params for tick controlling
-                           tabPanel("Handling ticks",
+                          # Params for tick controlling
+                          tabPanel("Handling ticks",
                                     
                                     br(),
                                     
@@ -132,6 +132,17 @@ shinyUI(fluidPage(
                                         value   = 2.5*10^6,
                                         step    = 500
                                     )),
+                          
+                          # Params for title adjustment
+                          tabPanel("Plot colors",
+                                   
+                                   br(),
+                                   
+                                   # plot title
+                                   textInput(
+                                       inputId = "data_panel_colors",
+                                       label = "Which colors (in #HEX or not) to use in data panels?"
+                                   )),
                            
                            # KaryoploteR data.panels
                            tabPanel("karyoploteR panels",
@@ -210,6 +221,7 @@ shinyUI(fluidPage(
         ),
         mainPanel(
             width = 9,
+            verbatimTextOutput("test"),
             uiOutput("delimiter"),
             withSpinner(plotOutput("karyotype", width = "100%", height = 1000), color="#0dc5c1")
         )
