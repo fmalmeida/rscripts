@@ -13,6 +13,7 @@ library(shinycssloaders)
 
 # Shiny options
 options(
+    repos = BiocManager::repositories(),
     shiny.maxRequestSize = 50*1024^2 # Input size to 50Mb
 )
 

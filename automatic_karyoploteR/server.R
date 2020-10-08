@@ -93,7 +93,7 @@ shinyServer(function(input, output) {
         gff.gr  <- readGFFAsGRanges(input$mainGFF$datapath)
         ft_list <- unique(gff.gr$type)
         selectInput("features", label = h3("Select feature for density plot"), 
-                    choices = ft_list, 
+                    choices = ft_list,
                     selected = 1)
     })
     
@@ -122,7 +122,8 @@ shinyServer(function(input, output) {
             label = "Select chr size threasholds for plot (min and max sizes)",
             min = 0,
             max = max_val,
-            value = c(0, max_val)
+            value = c(0, max_val),
+            step = 1000
         )
     })
     
@@ -166,7 +167,7 @@ shinyServer(function(input, output) {
             gff.gr <- readGFFAsGRanges(readTmpGff(input$mainGFF$datapath))
             
             # Filter GFF features for density plot
-            filtered.gff.gr <- plyranges::filter(gff.gr, type == input$feature)
+            filtered.gff.gr <- plyranges::filter(gff.gr, type == as.character(input$feature))
             
             # Gene density
             kpPlotDensity(kp, filtered.gff.gr, window.size = 1e6, 

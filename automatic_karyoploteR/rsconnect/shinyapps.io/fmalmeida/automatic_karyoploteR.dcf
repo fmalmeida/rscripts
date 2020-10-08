@@ -1,0 +1,13 @@
+name: automatic_karyoploteR
+title: automatic_karyoploteR
+username:
+account: fmalmeida
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2968175
+bundleId: 3715293
+url: https://fmalmeida.shinyapps.io/automatic_karyoploter/
+when: 1602126978.75446
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: test/.Rhistory|test/GCF_000240185.1_ASM24018v2_genomic.bed|test/GCF_000240185.1_ASM24018v2_genomic.fna|test/GCF_000240185.1_ASM24018v2_genomic.gff
