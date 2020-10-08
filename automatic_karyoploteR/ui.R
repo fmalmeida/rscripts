@@ -88,8 +88,9 @@ shinyUI(fluidPage(
                                         inputId = "titlecex",
                                         label   = "Title font cex (size)",
                                         min     = 0.1,
-                                        max     = 2,
-                                        value   = 0.9,
+                                        max     = 10,
+                                        value   = 1,
+                                        step    = 0.1
                                     )),
                            
                            # Params for chr ideogram adjustment
@@ -111,28 +112,44 @@ shinyUI(fluidPage(
                                         max     = 10,
                                         value   = -0.1,
                                         step    = 0.1
-                                    ), 
+                                    ),
                                     sliderInput(
                                         inputId = "ideoheight",
                                         label   = "Ideogram height",
                                         min     = 1,
                                         max     = 2000,
                                         value   = 300
-                                    )),
+                                    ),
+                                    
+                                    hr(),
+                                    uiOutput("density_window"),
+                                    uiOutput("density_color")),
                            
                           # Params for tick controlling
                           tabPanel("Handling ticks",
                                     
-                                    br(),
+                                   br(),
                                     
-                                    sliderInput(
-                                        inputId = "tickdistance",
-                                        label   = "Distance between ticks",
-                                        min     = 0,
-                                        max     = 1*10^10,
-                                        value   = 2.5*10^6,
-                                        step    = 500
-                                    )),
+                                   textInput(
+                                       inputId = "tickdistance",
+                                       label   = "Distance between ticks",
+                                       value   = 1*10^6
+                                   ),
+                                   sliderInput(
+                                       inputId = "ticklen",
+                                       label   = "Tick length",
+                                       min     = 0,
+                                       max     = 500,
+                                       value   = 50,
+                                       step    = 10
+                                   ),
+                                   sliderInput(
+                                       inputId = "tickcex",
+                                       label   = "Tick font size (.cex)",
+                                       min     = 0,
+                                       max     = 5,
+                                       value   = 0.65
+                                   )),
                           
                           # Params for title adjustment
                           tabPanel("Plot colors",
@@ -150,6 +167,7 @@ shinyUI(fluidPage(
                                     
                                     br(),
                                     
+                                    uiOutput("datapanel_color"),
                                     sliderInput(
                                         inputId = "plot-type",
                                         label   = "Plot type",
@@ -224,7 +242,11 @@ shinyUI(fluidPage(
             width = 9,
             verbatimTextOutput("test"),
             uiOutput("delimiter"),
-            withSpinner(plotOutput("karyotype", width = "100%", height = 1000), color="#0dc5c1")
+            # conditionalPanel(
+            #     condition = "output.karyotype != null",
+            #     downloadButton("downloadPlot", "Download Plot")
+            # ),
+            withSpinner(plotOutput("karyotype", width = "100%", height = 1000), color="#0dc5c1"),
         )
     )
 ))

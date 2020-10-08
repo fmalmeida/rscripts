@@ -5,9 +5,9 @@ account: fmalmeida
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2968175
-bundleId: 3715293
+bundleId: 3717315
 url: https://fmalmeida.shinyapps.io/automatic_karyoploter/
-when: 1602126978.75446
+when: 1602168063.56499
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: test/.Rhistory|test/GCF_000240185.1_ASM24018v2_genomic.bed|test/GCF_000240185.1_ASM24018v2_genomic.fna|test/GCF_000240185.1_ASM24018v2_genomic.gff
+ignoredFiles: test/GCF_000240185.1_ASM24018v2_genomic.bed|test/GCF_000240185.1_ASM24018v2_genomic.fna|test/GCF_000240185.1_ASM24018v2_genomic.gff
