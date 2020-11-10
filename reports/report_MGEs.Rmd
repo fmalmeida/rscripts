@@ -44,7 +44,7 @@ suppressMessages(library(ggplot2))
 phigaro_dir <- params$phigaro_dir
 phigaro_html <- paste0(phigaro_dir, "/", params$query, "_phigaro.html", collapse = "")
 phigaro_txt <- try(read.delim(params$phigaro_txt), silent = TRUE)
-if (class(phigaro_txt) != 'try_error' & nrow(phigaro_txt) > 0) {
+if (class(phigaro_txt) != 'try-error' & nrow(phigaro_txt) > 0) {
   phigaro_not_null <- TRUE
   phigaro_null <- FALSE
 } else {
@@ -54,7 +54,7 @@ if (class(phigaro_txt) != 'try_error' & nrow(phigaro_txt) > 0) {
 
 # Read plasmids
 plasmid_finder_tab <- try(read.csv(params$plasmid_finder_tab, sep = "\t"), silent = TRUE)
-if (class(plasmid_finder_tab) != 'try_error' & nrow(plasmid_finder_tab) > 0) {
+if (class(plasmid_finder_tab) != 'try-error' & nrow(plasmid_finder_tab) > 0) {
   plasmids_not_null <- TRUE
   plasmids_null <- FALSE
 } else {
@@ -68,7 +68,7 @@ gff <- read.delim(params$gff, header = FALSE)
 ## Read PHAST documents
 phast_prot_blast <- try(read.delim(params$phast_prot_blast, header = TRUE), silent = TRUE)
 phast_genome_blast <- try(read.delim(params$phast_genome_blast, header = TRUE), silent = TRUE)
-if (class(phast_prot_blast) != 'try_error' & nrow(phast_prot_blast) > 0) {
+if (class(phast_prot_blast) != 'try-error' & nrow(phast_prot_blast) > 0) {
   phast_not_null <- TRUE
   phast_null <- FALSE
 } else {
@@ -79,7 +79,7 @@ if (class(phast_prot_blast) != 'try_error' & nrow(phast_prot_blast) > 0) {
 ## Read ICEberg documents
 ice_prot_blast <- try(read.delim(params$ice_prot_blast, header = TRUE), silent = TRUE)
 ice_genome_blast <- try(read.delim(params$ice_genome_blast, header = TRUE), silent = TRUE)
-if (class(ice_prot_blast) != 'try_error' & nrow(ice_prot_blast) > 0) {
+if (class(ice_prot_blast) != 'try-error' & nrow(ice_prot_blast) > 0) {
   not_null <- TRUE
   null <- FALSE
 } else {
