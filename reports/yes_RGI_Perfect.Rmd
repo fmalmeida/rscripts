@@ -6,7 +6,7 @@ Perfect hits are genes that CARD guarantee its functionality. Which means that t
 colnames(rgi_perfect) <- c("Protein ID", "Cut_Off", "Product", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
 
 # Create List 
-string.list <- rgi_perfect %>% mutate_if(is.factor, as.character) %>% separate_rows(5, sep = "; ") %>% pull(5) %>% sort() %>% unique()
+string.list <- rgi_perfect %>% mutate_if(is.factor, as.character) %>% separate_rows(`Drug Class`, sep = "; ") %>% pull(5) %>% sort() %>% unique()
 cat("- **Drug Classes targeted by the query genome:**\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
@@ -36,7 +36,7 @@ rgi_perfect$CVTERM.ID <- card_url(rgi_perfect$CVTERM.ID)
 
 # Produce Table
 rgi_perfect %>%
-  select(Prokka_ID, Product, `AMR Gene Family`, 6, 5, CVTERM.ID, `Query Protein Coordinates`) %>%
+  select(Prokka_ID, Product, `AMR Gene Family`, `Drug Class`, `Resistance Mechanism`, CVTERM.ID, `Query Protein Coordinates`) %>%
   datatable(escape = FALSE,
           filter = 'top',
           options = dt_opt_lst,
@@ -51,8 +51,8 @@ The images \@ref(fig:rgi-perfect-resistome-png) and \@ref(fig:rgi-perfect-resist
 ```{r rgi-perfect-resistome-png, fig.align='center', fig.show='hold', fig.cap="Targeted drug classes by th resistome predicted using CARD RGI tool", out.width="45%"}
 rgi_count <- rgi_perfect %>%
   mutate_if(is.factor, as.character) %>%
-  separate_rows(5, sep = "; ", convert = FALSE) %>%
-  select(Prokka_ID, 5)
+  separate_rows(`Drug Class`, sep = "; ", convert = FALSE) %>%
+  select(Prokka_ID, `Drug Class`)
 colnames(rgi_count) <- c("Contig", "Class")
 drugs <- plyr::count(rgi_count, "Class")
 
@@ -69,8 +69,8 @@ ggplot(drugs, aes(x=Class, y=freq, fill=Class)) +
 ```{r rgi-perfect-resistome-png-2, fig.align='center', fig.show='hold', fig.cap="Resistance mechanisms of the resistome predicted using CARD RGI tool", out.width="45%"}
 rgi_count <- rgi_perfect %>%
   mutate_if(is.factor, as.character) %>%
-  separate_rows(6, sep = "; ", convert = FALSE) %>%
-  select(Prokka_ID, 6)
+  separate_rows(`Resistance Mechanism`, sep = "; ", convert = FALSE) %>%
+  select(Prokka_ID, `Resistance Mechanism`)
 colnames(rgi_count) <- c("Contig", "Class")
 drugs <- plyr::count(rgi_count, "Class")
 

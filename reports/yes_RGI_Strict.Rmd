@@ -6,8 +6,8 @@ Strict hits genes are genes annotated with looser parameters and are not surely 
 colnames(rgi_strict) <- c("Protein ID", "Cut_Off", "Product", "ARO", "Drug Class", "Resistance Mechanism", "AMR Gene Family")
 
 # Create List
-string.list <- rgi_strict %>% mutate_if(is.factor, as.character) %>% separate_rows(5, sep = "; ")
-string.list <- string.list %>% pull(5) %>% sort() %>% unique()
+string.list <- rgi_strict %>% mutate_if(is.factor, as.character) %>% separate_rows(`Drug Class`, sep = "; ")
+string.list <- string.list %>% pull(`Drug Class`) %>% sort() %>% unique()
 cat("- **Drug Classes targeted by the query genome:**\n")
 cat(paste("\t-", string.list), sep = '\n')
 ```
