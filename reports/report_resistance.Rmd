@@ -4,17 +4,17 @@ author: "Produced with bacannot pipeline"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 subtitle: "Query: `r params$query`"
 params:
-  blast_id: 90
-  blast_cov: 80
-  query: "KpV3"
-  amrfinder: /Volumes/falmeida1TB/bacannot_teste/teste/KpV3/resistance/AMRFinderPlus/AMRFinder_complete.tsv
-  gff: /Volumes/falmeida1TB/bacannot_teste/teste/KpV3/gffs/KpV3.gff
-  rgitool: /Volumes/falmeida1TB/bacannot_teste/teste/KpV3/resistance/RGI/RGI_KpV3.txt
-  rgiperfect: /Volumes/falmeida1TB/bacannot_teste/teste/KpV3/resistance/RGI/Perfect_RGI_KpV3_hits.txt
-  rgistrict: /Volumes/falmeida1TB/bacannot_teste/teste/KpV3/resistance/RGI/Strict_RGI_KpV3_hits.txt
-  argminer_blastp: /Volumes/falmeida1TB/bacannot_teste/teste/KpV3/resistance/ARGMiner/KpV3_argminer_blastp_onGenes.summary.txt
-  resfinder_tab: /Volumes/falmeida1TB/bacannot_teste/teste/KpV3/resistance/Resfinder/KpV3_amr/results_tab.txt
-  resfinder_pointfinder: /Volumes/falmeida1TB/bacannot_teste/teste/KpV3/resistance/Resfinder/KpV3_amr/PointFinder_results.txt
+  blast_id:
+  blast_cov:
+  query:
+  amrfinder:
+  gff:
+  rgitool:
+  rgiperfect:
+  rgistrict:
+  argminer_blastp:
+  resfinder_tab:
+  resfinder_pointfinder:
 output:
   bookdown::html_document2: 
     css: styles.css
