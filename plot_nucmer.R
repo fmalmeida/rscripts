@@ -82,10 +82,16 @@ load_and_plot_nucmer_w_ref <- function(NUCmer_coords_file, ref_faidx_file, perc.
   return(plot)
 }
 
-output <- paste0("nucmer_plot_", opt$qname, ".svg", sep = "")
-
 # Produce the plot
+output <- paste0("nucmer_plot_", opt$qname, ".svg", sep = "")
 svg(as.character(output))
+load_and_plot_nucmer_w_ref(NUCmer_coords_file = opt$coords,
+                           ref_faidx_file = opt$index,
+                           perc.id = 90)
+dev.off()
+
+output <- paste0("nucmer_plot_", opt$qname, ".png", sep = "")
+png(as.character(output))
 load_and_plot_nucmer_w_ref(NUCmer_coords_file = opt$coords,
                            ref_faidx_file = opt$index,
                            perc.id = 90)
